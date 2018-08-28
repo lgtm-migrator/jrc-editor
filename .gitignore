@@ -1,0 +1,15 @@
+# root directory
+/.gradle/
+/build/
+/.idea/
+/out/
+
+# everywhere
+.settings/
+.project
+.classpath
+.directory
+*~
+*.kdev4
+.*.swp
+

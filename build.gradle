@@ -1,0 +1,21 @@
+plugins {
+	id 'java'
+	id 'application'
+}
+
+mainClassName = 'org.zaval.tools.i18n.translator.Main'
+
+dependencies {
+	compile 'jakarta-regexp:jakarta-regexp:1.4'
+
+}
+
+repositories {
+	jcenter()
+}
+
+wrapper {
+	gradleVersion = '4.10'
+	distributionType = Wrapper.DistributionType.ALL
+}
+

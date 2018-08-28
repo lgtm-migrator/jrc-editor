@@ -1,4 +1,0 @@
-Manifest-Version: 1.0
-Main-Class: org.zaval.tools.i18n.translator.Main
-Class-Path: jakarta-regexp-1.2.jar
-
