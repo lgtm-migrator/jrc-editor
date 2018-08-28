@@ -1,0 +1,247 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<title>Zaval Java Resource Editor User's Guide</title>
+<style>
+.regularFont, BODY, td{
+    font-family : Verdana, Geneva, Arial, Helvetica, sans-serif;
+    font-size : 11px;
+    color: #666666;
+}
+A {
+    color : Black;
+    text-decoration : underline;
+    font-family : Verdana, Geneva, Arial, Helvetica, sans-serif;
+    font-size : 11px;;
+}.copyright {  font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10px; color: #999999}
+.notReady {  font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 11px; color: #999999}
+.regularBlack {  font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 11px; font-weight: normal; color: #000000}
+.header1 {  font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 12px; color: #000000; font-weight: bold}
+.regularBlackBold { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 11px; font-weight: bold; color: #000000 }
+</style>
+</head>
+<body bgcolor="#FFFFFF" text="#000000">
+      <h2 align="center"><b>Zaval JRC Editor</b></h2>
+      <h4 align="center">Version 1.0</h4>
+<h1 align="center"><b>User's Guide</b></h1>
+<p align="center">Zaval Creative Engineering Group</p>
+<p align="center"><a href="http://www.zaval.org">http://www.zaval.org</a></p>
+<hr color="#CCCCCC" noshade>
+<h2 align="center"><b>Contents</b></h2>
+<p><a href="#intro">Introduction to the Zaval JRC Editor.</a></p>
+<p>&nbsp;&nbsp;<a href="#what_can">What Can You Do with the Zaval Java Resource Editor.</a></p>
+<p>&nbsp;&nbsp;<a href="#when_to_use">When To Use the Zaval Java Resource Editor.</a></p>
+<p><a href="#concept">Internationalization concept overview.</a></p>
+<p><a href="#install">Installing the Zaval Java Resource Editor.</a></p>
+<p>&nbsp;&nbsp;<a href="#requirements">Requirements.</a></p>
+<p>&nbsp;&nbsp;<a href="#procedure">Installation procedure.</a></p>
+<p><a href="#usage">Using Zaval JRC Editor.</a></p>
+<p>&nbsp;&nbsp;<a href="#start">Application start.</a></p>
+<p>&nbsp;&nbsp;<a href="#existing">Editing existing resources.</a></p>
+<p>&nbsp;&nbsp;<a href="#creating_new">Creating new resources.</a></p>
+<p>&nbsp;&nbsp;<a href="#new">Inserting new items.</a></p>
+<p>&nbsp;&nbsp;<a href="#delete">Deleting items.</a></p>
+<p>&nbsp;&nbsp;<a href="#new_lang">Adding new language.</a></p>
+<p>&nbsp;&nbsp;<a href="#import">Importing resources from *.java files.</a></p>
+<p>&nbsp;&nbsp;<a href="#generation">Resource stencil source code generation.</a></p>
+<p><a href="#limits">Product limitations.</a></p>
+<p><a href="#plans">Further product plans.</a></p>
+<p><a href="#support">Support available.</a></p>
+<p><a href="#news">Stay informed!.</a></p>
+<hr>
+      <h1><a name="intro">Introduction to the Zaval JRC Editor</a></h1>
+      <p>Since JDK 1.1.x. Sun introduced Internationalization concept for Java.</p>
+      <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+            <td width="40">&nbsp;</td>
+            <td><i>Internationalization</i> is the process of designing an application so that it can be adapted to various languages and regions without engineering changes.<br>
+                <i>Localization</i> is the process of adapting software for a specific region or language by adding locale-specific components and translating text.
+            </td>
+        </tr>
+        <tr>
+            <td width="40">&nbsp;</td>
+            <td align="right"><i>The JavaTM Tutorial</i></td>
+        </tr>
+      </table>
+      <p>The text used in programs is locale dependent, that's why we store all text strings in the separate files as a key-value pairs. When we need to localize a program for yet another language support we have to translate values in these files to the desired language. And that's all! These files are called resources. We provide GUI tool to manipulate these resources. The files being produced by this tool is fully compatible with ResourceBundle expectations.</p>
+      <p>So, the Zaval JRC Editor (also known as Zaval Java Resource Editor) solution is small and easy-to-use visual editor for resource files.</p>
+
+<h2><a name="what_can">What Can You Do with the Zaval Java Resource Editor</a></h2>
+      <p>The Zaval Java Resource Editor can be used for new and existing software localization, resources synchronization and any other resources manipulations.</p>
+      <p>It provides full support for any language specific resources (it depends on the fonts and font metrics settings of the host OS at your computer). The target of this tool is localization strings manipulation for all Java-based software that has appropriate support embedded.</p>
+<h2><a name="when_to_use">When To Use the Zaval Java Resource Editor.</a></h2>
+      <p>The Zaval JRC Editor is best used for regular access to various resource files. You can add your own language support to the existing software if strings are not hard-coded to the software. One of the greatest things in the internationalization is that you don't need to make code changes.</p>
+      <p>Another great area in this tool usage is resource bundle synchronization. Our tool can handle this task easily - it compares the files set and highlights all differences. It allows separating development process and resource management process. That's why this tool can be used as part of your software pack to provide 3rd party localization.</p>
+<h1><a name="concept">Internationalization concept overview</a></h1>
+      <p>Internationalization means that developers can customize their product for different languages and locales. In Java language terms this task handles by ResourceBundle class (see The JavaTM Tutorial). All resource files' names have two parts: resource name and localization suffix. When you want your program to 'speak' French, for example, the only thing you need to do is adding corresponding properties file. This procedure does not require any interaction with the software creator.</p>
+      <p>For more info on the localization see corresponding tutorial at <a href="http://java.sun.com">http://java.sun.com</a>.</p>
+<h1><a name="install">Installing the Zaval Java Resource Editor</a></h1>
+      <p>We did our best to make the installation procedure of the product easy, so just follow the instructions.</p>
+<h2><a name="requirements">Requirements</a></h2>
+      <p>To use the Zaval JRC Editor you need a JDK/JRE installed on your computer. All Sun's JDK (versions since 1.1.7) can be used without any problems. We suggest you to use Sun's JDK 1.2.2 or later as most stable (can be found at <a href="http://java.sun.com">http://java.sun.com</a>). Alternatively you can use any other vendors' JDK (IBM's were ok for versions 1.2.x, 1.3.x and 1.4).</p>
+<h2><a name="procedure">Installation procedure</a></h2>
+      <ol>
+        <li>Unpack zip/tarball with Zaval JRC Editor to an empty directory.</li>
+        <li>If you are using JDK 1.2 or above start the batch file (editor.bat) to run Zaval Java Resource Editor, otherwise go to step 3.</li>
+        <li>For any other non-standard or old versions of JDK/JRE you need to make several changes to the batch file (or you need to setup environment variables):<br>
+        <pre>
+        set JAVA_HOME=<location of JDK>
+        set PATH=%JAVA_HOME\jre\bin;%PATH%
+        set CLASSPATH=.;%JAVA_HOME%\jre\lib\rt.jar;%CLASSPATH%
+        </pre>
+        The last line can have variation for old versions of JDK, such as 1.0.2 or 1.1.x.<br>
+        In this case you need specify the following line instead:<br>
+        <pre>
+        set CLASSPATH=.;%JAVA_HOME%\jlib\classes.zip;%CLASSPATH%
+        </pre>
+        When you complete the steps above the Zaval JRC Editor is ready to use.
+        </li>
+      </ol>
+<h1><a name="usage">Using Zaval JRC Editor</a></h1>
+<h2><a name="start">Application start</a></h2>
+      <p>To start this application you need simply start corresponding batch file. When the application is started you are able to manipulate resource files.</p>
+<h2><a name="existing">Editing existing resources</a></h2>
+      <p>Zaval Java Resource Editor consists of two panels displayed on Screenshot 1. To start working with your resource set you should make several steps:</p>
+      <ul>
+        <li>From the <b>File</b> menu, choose <b>Open</b> or <b>New resource</b>.</li>
+        <li>In the opened dialog select resource file that meets mentioned requirements.</li>
+      </ul>
+      <p><b>Note:</b> the files previously opened will be closed automatically.</p>
+      <p>Left panel is a key hierarchy that was stripped out from the appropriate resource files set. The key hierarchy is created automatically using "." or "_" as a separator. So, adding "." in key name automatically creates new hierarchy level.</p>
+      <p>Right panel displays a list of the languages defined by the resource files set.</p>
+      <center>
+      <table border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td align="left"><img src="images/1.gif" width="659" height="443" alt="Working area of the Zaval Java Resource Editor"></td>
+        </tr>
+        <tr>
+            <td align="left">&nbsp;</td>
+        </tr>
+        <tr>
+            <td align="center"><b>Screenshot 1. Working area of the Zaval Java Resource Editor</b></td>
+        </tr>
+      </table>
+      </center>
+      <p>To hide a language from the right panel go through the following steps:</p>
+      <ul>
+        <li>From the <b>View</b> menu, select <b>Show resource</b>.</li>
+        <li>In the <b>Show resource</b> list, clear a checkbox next to the language.</li>
+      </ul>
+      <p>To edit key property for any language available do the following:</p>
+      <ul>
+        <li>In the left panel select item you want to edit - it will appear in the <b>Key</b> field at the bottom of the panel(in our example <b>dialog.button.help</b>).</li>
+        <li>In the right panel make necessary changes to the corresponding field (see Screenshot 1).</li>
+      </ul>
+      <p>To apply changes use <b>File -> Save</b> from the top menu. Resource file's name consists of base name (e.g. <b>'editor'</b>), language suffix (e.g. <b>'de'</b>), and <b>.properties</b> extension, for example, <b>editor_de.properties</b> (German), <b>editor_fr.properties</b> (French). In our example <b>jrc-editor.properties</b> file contains default English messages and is displayed in the title of the Zaval Java Resource Editor's panel.</p>
+      <p>To save all files with a different base name and/or write them to a different directory, use <b>File -> Save as</b> instead.</p>
+<h2><a name="creating_new">Creating new resources</a></h2>
+      <p>There are several ways to create new resources: either enter them by hands, or importing them from *.java files. For more info see <a href="#import">Importing resources from *.java files</a> section.</p>
+<h2><a name="new">Inserting new items</a></h2>
+      <p>To add your own items to the tree proceed through the following steps:</p>
+      <ul>
+        <li>In the <b>Key</b> field, type tree key, for example <b>dialog.button.new</b>.</li>
+        <li>Press Insert button.</li>
+        <li>Fill in all Key's values.</li>
+        <li>Repeat these steps for all items you want to add.</li>
+      </ul>
+<h2><a name="delete">Deleting items</a></h2>
+      <p>The remove a key-value pair do the following:</p>
+      <ul>
+        <li>Select the appropriate key at the left panel.</li>
+        <li>Press <b>Delete</b> button.</li>
+      </ul>
+      <p><b>Caution:</b> all sub-keys will be removed as well.</p>
+      <p><b>Note:</b> removing items from the .properties file may cause application to fail. Think over before you proceed. Unused items will do no harm to the application stability.</p>
+<h2><a name="new_lang">Adding new language</a></h2>
+      <p>Adding new language is simple:</p>
+      <ul>
+        <li>Choose <b>Edit -> New language</b>.</li>
+        <li>In the <b>New resource</b> dialog (see Screenshot 2), enter resource file suffix, for example, <b>fr</b>. When you click OK corresponding .properties file will be created (in our example <b>jrc-editor_fr.properties</b>) and edit fields for French language will appear in the right panel.</li>
+      </ul>
+      <center>
+      <table border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td align="left"><img src="images/2.gif" width="310" height="100" alt="Adding new language"></td>
+        </tr>
+        <tr>
+            <td align="left">&nbsp;</td>
+        </tr>
+        <tr>
+            <td align="center"><b>Screenshot 2. Adding new language</b></td>
+        </tr>
+      </table>
+      </center>
+      <p>An exclamation mark next to tree node notifies you that there is at list one item in this node that is not translated into all languages displayed in the right panel (see Screenshot 3).</p>
+      <center>
+      <table border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td align="left"><img src="images/3.gif" width="659" height="443" alt="Resources synchronization"></td>
+        </tr>
+        <tr>
+            <td align="left">&nbsp;</td>
+        </tr>
+        <tr>
+            <td align="center"><b>Screenshot 3. Resources synchronization</b></td>
+        </tr>
+      </table>
+      </center>
+      <p>When edit field next to a language is left empty, then it defaults to English language.</p>
+<h2><a name="import">Importing resources from *.java files</a></h2>
+      <p>To simplify existing applications transfer to the resources usage you can use <b>Parse source…</b> feature. It goes through java sources, extracts text strings and builds tree-like structure based on class name/package name. Now you can import resources only from one file at a time and can't do iterations.</p>
+      <p>Importing process doesn't get all strings but only those that look right: for example, it wouldn't import any single character strings.</p>
+<h2><a name="generation">Resource stencil source code generation</a></h2>
+      <p>Stencil is a java source that contains all resource strings with their initialization and corresponding getters/setters. Initialization requires appropriate resource bundle.</p>
+      <p>To generate use <b>File -> Generate source code…</b>.</p>
+<h1><a name="limits">Product limitations</a></h1>
+      <p>There are several product limitations that can be fixed in future versions:</p>
+      <ul>
+        <li>You can't operate with multiple resource sets - only one resource set available at a time.</li>
+        <li>You cannot operate with resources in JAR files.</li>
+        <li>You cannot analyze a lot of Java sources at a time.</li>
+        <li>You cannot split all lines being generated to multiple targets (Java files).</li>
+      </ul>
+<h1><a name="plans">Further product plans</a></h1>
+      <p>Current tool implementation follows the minimalist computing concept. In near future the following features will be added:</p>
+      <ul>
+        <li>Ability to merge different resource sets;</li>
+        <li>Ability to split one existing resource set to multiple ones;</li>
+        <li>Code generation and analysis improvements and multiple operations support;</li>
+        <li>Compressed resource set support (*.jar);</li>
+      </ul>
+<h1><a name="support">Support available</a></h1>
+      <p>All support for software installation and problems should be sent directly 
+        to <a href="mailto:support@zaval.org">support@zaval.org</a> with 'Re: 
+        Zaval JRC Editor Support' in subject line and plain text in the 
+        message body, describing your request and/or your problem. Since this 
+        software is distributed under the General Public License and is maintained 
+        by its authors on non-commercial basis, your request will be answered 
+        as soon as possible, but no later than 5 business days.</p>
+      <p>The Zaval Creative Engineering Group carries out its software customization/new software development on the regular basis. For more info contact us at <a href="mailto:info@zaval.org">info@zaval.org</a>.</p>
+<h1><a name="news">Stay informed!</a></h1>
+      <p>Now you can receive information on latest products' updates and hotfixes via email.<br>
+      This is a low-traffic list (1-2 messages per month). To subscribe, send blank mail to <a href="mailto:news-subscribe@zaval.org">news-subscribe@zaval.org</a>.</p>
+<br>
+<p>For more information about the product, please contact <a href="mailto:support@zaval.org?Subject=Re:%20Zaval%20Database%20Front-end">Zaval CE Group</a> directly in a free form. Please allow some time for reply.<br><br>
+Thank you,<br>
+The Zaval CE Group.</p>
+<center>
+<table width="746" border="0" cellspacing="0" cellpadding="0">
+  <tr> 
+    <td align="center" class="copyright" height="40" valign="bottom">&nbsp;</td>
+  </tr>
+  <tr> 
+    <td align="center" class="copyright">Original idea: Victor Krapivin. Developed 
+      under Zaval Creative Process<sup>TM</sup>.</td>
+  </tr>
+  <tr> 
+    <td align="center" class="copyright">Copyright &copy; Zaval Creative Engineering 
+      Group, 2000-2002.</td>
+  </tr>
+  <tr>
+    <td align="center" class="copyright"> Distributed under GPL v2. All Rights 
+      Reserved.</td>
+  </tr>
+</table>
+</center>
+</body>
+</html>
