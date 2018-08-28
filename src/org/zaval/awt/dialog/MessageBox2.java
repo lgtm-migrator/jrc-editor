@@ -4,7 +4,7 @@
  *     $Date: 2002/03/28 9:24:42 $
  *
  *     @author:     Victor Krapivin
- *     @version:    1.1
+ *     @version:    1.2
  *
  * Zaval JRC Editor is a visual editor which allows you to manipulate 
  * localization strings for all Java based software with appropriate 
@@ -346,6 +346,19 @@ implements LayoutManager
 
     public void setModal( boolean b )
     {
+    }
+
+    public boolean keyDown( Event e, int key ){
+      if ( e.target instanceof Button && key == Event.ENTER ){
+        Window wnd = null;
+        Component p = this;
+        while(p!=null && !(p instanceof Window)) p = p.getParent();
+        if(p==null) return false;
+        wnd = (Window)p;
+        p.action(e, null);
+        return true;
+      }
+      return false;
     }
 }
 

@@ -4,7 +4,7 @@
  *     $Date: 2002/03/28 9:24:42 $
  *
  *     @author:     Victor Krapivin
- *     @version:    1.1
+ *     @version:    1.2
  *
  * Zaval JRC Editor is a visual editor which allows you to manipulate 
  * localization strings for all Java based software with appropriate 
@@ -139,15 +139,14 @@ extends Canvas
             try{
                 byte[] b2 = { (byte)key };
                 key = (int)(new String(b2, encType)).charAt(0);
-        }
-        catch(Exception eee){
-        }
-        Character.UnicodeBlock b3 = Character.UnicodeBlock.of((char)key);
-        if(b3==null) key = old_key;
-    }    
+            }
+            catch(Exception eee){
+            }
+            Character.UnicodeBlock b3 = Character.UnicodeBlock.of((char)key);
+            if(b3==null) key = old_key;
+        }    
     }
-    if (e.id != Event.KEY_ACTION || key == 0){
-       if (inputKey(key)) return false;
+    if (e.id != Event.KEY_ACTION || key == 0){       if (inputKey(key)) return false;
     }  
     return super.keyDown(e, key);
   }
@@ -169,12 +168,17 @@ extends Canvas
      return s;
   }
 
-  void blCopy() {
+  public String getSelectedText()
+  {
+    return buffer.toString().substring(selPos, selPos + selWidth);
+  }
+
+  public void blCopy() {
     if (!isSelected()) return ;
     writeToClipboard(buffer.toString().substring(selPos, selPos + selWidth));
   }
 
-  void blDelete()
+  public void blDelete()
   {
     if (!isSelected()) return;
     writeToClipboard(buffer.toString().substring(selPos, selPos + selWidth));
@@ -604,7 +608,6 @@ extends Canvas
 /**
  *
  * Contributed by <a href="mailto:morten@bilpriser.dk">Morten Raahede Knudsen</a>.
- *
  */
   
   protected static synchronized void writeToClipboard(String s)
@@ -623,8 +626,7 @@ extends Canvas
       try{
         return (String)t.getTransferData(java.awt.datatransfer.DataFlavor.stringFlavor);
       }
-      catch(Exception ex)
-      {
+      catch(Exception ex){
       }
     return "";
   }

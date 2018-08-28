@@ -1,6 +1,6 @@
 
-JAVAC=jcc
-JCFLAGS=../classes
+JAVAC=javac
+JCFLAGS=-d ../classes -classpath $(CLASSPATH);../classes
 Jack=javacc
 
 OUTROOT=../classes
@@ -18,9 +18,11 @@ clean:
 dist-clean:
     rm -rf $(OUTROOT)/*.properties $(OUTROOT)/org
 
-tools-compile: $(SRCROOT)/org/zaval/tools/i18n/translator/JavaParser.flags 
+tools-compile: \
+    $(SRCROOT)/org/zaval/tools/i18n/translator/JavaParser.flags \
+    $(SRCROOT)/org/zaval/tools/i18n/translator/UtfParser.flags 
 
-JCCLIST=\
+JCCLIST1=\
     $(SRCROOT)/org/zaval/tools/i18n/translator/JavaParser.java              \
     $(SRCROOT)/org/zaval/tools/i18n/translator/JavaParserTokenManager.java  \
     $(SRCROOT)/org/zaval/tools/i18n/translator/JavaParserConstants.java     \
@@ -28,6 +30,11 @@ JCCLIST=\
     $(SRCROOT)/org/zaval/tools/i18n/translator/Token.java   \
     $(SRCROOT)/org/zaval/tools/i18n/translator/TokenMgrError.java   \
     $(SRCROOT)/org/zaval/tools/i18n/translator/JavaCharStream.java
+
+JCCLIST2=\
+    $(SRCROOT)/org/zaval/tools/i18n/translator/UtfParser.java              \
+    $(SRCROOT)/org/zaval/tools/i18n/translator/UtfParserTokenManager.java  \
+    $(SRCROOT)/org/zaval/tools/i18n/translator/UtfParserConstants.java     
 
 $(SRCROOT)/org/zaval/tools/i18n/translator/JavaParser.java             : $(SRCROOT)/org/zaval/tools/i18n/translator/JavaParser.flags
 
@@ -48,5 +55,17 @@ $(SRCROOT)/org/zaval/tools/i18n/translator/JavaParser.flags : $(SRCROOT)/org/zav
     $(Jack) JavaParser.jj
     cd ../../../../..
     touch $(SRCROOT)/org/zaval/tools/i18n/translator/JavaParser.flags
+
+$(SRCROOT)/org/zaval/tools/i18n/translator/UtfParser.java             : $(SRCROOT)/org/zaval/tools/i18n/translator/UtfParser.flags
+
+$(SRCROOT)/org/zaval/tools/i18n/translator/UtfParserTokenManager.java : $(SRCROOT)/org/zaval/tools/i18n/translator/UtfParser.flags
+
+$(SRCROOT)/org/zaval/tools/i18n/translator/UtfParserConstants.java    : $(SRCROOT)/org/zaval/tools/i18n/translator/UtfParser.flags
+
+$(SRCROOT)/org/zaval/tools/i18n/translator/UtfParser.flags : $(SRCROOT)/org/zaval/tools/i18n/translator/UtfParser.jj
+    cd $(SRCROOT)/org/zaval/tools/i18n/translator
+    $(Jack) UtfParser.jj
+    cd ../../../../..
+    touch $(SRCROOT)/org/zaval/tools/i18n/translator/UtfParser.flags
 
 compile:

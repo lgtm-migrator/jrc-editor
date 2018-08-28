@@ -1,3 +1,15 @@
+jrc-editor (1.2.0) stable; urgency=low
+
+  * Shortcuts navigation have added
+  * Main menu have updated
+  * merge startup scripts in one
+  * tab and keyboard navigation slightly changed
+  * XML import/export added
+  * Plain text import/export added
+
+ -- Victor Krapivin <v.krapivin@zaval.org>  Mon,  14 Oct 2002 14:01:22 +0200
+ -- Alexander Ivanyukovich <a.ivanyukovich@zaval.org>  Tue,  15 Oct 2002 2:15:10 +0200
+
 jrc-editor (1.1.0) stable; urgency=low
 
   * manipulations with empty entries.
