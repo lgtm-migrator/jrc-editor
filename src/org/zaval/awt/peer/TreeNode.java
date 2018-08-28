@@ -140,11 +140,13 @@ public class TreeNode
     }
 
     public Image getExpandedImage()  {
+        loadImages();    
         return (expandedImage != null) ? expandedImage : collapsedImage;
     }
 
     public Image getCollapsedImage() {
-        return collapsedImage;
+        loadImages();
+	return collapsedImage;
     }
 
     public String getNameImage()
@@ -156,6 +158,16 @@ public class TreeNode
       return null;
     }
 
+  
+    private void loadImages()
+    {
+        if(imgres==null) return;
+	if(nameCollImage!=null && collapsedImage==null)
+	    collapsedImage = imgres.getImage(nameCollImage);
+	if(nameExpImage!=null && expandedImage==null)    
+	    expandedImage  = imgres.getImage(nameExpImage );
+    }
+    
     public void setExpandedImage(String image)
     {
       this.nameCollImage  = image;

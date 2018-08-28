@@ -4,7 +4,7 @@
  *     $Date: 2002/03/28 9:24:42 $
  *
  *     @author:     Victor Krapivin
- *     @version:    1.3
+ *     @version:    2.0
  *
  * Zaval JRC Editor is a visual editor which allows you to manipulate 
  * localization strings for all Java based software with appropriate 
@@ -51,10 +51,24 @@ public class Main
    public static void main( String arg[] )
    throws Exception
    {
-      File f = new File(".");
+      String altDir = System.getProperty("my.root.dir");
+      File f = new File(altDir!=null ? altDir : ".");
       String path = f.getAbsolutePath();
-      Translator t = new Translator( path.substring( 0, path.length() - 1 ) +
-         "images/", new SafeResourceBundle("jrc-editor", Locale.getDefault()) );
+      if(path.endsWith(".")) path = path.substring( 0, path.length() - 1 );
+      path += "/images/";
+
+      Translator t = null;
+      if(arg.length>0){
+          t = new Translator( 
+             path, 
+             new SafeResourceBundle("jrc-editor", Locale.getDefault()),
+             arg[0] );
+      }
+      else
+          t = new Translator( 
+             path, 
+             new SafeResourceBundle("jrc-editor", Locale.getDefault()) );
+
       Dimension gdz = Toolkit.getDefaultToolkit().getScreenSize();
       int optimalX = gdz.width / 4 * 3;
       int optimalY = gdz.height / 4 * 3;

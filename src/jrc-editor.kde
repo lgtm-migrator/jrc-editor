@@ -1,0 +1,8 @@
+[Desktop Entry]
+BinaryPattern=jrc-editor;
+MimeType=application/octet-stream;
+Name=JRC Editor
+Exec=jrc-editor
+Icon=/usr/lib/jrc-editor/jrc-editor.ico
+Type=Application
+Terminal=0

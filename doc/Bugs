@@ -1,0 +1,16 @@
+Known bugs
+----------
+
+* The Java source parser is based upon JLS 1.2.x, so asserts, generics, and 
+  such modern forms of inner classes may not recoginized cirrectly. As JRC 
+  Editor uses strict source code validation it may produce exception.
+
+* If no strings assumed during source parsing the empty key would be created
+  by default rather error message.
+
+* Jar import assumes all property files inside are belongs to one resource 
+  bundle even if files have ddifferent code base.
+
+* The JRC Editor have optimized to work with JDK/JRE 1.4, so workarounds fir
+  older versions have removed.
+

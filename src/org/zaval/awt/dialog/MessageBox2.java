@@ -62,6 +62,11 @@ implements LayoutManager
     private static final int ICON_TEXT_GAP = 5;
     private static final int w = 4, h = 3, maxlinecount = 15;
 
+    public ResultField getTextContainer()
+    {
+        return text;
+    }
+
     public MessageBox2(Frame parent)
     {
         super(parent, false);
@@ -344,9 +349,9 @@ implements LayoutManager
     {
     }
 
-    public void setModal( boolean b )
+  /*public void setModal( boolean b )
     {
-    }
+    }*/
 
     public boolean keyDown( Event e, int key ){
       if ( e.target instanceof Button && key == Event.ENTER ){

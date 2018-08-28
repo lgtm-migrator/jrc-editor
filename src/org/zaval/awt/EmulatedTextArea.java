@@ -4,7 +4,7 @@
  *     $Date: 2002/03/28 9:24:42 $
  *
  *     @author:     Victor Krapivin
- *     @version:    1.3
+ *     @version:    2.0
  *
  * Zaval JRC Editor is a visual editor which allows you to manipulate 
  * localization strings for all Java based software with appropriate 
@@ -42,6 +42,7 @@
 package org.zaval.awt;
 
 import java.awt.*;
+import java.awt.event.*;
 import java.util.*;
 import org.zaval.awt.ScrollObject;
 //import org.zaval.awt.ScrollPanel;
@@ -72,8 +73,6 @@ implements ScrollObject
   public EmulatedTextArea()
   {
      super();
-//     insets.right = 2;
-//     insets.bottom = 2;
      lineText.addElement( "" );
   }
 
@@ -112,46 +111,52 @@ implements ScrollObject
      recalcLines( 0 );
   }
 
-  public boolean gotFocus(Event e, Object obj)
-  {
-     int wasCP = cursorPos;
-     boolean res = super.gotFocus( e, obj );
-     selPos = 0;
-     selWidth = 0;
-     cursorPos = wasCP;
-     return res;
-  }
+    public void focusGained(FocusEvent e)
+    {
+        int wasCP = cursorPos;
+        super.focusGained(e);
+        selPos = 0;
+        selWidth = 0;
+        cursorPos = wasCP;
+    }
 
   protected boolean controlKey(int key, boolean shift)
   {
-    switch (key)
-    {
-      case Event.DOWN: seek( vertPosShift( cursorPos, 1 ) - cursorPos, shift);  break;
-      case Event.UP  : seek( vertPosShift( cursorPos, - 1 ) - cursorPos, shift);  break;
-      case Event.HOME: seek(lineStart[lineFromPos(cursorPos)]-cursorPos,shift); break;
-      case Event.END :
+    switch (key){
+      case KeyEvent.VK_DOWN: 
+        seek( vertPosShift( cursorPos, 1 ) - cursorPos, shift);  
+        break;
+      case KeyEvent.VK_UP  : 
+        seek( vertPosShift( cursorPos, - 1 ) - cursorPos, shift);  
+        break;
+      case KeyEvent.VK_HOME: 
+        seek(lineStart[lineFromPos(cursorPos)]-cursorPos,shift); 
+        break;
+      case KeyEvent.VK_END :
          int ln = lineFromPos(cursorPos);
          int newPos = buffer.toString().length();
          if ( ln < lineText.size() - 1 ) newPos = adjustPos( lineStart[ln+1] - 1, false );
          seek( newPos - cursorPos, shift );
          break;
-      case '\n'      : return false;
-      case Event.PGUP:
+      case KeyEvent.VK_ENTER :
+         return false;
+      case KeyEvent.VK_PAGE_UP:
          upRowNum -= lastVisLine;
          if ( upRowNum < 0 ) upRowNum = 0;
          seek( vertPosShift( cursorPos, - lastVisLine ) - cursorPos, shift);
          break;
-      case Event.PGDN:
+      case KeyEvent.VK_PAGE_DOWN:
          upRowNum += lastVisLine;
          if ( upRowNum + lastVisLine >= lineText.size() ) upRowNum = lineText.size() - lastVisLine - 1;
          seek( vertPosShift( cursorPos, lastVisLine ) - cursorPos, shift);  break;
-      default        : return super.controlKey( key, shift );
+      default        : 
+        return super.controlKey( key, shift );
     }
     if ( !shift ) clear();
     return true;
   }
 
-  protected boolean write(int key)
+  protected boolean write(char key)
   {
      super.write( key );
      if ( addLineFeed && key == '\n' ) super.write( '\r' );
@@ -171,8 +176,9 @@ implements ScrollObject
 
   protected void remove(int pos, int size)
   {
-     if ( pos > 0 && buffer.charAt( pos ) == '\n' && buffer.charAt( pos - 1 ) == '\r' )
-     {
+     if ( pos + size > buffer.length()) size = buffer.length() - pos;
+     if ( pos > buffer.length() || size <=0) return;
+     if ( pos > 0 && buffer.charAt( pos ) == '\n' && buffer.charAt( pos - 1 ) == '\r' ){
         pos--;
         size++;
      }
@@ -261,17 +267,29 @@ implements ScrollObject
 
   public Dimension preferredSize()
   {
-     int h, w;
-     if ( prefWidth == 0 ) w = maxTextWidth;
-     else w = prefWidth;
+     int w = 0, h = 0;
+     int rows = 1;
+
      Font f = getFont();
      if (f == null) return new Dimension (0,0);
      FontMetrics m = getFontMetrics(f);
-     if (m == null) return new Dimension (0,0);
+     if(m==null){
+        Toolkit k = Toolkit.getDefaultToolkit();
+        m = k.getFontMetrics(f);
+        if(m==null) return new Dimension (0,0);
+     }
+
+     String text = getText();
+     for(int j=0;j<text.length();++j) if(text.charAt(j)=='\n') ++rows;
+     StringTokenizer st = new StringTokenizer(text, "\n");
+     h = m.getHeight() * (rows + 1);
+     while(st.hasMoreTokens()){
+        String s = st.nextToken();
+        w = Math.max(w, m.stringWidth(s));
+     }
      Insets i = insets();
-     if ( rowsNumber == 0 ) h = lineText.size();
-     else h = rowsNumber;
-     return new Dimension( i.left + i.right + w, i.top + i.bottom + m.getHeight() * h );
+     Dimension ask = new Dimension( i.left + i.right + w, i.top + i.bottom + h );
+     return ask;
   }
 
   public Point getSOLocation()

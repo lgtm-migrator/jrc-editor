@@ -57,6 +57,12 @@ implements TranslatorConstants
       set = new BundleSet();
    }
 
+   void appendResource(InputStream stream, String lang)
+   throws IOException
+   {
+      readResource(stream, lang);
+   }
+
    BundleManager(String baseFileName)
    throws IOException
    {
@@ -66,7 +72,7 @@ implements TranslatorConstants
 
    BundleSet getBundle()
    {
-    return set;
+      return set;
    }
 
    String dirName(String fn)
@@ -119,7 +125,7 @@ implements TranslatorConstants
       return res;
    }
 
-   private String determineLanguage(String fn)
+   String determineLanguage(String fn)
    {
       fn = baseName( fn );
       int ind = fn.lastIndexOf( '_' );
@@ -138,15 +144,38 @@ implements TranslatorConstants
       Vector fileNames = getResFiles( dir, baseFileName, ext );
       for ( int i = 0; i < fileNames.size(); i++ ){
          String fn = (String) fileNames.elementAt( i );
+      // long t1 = System.currentTimeMillis();
          readResource( dir + fn, determineLanguage(fn));
+      // long t2 = System.currentTimeMillis();
+      // System.err.println("      ... ["+determineLanguage(fn)+"]: " + (t2 - t1) + "ms");
       }
    }
 
    private void readResource( String fullName, String lang)
    throws IOException
    {
+   // long t1 = System.currentTimeMillis();
       Vector lines = getLines( fullName );
+   // long t2 = System.currentTimeMillis();
+      proceedLines(lines, lang, fullName);
+   // long t3 = System.currentTimeMillis();
+   // System.err.println("          ... read stream = " + (t2 - t1) + "ms");
+   // System.err.println("          ... parse lines = " + (t3 - t2) + "ms");
+   }
+
+   private void readResource( InputStream in, String lang)
+   throws IOException
+   {
+      Vector lines = getLines( in );
+      proceedLines(lines, lang, null);
+   }
+
+   private void proceedLines(Vector lines, String lang, String fullName)
+   {
       String lastComment = null;
+      fullName = fullName!=null ? fullName : "tmp_" + lang;
+      set.addLanguage(lang);
+      set.getLanguage(lang).setLangFile(fullName);
       for( int i = 0; i < lines.size(); i++ ){
          String line = (String) lines.elementAt( i );
          line = line.trim();
@@ -156,23 +185,22 @@ implements TranslatorConstants
             continue;
          }
          int q = line.indexOf('#');
+      // if(q>0) line = line.substring(0, q).trim();
 
          StringTokenizer st = new StringTokenizer(line, "=", true); // key = value
          if(st.countTokens()<2) continue; // syntax error, ignored
          String dname = st.nextToken().trim();
          st.nextToken(); // '='
          String value = "";
-         if(st.hasMoreTokens()) // is there a assigned value
-           value = st.nextToken("");
-
-         set.addLanguage(lang);
-       //set.updateValue(DEFAULT_LANG_KEY, lang, set.getLanguage(lang).getLangDescription());
-         set.getLanguage(lang).setLangFile(fullName);
-         set.addKey(dname);
-         set.updateValue(dname, lang, value);
-         set.getItem(dname).setComment(lastComment);
+         if(st.hasMoreTokens()) value = st.nextToken("");
+        
+         BundleItem bi = set.getItem(dname); 
+         if(bi == null) bi = set.addKey(dname);
+         bi.setTranslation(lang, value);
+         bi.setComment(lastComment);
          lastComment = null;
       }
+      set.resort();
    }
 
    void setComment(String key, String comment)
@@ -201,6 +229,7 @@ implements TranslatorConstants
              }
              res.addElement( fromEscape( line ) );
          }
+         in.close();
       }
       else{
          RandomAccessFile in = new RandomAccessFile( fileName, "r" );
@@ -208,6 +237,7 @@ implements TranslatorConstants
          int factor1 = 1;
          int factor2 = 256;
          for(;;){
+            if(in.length() - in.getFilePointer() == 0 ) break;
             int i = in.readUnsignedByte() * factor1 + in.readUnsignedByte() * factor2;
             if ( i == 0xFFFE ){
                factor1 = 256;
@@ -220,7 +250,30 @@ implements TranslatorConstants
                   sb.setLength( 0 );
                }
          }
+         in.close();
       }
+      return res;
+   }
+
+   private Vector getLines( InputStream xin )
+   throws IOException
+   {
+      Vector res = new Vector();
+      DataInputStream in = new DataInputStream(xin);
+      String line = null;
+      while((line=in.readLine())!=null) {
+          for(;;){
+              line = line.trim();
+              if(line.endsWith("\\")){
+                 String line2 = in.readLine();
+                 if(line2!=null) line = line.substring(0, line.length()-1) + line2;
+                 else break;
+              }
+              else break;
+          }
+          res.addElement( fromEscape( line ) );
+      }
+      in.close();
       return res;
    }
 
@@ -241,25 +294,33 @@ implements TranslatorConstants
       }
       return res.toString();
    }
- 
+
    private static String fromEscape( String s )
    {
-      StringBuffer res = new StringBuffer();
+      StringBuffer res = new StringBuffer(s.length());
       for ( int i = 0; i < s.length(); i++ ){
          char ch = s.charAt( i );
          if (ch == '\\' && i+1>=s.length()){
             res.append(ch);
             break;
          }
-         if ( ch != '\\' || ch == '\\' && s.charAt( i+1 ) != 'u' ) res.append( ch );
-         else{
-            res.append( (char) Integer.parseInt( s.substring( i+2, i+6 ), 16 ) );
-            i += 5;
+         if ( ch != '\\') res.append( ch );
+         else {
+             switch (s.charAt(i+1)) {
+             case 'u': 
+                 res.append( (char) Integer.parseInt( s.substring( i+2, i+6 ), 16 ) );
+                 i += 5;
+                 break;
+             case 'n': res.append('\n'); i++; break;
+             case 't': res.append('\t'); i++; break;
+             case 'r': res.append('\r'); i++; break;
+             default: break;
+             }
          }
       }
       return res.toString();
    }
-
+ 
    String replace( String line, String from, String to )
    {
        StringBuffer res = new StringBuffer(line.length());

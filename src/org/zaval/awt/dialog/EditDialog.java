@@ -49,8 +49,9 @@ import java.util.*;
 
 public class EditDialog
 extends Dialog
+implements java.awt.event.AWTEventListener
 {
-   private TextField edit;
+   private EmulatedTextField edit;
    private Button    ok, cancel;
    private boolean   isApply;
    private Component listener;
@@ -61,29 +62,28 @@ extends Dialog
       super(f, s, b);
       setLayout(new GridBagLayout());
 
-      label = new IELabel( "Name" );
-      constrain(this, label, 0,0,1,1,
-         GridBagConstraints.NONE,GridBagConstraints.WEST,
-         0.0,0.0,5,5,5,5);
-      constrain(this,edit = new TextField(20), 1,0,4,1,
-         GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,
-         1.0,0.0,5,5,5,5);
-
       ok     = new Button("Ok");
       cancel = new Button("Cancel");
+      label = new IELabel( "Name" );
 
       Panel p = new Panel();
       p.setLayout(new GridLayout(1,2,2,0));
       p.add (ok);
       p.add (cancel);
 
-      constrain(this,p, 0,1,2,1,
+      constrain(this, label, 0,0,1,1,
+         GridBagConstraints.NONE,GridBagConstraints.WEST,
+         0.0,0.0,5,5,5,5);
+      constrain(this,edit = new EmulatedTextField(20), 1,0,4,1,
+         GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,
+         1.0,0.0,5,5,5,5);
+      constrain(this,p, 0,10,2,1,
          GridBagConstraints.NONE,
          GridBagConstraints.EAST,
          1.0,0.0,5,5,5,5);
 
       listener = l;
-      pack();
+      edit.requestFocus();
    }
 
    public void setText(String t) {
@@ -132,7 +132,7 @@ extends Dialog
      Dimension s = Toolkit.getDefaultToolkit().getScreenSize();
      Dimension d = getSize();
      move((s.width - d.width)/2, (s.height - d.height)/2);
-   }
+    }
 
     static public void constrain(Container c, Component p,
         int x, int y, int w, int h,
@@ -186,17 +186,89 @@ extends Dialog
     }
 
     public boolean keyDown( Event e, int key ){
-      if ((e.target == ok && key == Event.ENTER) || (e.target == edit && key == Event.ENTER)){
+      if(key=='\t') return moveFocus();
+      else if ((e.target == ok && key == Event.ENTER) || (e.target == edit && key == Event.ENTER)){
         isApply = true;
         listener.postEvent(new Event(this, e.ACTION_EVENT, edit.getText()));
         dispose();
         return true;
       }
-      if ( e.target == cancel && key == Event.ENTER ){
+      else if ( e.target == cancel && key == Event.ENTER ){
         isApply = false;
         dispose();
         return true;
       }
-      return false;
+      else return false;
+    }
+
+    public boolean doModal()
+    {
+        Toolkit.getDefaultToolkit().addAWTEventListener(this, AWTEvent.KEY_EVENT_MASK);
+        pack();
+        toCenter();
+        edit.requestFocus();
+        show();
+        Toolkit.getDefaultToolkit().removeAWTEventListener(this);
+        return isApply();
+    }
+
+    private boolean moveFocus()
+    {
+        Component owner = getFocusOwner();
+        return moveFocus(owner);
+    }
+
+    private void optimize(Vector v)
+    {   
+        int j, k = v.size();
+        for(j=0;j<k;++j){
+            Component c = (Component)v.elementAt(j);
+            if(c instanceof Button){
+                v.removeElementAt(j);
+                v.addElement(c);
+                --k;
+                --j;
+            }
+        }
+    }
+
+    private boolean moveFocus(Component c)
+    {
+        int j, k;
+        boolean ask = false;
+        Vector v = new Vector();
+
+        linearize(this, v);
+        optimize(v);
+        for(k=v.size(), j=0;j<k;++j)
+            if(c == v.elementAt(j)) break;
+        if(j>=k) j = -1;
+        if(j==k-1){
+            ask = true;
+            j=-1; // see below +1
+        }
+        ((Component)v.elementAt(j+1)).requestFocus();
+        return ask;
+    }
+
+    private void linearize(Container cc, Vector v)
+    {
+        int j, k = cc.getComponentCount();
+        for(j=0;j<k;++j){
+            Component c = cc.getComponent(j);
+            if(c instanceof Label) continue;
+            else if(c instanceof IELabel) continue;
+            else if(c instanceof Container) linearize((Container)c, v);
+            else v.addElement(c);
+        }
+    }
+
+    public void eventDispatched(AWTEvent event)
+    {
+        if(event.getID()!=java.awt.event.KeyEvent.KEY_TYPED) return;
+        if(!(event instanceof java.awt.event.KeyEvent)) return;
+        java.awt.event.KeyEvent ke = (java.awt.event.KeyEvent)event;
+        if(ke.getKeyChar()!='\t') return;
+        moveFocus();
     }
 }

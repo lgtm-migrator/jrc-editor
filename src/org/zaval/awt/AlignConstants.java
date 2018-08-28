@@ -47,12 +47,14 @@ public interface AlignConstants
   public static final int RIGHT  = 0x2;
   public static final int TOP    = 0x4;
   public static final int BOTTOM = 0x8;
+  public static final int FIT    = 0x10;
+  public static final int JUSTIFY= 0x20;
+
   public static final int TLEFT  = LEFT  | TOP;
   public static final int TRIGHT = RIGHT | TOP;
   public static final int BLEFT  = LEFT  | BOTTOM;
   public static final int BRIGHT = RIGHT | BOTTOM;
   public static final int CENTER = 0;
-
 
   public static final String STR_LEFT   = "left";
   public static final String STR_RIGHT  = "right";

@@ -121,6 +121,39 @@ extends AlignArea
     draw(g, 0, 0, col);
   }
 
+  private void drawText(Graphics gr, String text, int xs, int ys, int max)
+  {
+     int comml = 0, commr = 0, j = 0;
+     StringTokenizer st = new StringTokenizer(text,":");
+     String left = st.nextToken() + ":";
+     String right= st.nextToken();
+
+     FontMetrics fm = fontMetrics;
+     comml += fm.stringWidth(left);
+     commr += fm.stringWidth(right);
+
+     gr.drawString(left,  xs, ys);
+     gr.drawString(right, xs + max - commr, ys);
+  }
+
+  private void drawJText(Graphics gr, String text, int xs, int ys, int max)
+  {
+     int j = 0, sizes = 0;
+     StringTokenizer st = new StringTokenizer(text,"\t ");
+     String[] words = new String[st.countTokens()];
+     FontMetrics fm = fontMetrics;
+
+     for(;st.hasMoreTokens();++j){
+         words[j] = st.nextToken();
+         sizes += fm.stringWidth(words[j]);
+     }
+     double space = (max - sizes) / (words.length - 1);
+     for(j=0;j<words.length;++j){
+        gr.drawString(words[j], xs, ys);
+        xs += space;
+     }
+  }
+
   public void draw(Graphics g, int offx, int offy, Color col)
   {
     Dimension d   = getSize();
@@ -141,7 +174,9 @@ extends AlignArea
           if (len > d.width) x = ins.left + offx;
           else               x = r.x + offx + r.width - len;
         }
-        g.drawString(strs[i], x, y);
+        if((getAlign() & Align.FIT)>0) drawText(g, strs[i], x, y, d.width);
+        else if(i+1 !=strs.length && (getAlign() & Align.JUSTIFY)>0) drawJText(g, strs[i], x, y, d.width);
+        else g.drawString(strs[i], x, y);
         y += (h + STRING_GAP);
       }
 

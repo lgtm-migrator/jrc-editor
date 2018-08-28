@@ -1,5 +1,8 @@
 MAKE=nmake -nologo
 
+OUTROOT=../classes
+SRCROOT=../src
+
 all:
     $(MAKE) -f Makefile.2
 
@@ -9,10 +12,27 @@ depend:
     jdepend -v 6 -u filelist-all >>Makefile.2
     rm filelist-all
 
-clean:
-    $(MAKE) -f Makefile.2 clean
+depend.unix:
+    xfind . -name '*.java' -print | sed -e 's:^\./::g' >filelist-all
+    cat Makefile.1.unix >Makefile.2.unix
+    jdepend -v 6 -u filelist-all >>Makefile.2.unix
+    rm filelist-all
 
-install:
-    $(MAKE) -f Makefile.2 install
+install: all
+    cp $(SRCROOT)/*.properties $(OUTROOT)
+    cp -r $(SRCROOT)/META-INF $(OUTROOT)
+    cd $(OUTROOT)
+    zip -r9 jrc-editor.jar *.properties org/* META-INF/*
+
+clean:
+    rm -rf $(OUTROOT)/*.properties $(OUTROOT)/org $(OUTROOT)/*.jar
+
+dist-clean:
+    rm -rf $(OUTROOT)/*.properties $(OUTROOT)/org
+
+test: all install
+    cd ..
+    jrc-editor.bat
+    cd src
 
 #EOF

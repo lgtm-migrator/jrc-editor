@@ -4,7 +4,7 @@
  *     $Date: 2002/03/28 9:24:42 $
  *
  *     @author:     Victor Krapivin
- *     @version:    1.3
+ *     @version:    2.0
  *
  * Zaval JRC Editor is a visual editor which allows you to manipulate 
  * localization strings for all Java based software with appropriate 
@@ -48,11 +48,13 @@ implements TranslatorConstants
 {
     private Vector items;
     private Vector lng;
+    private Hashtable nameCache;
     
     BundleSet()
     {
         items = new Vector();
         lng = new Vector();
+        nameCache = new Hashtable();
     }
 
     void addLanguage(String slng, String desc)
@@ -115,40 +117,57 @@ implements TranslatorConstants
 
     BundleItem getItem(String key)
     {
-        int j = getItemIndex(key);
-        if(j<0) return null;
-        return getItem(j);
+    //  int j = getItemIndex(key);
+    //  if(j<0) return null;
+    //  return getItem(j);
+        return (BundleItem)nameCache.get(key);
     }
 
     int getItemIndex(String key)
     {
         int j, k = getItemCount();
-        for(j=0;j<k;++j){
+        for(j=k-1;j>=0;--j){
             BundleItem bi = getItem(j);
             if(bi.getId().equals(key)) return j;
         }
         return -1;
     }
 
-    void addKey(String key)
+    BundleItem addKey(String key)
     {
         int j, k = getItemCount(), q;
-        for(j=0;j<k;++j){
+        BundleItem ask = (BundleItem)getItem(key);
+    /*  for(j=0;j<k;++j){
             BundleItem bi = getItem(j);
             q = bi.getId().compareTo(key);
-            if(q==0) return;
+            if(q==0) return bi;
             else if(q>0){
-                items.insertElementAt(new BundleItem(key), j);
-                return;
+                items.insertElementAt(ask = new BundleItem(key), j);
+                return ask;
             }
+        } */
+        if(ask==null){ 
+            items.addElement(ask = new BundleItem(key));
+            nameCache.put(key, ask);
         }
-        items.addElement(new BundleItem(key));
+        return ask;
     }
 
     void removeKey(String key)
     {
         int j = getItemIndex(key);
         if(j>=0) items.removeElementAt(j);
+        nameCache.remove(key);
+    }
+
+    Enumeration getKeysBeginningWith(String key)
+    {
+        Vector v = new Vector();
+        for(int j=0;j<getItemCount();++j){
+            BundleItem bi = getItem(j);
+            if(bi.getId().startsWith(key)) v.addElement(bi);
+        }
+        return v.elements();
     }
 
     void removeKeysBeginningWith(String key)
@@ -236,5 +255,17 @@ implements TranslatorConstants
         if(j<0) return;
         base = base.substring(0, j) + "_" + lang.getLangId() + base.substring(j);
         lang.setLangFile(base);
+    }
+
+    public void resort()
+    {
+        Collections.sort(items, new Comparator(){
+            public int compare(Object o1, Object o2){
+                return ((BundleItem)o1).getId().compareTo(((BundleItem)o2).getId());
+            }
+            public boolean equals(Object obj){
+                return this == obj;
+            }
+        });
     }
 }

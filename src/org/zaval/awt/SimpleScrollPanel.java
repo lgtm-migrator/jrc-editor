@@ -192,65 +192,10 @@ implements LayoutManager
   {
      Dimension x = comp.preferredSize();
      if(x.width==0 || x.height==0) x = comp.size();
-
-     Rectangle r = bounds();
-     comp.move(0,0);
-     int hor_h = hor.preferredSize().height;
-     int ver_w = ver.preferredSize().width;
-
-     int wx=r.width;
-     int wy=r.height;
-
-     boolean seth = false;
-     boolean setv= false;
-
-  // System.err.println("Layout: RS=["+wx+","+wy+"], PS=["+
-  //    x.width+","+x.height+"], SB=("+hor_h+","+ver_w+")");
-
-     seth = (x.width>wx)  || ((x.height>wy) && (x.width>wx-ver_w));
-     setv = (x.height>wy) || ((x.width>wx)  && (x.height>wy-hor_h));
-
-     if(!seth){
-  //    System.err.println("   RS.w >= PFS.w");
-        if(hor.isVisible()) hor.hide();
-        comp.move(0,0);
-     }
-     else{
-  //    System.err.println("   RS.w < PFS.w: "+(x.width - wx));
-        hor.move(0,r.height-hor_h);
-        hor.resize(r.width-(setv?ver_w:0),hor_h);
-        hor.show();
-        wy-=hor_h;
-        int newh=x.width - wx + (x.height>wy?ver_w:0);
-     // if(newh<ver_w) newh+=ver_w;
-        hor.setValues(0,wx-(setv?ver_w:0),0,x.width);
-        hor.setPageIncrement(wx/2);
-  //    System.err.println("   RS'=["+wx+","+wy+"]");
-     }
-
-     if(!setv){
-  //    System.err.println("   RS.h >= PFS.h");
-        if(ver.isVisible()) ver.hide();
-        comp.move(0,0);
-     }
-     else{
-  //    System.err.println("   RS.h < PFS.h: "+(x.height - wy));
-        ver.move(r.width-ver_w,0);
-        ver.resize(ver_w,r.height-(seth?hor_h:0));
-        ver.show();
-        wx-=ver_w;
-        int newh=x.height - wy; // hor_h == ver_w
-     // if(newh<hor_h) newh+=hor_h;
-        ver.setValues(0,wy,0,x.height);
-        ver.setPageIncrement(wy/2);
-  //    System.err.println("   RS'=["+wx+","+wy+"]");
-     }
-  // System.err.println("   panel = ["+wx+","+wy+"]");
-     panel.move(0,0);
-     panel.resize(wx,wy);
-     if(x.width<wx) x.width=wx; // To fit it horizontally
-     comp.resize(x.width,x.height); // To scroll it
-  // System.err.println("   comp  = ["+x.width+","+x.height+"]");
+     comp.resize(x.width,x.height);
+     Rectangle r = comp.bounds();
+     if(r.x < 0 || r.y < 0) comp.move(0, 0);
+     checkForSVH();
   }
 
   private Component get0(Container c)
@@ -261,5 +206,73 @@ implements LayoutManager
   public void setMaxSize(Dimension auf)
   {
      this.auf = auf;
+  }
+
+  private void checkForSVH()
+  {
+     Dimension x = comp.preferredSize();
+     if(x.width==0 || x.height==0) x = comp.size();
+     Rectangle r = bounds();
+     int hor_h = hor.preferredSize().height;
+     int ver_w = ver.preferredSize().width;
+     int wx=r.width;
+     int wy=r.height;
+
+     boolean seth = false;
+     boolean setv= false;
+
+     seth = (x.width>wx)  || ((x.height>wy) && (x.width>wx-ver_w));
+     setv = (x.height>wy) || ((x.width>wx)  && (x.height>wy-hor_h));
+
+     if(!seth){
+        if(hor.isVisible()) hor.hide();
+        comp.move(0,0);
+     }
+     else{
+        hor.move(0,r.height-hor_h);
+        hor.resize(r.width-(setv?ver_w:0),hor_h);
+        hor.show();
+        wy-=hor_h;
+        int newh=x.width - wx + (x.height>wy?ver_w:0);
+        hor.setValues(0,wx-(setv?ver_w:0),0,x.width);
+        hor.setPageIncrement(wx/2);
+     }
+
+     if(!setv){
+        if(ver.isVisible()) ver.hide();
+        comp.move(0,0);
+     }
+     else{
+        ver.move(r.width-ver_w,0);
+        ver.resize(ver_w,r.height-(seth?hor_h:0));
+        ver.show();
+        wx-=ver_w;
+        int newh=x.height - wy; // hor_h == ver_w
+        ver.setValues(0,wy,0,x.height);
+        ver.setPageIncrement(wy/2);
+     }
+     panel.move(0,0);
+     panel.resize(wx,wy);
+     if(x.width<wx){ 
+        x.width=wx; // To fit it horizontally
+        comp.resize(x.width,x.height);
+     }
+  }
+
+  public Scrollbar getVScrollbar()
+  {
+    return ver;
+  }
+
+  public Scrollbar getHScrollbar()
+  {
+    return hor;
+  }
+
+  public void scroll(int newX, int newY)
+  {
+     comp.move(-newX, -newY);
+     hor.setValue(newX);
+     ver.setValue(newY);
   }
 }

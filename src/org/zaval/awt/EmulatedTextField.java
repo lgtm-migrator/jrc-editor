@@ -4,7 +4,7 @@
  *     $Date: 2002/03/28 9:24:42 $
  *
  *     @author:     Victor Krapivin
- *     @version:    1.3
+ *     @version:    2.0
  *
  * Zaval JRC Editor is a visual editor which allows you to manipulate 
  * localization strings for all Java based software with appropriate 
@@ -42,10 +42,12 @@
 package org.zaval.awt;
 
 import java.awt.*;
+import java.awt.event.*;
 import java.util.*;
 
 public class EmulatedTextField
 extends Canvas
+implements KeyListener, MouseListener, FocusListener, ActionListener
 {
   protected static EmulatedTextField cursorOwner = null;
 
@@ -53,7 +55,7 @@ extends Canvas
   public static final int RIGHT = 2;
 
   protected StringBuffer buffer         = new StringBuffer("");
-  Insets       insets         = new Insets (0,4,0,4);
+  Insets       insets         = new Insets (2,5,2,5);
   Point        textLocation   = new Point (0,0);
   Point        cursorLocation = new Point (0,0);
   Dimension    textSize       = new Dimension(0,0);
@@ -64,13 +66,48 @@ extends Canvas
   int          align          = LEFT;
   boolean      is3D           = true;
   protected int          selPos = 0, selWidth = 0, startSel = 0;
+  private PopupMenu menu;
+  private int minSize = 0;
 
   public EmulatedTextField() {
     this(null);
   }
 
+  public EmulatedTextField(int size) {
+    this(null);
+    minSize = size;
+  }
+
+  public void actionPerformed(ActionEvent e)
+  {
+    if(e.getActionCommand().equals("Cut")){
+        blCopy();
+        removeBlock();
+    }
+    else if(e.getActionCommand().equals("Copy")) blCopy();
+    else if(e.getActionCommand().equals("Paste")) blPaste();
+  }
+
   public EmulatedTextField(String s) {
     if (s != null) setText(s);
+    enableInputMethods(true);
+    addKeyListener(this);
+    addMouseListener(this);
+    addFocusListener(this);
+
+    MenuItem mi1;
+    menu = new PopupMenu();
+    add(menu);
+    menu.add(mi1 = new MenuItem("Cut"));
+    mi1.addActionListener(this);
+    mi1.setActionCommand("Cut");
+    menu.add(mi1 = new MenuItem("Copy"));
+    mi1.addActionListener(this);
+    mi1.setActionCommand("Copy");
+    menu.add(mi1 = new MenuItem("Paste"));
+    mi1.addActionListener(this);
+    mi1.setActionCommand("Paste");
+    menu.addActionListener(this);
   }
 
   public void setText(String s) {
@@ -123,39 +160,121 @@ extends Canvas
   public boolean is3D() {
     return is3D;
   }
-  
-  public boolean keyDown(Event e, int key)
+
+  public void keyTyped(KeyEvent ke)
   {
-    if(key>0xFF00) key -= 0xFF00; /* Linux 1.3.1 workaround */
-    if (blockKey(e)) return false;
-    if (controlKey(key, e.shiftDown())) return false;
-    
-    if(java.awt.event.KeyEvent.getKeyText(key).indexOf("nknown") != -1){    
-    int old_key = key;
-    if(System.getProperty("key.locale.conversion")!=null){
-        key = key & 0x00FF; // Latin1 with wrong unicode page?
-        String encType = System.getProperty("file.encoding");
-        if(encType!=null)
-            try{
-                byte[] b2 = { (byte)key };
-                key = (int)(new String(b2, encType)).charAt(0);
-            }
-            catch(Exception eee){
-            }
-            Character.UnicodeBlock b3 = Character.UnicodeBlock.of((char)key);
-            if(b3==null) key = old_key;
-        }    
+    int key = ke.getKeyCode();
+    boolean isCtrl = (ke.getModifiers()&ke.CTRL_MASK) !=0;
+    boolean isShift = (ke.getModifiers()&ke.SHIFT_MASK) !=0;
+    if (controlKey(key, isShift)) return;
+
+    if (ke.isActionKey()) return;
+    char c = ke.getKeyChar();
+    if(c==ke.CHAR_UNDEFINED) return;
+
+    if(c==0x7F || c == 0x1B) return;
+    if(ke.isControlDown()) return;
+    if(c!='\b' && c!='\t'){
+        removeBlock();
+        if (write(c)) seek (1, false);
     }
-    if (e.id != Event.KEY_ACTION || key == 0){       if (inputKey(key)) return false;
-    }  
-    return super.keyDown(e, key);
+  }
+
+  public void keyPressed(KeyEvent ke)
+  {
+    int key = ke.getKeyCode();
+    boolean isCtrl = (ke.getModifiers()&ke.CTRL_MASK) !=0;
+    boolean isShift = (ke.getModifiers()&ke.SHIFT_MASK) !=0;
+    if (blockKey(key, isCtrl, isShift)) return;
+    if (controlKey(key, isShift)) return;
+    if (key==ke.VK_F12) menu.show(this, 0, 0);
+  }
+
+  public void keyReleased(KeyEvent ke)
+  {
+  }
+  
+  protected boolean blockKey(int key, boolean isCtrlDown, boolean isShiftDown)
+  {
+    boolean shift = isShiftDown;
+    if (isCtrlDown && (key == KeyEvent.VK_INSERT || key == KeyEvent.VK_C)) blCopy();
+    else if ((isShiftDown && key == KeyEvent.VK_INSERT) || (isCtrlDown && key == KeyEvent.VK_V)) blPaste();
+    else if ((isShiftDown && key == KeyEvent.VK_DELETE) || (isCtrlDown && key == KeyEvent.VK_X)) blDelete();
+    else if (isCtrlDown && key==KeyEvent.VK_RIGHT) seek(nextSpace() - cursorPos, shift);
+    else if (isCtrlDown && key==KeyEvent.VK_LEFT)  seek(prevSpace() - cursorPos, shift);
+    else if (!isCtrlDown) return false;
+    return true;
+  }
+
+  protected int prevSpace()
+  {
+    int j = cursorPos;
+    if(j>=buffer.length()) j = buffer.length() - 1;
+    for(;j>0 &&  Character.isSpaceChar(buffer.charAt(j));--j); 
+    for(;j>0 && !Character.isSpaceChar(buffer.charAt(j));--j); 
+    return j;
+  }
+
+  protected int nextSpace()
+  {
+    int j = cursorPos;
+    int k = buffer.length();
+    if(j>=k) return cursorPos;
+    for(;j<k &&  Character.isSpaceChar(buffer.charAt(j));++j); 
+    for(;j<k && !Character.isSpaceChar(buffer.charAt(j));++j); 
+    return j;
+  }
+
+  protected boolean controlKey(int key, boolean shift)
+  {
+    boolean b = true;
+    switch (key){
+    case KeyEvent.VK_DOWN  :
+    case KeyEvent.VK_RIGHT : 
+      seek(1, shift);  
+      break;
+    case KeyEvent.VK_UP    :
+    case KeyEvent.VK_LEFT  : 
+      seek(-1, shift); 
+      break;
+    case KeyEvent.VK_END   : 
+      seek2end(shift); 
+      break;
+    case KeyEvent.VK_HOME  : 
+      seek2beg(shift); 
+      break;
+    case KeyEvent.VK_DELETE: 
+      if (!isSelected()) remove(cursorPos, 1);
+      else removeBlock();
+      break;
+    case KeyEvent.VK_BACK_SPACE : 
+      if (!isSelected()){
+        if (cursorPos > 0){
+          seek(-1, shift);
+          remove(cursorPos, 1);
+        }
+      }
+      else removeBlock();
+      break;
+    case KeyEvent.VK_ENTER :
+    case KeyEvent.VK_PAGE_UP   :
+    case KeyEvent.VK_PAGE_DOWN : 
+      break;
+    case KeyEvent.VK_INSERT :   
+      return false;
+    case KeyEvent.VK_TAB : 
+      return true;
+    default    : 
+      return false;
+    }
+    if (!shift) clear();
+    return b;
   }
 
   public void blPaste()
   {
     String s = readFromClipboard();
-    if (s != null)
-    {
+    if (s != null){
       s = filterSymbols( s );
       removeBlock();
       insert(cursorPos, s);
@@ -185,22 +304,6 @@ extends Canvas
     removeBlock();
   }
 
-  protected boolean blockKey(Event e)
-  {
-    if ((e.controlDown() && e.key == 1025) || e.key == 3)
-      blCopy();
-    else
-    if ((e.shiftDown() && e.key == 1025)|| e.key == 22)
-      blPaste();
-    else
-    if ((e.shiftDown() && e.key == 0x7F)|| e.key == 24)
-      blDelete();
-    else
-      if (!e.controlDown()) return false;
-
-    return true;
-  }
-
   protected boolean inputKey(int key)
   {
     removeBlock();
@@ -211,49 +314,11 @@ extends Canvas
 
   protected void removeBlock()
   {
-    if (isSelected())
-    {
+    if (isSelected()){
       remove(selPos, selWidth);
       setPos(selPos);
       clear();
     }
-  }
-
-  protected boolean controlKey(int key, boolean shift)
-  {
-    boolean b = true;
-    switch (key)
-    {
-      case Event.DOWN  :
-      case Event.RIGHT : seek(1, shift);  break;
-      case Event.UP  :
-      case Event.LEFT  : seek(-1, shift); break;
-      case Event.END   : seek2end(shift); break;
-      case Event.HOME  : seek2beg(shift); break;
-      case 0x7F  : if (!isSelected()) remove(cursorPos, 1);
-                   else               removeBlock();
-                   break;
-      case '\b'  : if (!isSelected())
-                   {
-                     if (cursorPos > 0)
-                     {
-                       seek(-1, shift);
-                       remove(cursorPos, 1);
-                     }
-                   }
-                   else removeBlock();
-                   break;
-      case '\n'      :
-      case Event.PGUP:
-      case Event.PGDN: break;
-      case 1025  :   return false; //INS
-
-      case '\t'  : return true;
-      default    : return false;
-    }
-
-    if (!shift) clear();
-    return b;
   }
 
   public void paint(Graphics g)
@@ -299,6 +364,13 @@ extends Canvas
     if (cursorOwner != this) return;
     g.setColor(cursorColor);
     g.fillRect(cursorLocation.x + shift.x, cursorLocation.y + shift.y, cursorSize.width, cursorSize.height);
+  }
+
+  public Rectangle getCursorShape()
+  {
+    return new Rectangle(cursorLocation.x + shift.x, cursorLocation.y + shift.y, 
+        cursorSize.width, 
+        cursorSize.height);
   }
 
   protected void drawBorder(Graphics g)
@@ -363,9 +435,15 @@ extends Canvas
     return true;
   }
 
+  protected boolean write(char key) {
+    buffer.insert(cursorPos, key);
+    return true;
+  }
+
   protected void remove(int pos, int size)
   {
-    if (pos == buffer.length() || pos < 0) return;
+    if (pos > buffer.length() || pos < 0) return;
+    if (pos + size > buffer.length()) size = buffer.length() - pos;
     String s = buffer.toString();
     s = s.substring(0, pos) + s.substring(pos+size);
     buffer = new StringBuffer(s);
@@ -392,22 +470,48 @@ extends Canvas
     repaintPart ();
   }
 
-  long clickTime = 0;
+    private long clickTime = 0;
 
-  public boolean mouseDown(Event e, int x, int y)
-  {
-    if (cursorOwner != this) requestFocus();
-    int pos = calcTextPos(x, y);
-    if (pos >= 0 && pos != cursorPos) setPos(pos);
-    if (isSelected()) clear();
+    public void mouseClicked(MouseEvent e)
+    {
+    }
 
-    long t = System.currentTimeMillis();
-    if ((t - clickTime) < 300)
-      select(0, buffer.length());
-    clickTime = t;
+    public void mousePressed(MouseEvent e)
+    {
+    }
 
-    return super.mouseDown(e, x, y);
-  }
+    public void selectAll()
+    {
+        select(0, buffer.length());
+    }
+
+    public void mouseReleased(MouseEvent e)
+    {
+        int x = e.getX();
+        int y = e.getY();
+
+        if (cursorOwner != this) requestFocus();
+        int pos = calcTextPos(x, y);
+        if (pos >= 0 && pos != cursorPos) setPos(pos);
+
+        if(e.isPopupTrigger() || e.isShiftDown()){
+            menu.show(this, x, y);
+            return;
+        }
+        else if (isSelected() && !e.isShiftDown()) clear();
+
+        long t = System.currentTimeMillis();
+        if ((t - clickTime) < 300) select(0, buffer.length());
+        clickTime = t;
+    }
+
+    public void mouseEntered(MouseEvent e)
+    {
+    }
+
+    public void mouseExited(MouseEvent e)
+    {
+    }
 
   protected int calcTextPos(int x, int y)
   {
@@ -462,12 +566,18 @@ extends Canvas
   protected Dimension calcSize()
   {
     Font f = getFont();
-    if (f == null) return new Dimension (0,0);
+    if (f == null) return new Dimension (0,25);
     FontMetrics m = getFontMetrics(f);
-    if (m == null) return new Dimension (0,0);
+    if(m==null){
+       Toolkit k = Toolkit.getDefaultToolkit();
+       m = k.getFontMetrics(f);
+       if(m==null) return new Dimension (0,25);
+    }
     Insets i = insets();
     String t = buffer.toString();
-    return new Dimension (i.left + i.right + m.stringWidth(t) , i.top + i.bottom + m.getHeight());
+    return new Dimension (
+        i.left + i.right + Math.max(minSize* m.stringWidth("W"), m.stringWidth(t)), 
+        i.top + i.bottom + Math.max(m.getHeight(), 17));
   }
 
   protected boolean recalc()
@@ -533,30 +643,25 @@ extends Canvas
     repaint();
   }
 
-  public boolean lostFocus(Event e, Object obj)
-  {
-    if (cursorOwner == this)
+    public void focusGained(FocusEvent e)
     {
-      cursorOwner = null;
-      clear();
-      repaint();
-    }
-    return super.lostFocus(e, obj);
-  }
-
-  public boolean gotFocus(Event e, Object obj)
-  {
-    if (cursorOwner != null) cursorOwner.otdaiFocusTvojuMat();
-    cursorOwner = this;
-    if (buffer != null)
-    {
-      setPos(buffer.length());
-      select(0, buffer.length());
+        if (cursorOwner != null) cursorOwner.otdaiFocusTvojuMat();
+        cursorOwner = this;
+        if (buffer != null){
+           setPos(buffer.length());
+           select(0, buffer.length());
+        }
+        repaint();
     }
 
-    repaint();
-    return super.gotFocus(e, obj);
-  }
+    public void focusLost(FocusEvent e)
+    {
+        if (cursorOwner == this){
+          cursorOwner = null;
+          clear();
+          repaint();
+        }
+    }
 
   protected void repaintPart ()
   {

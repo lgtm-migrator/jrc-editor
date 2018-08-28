@@ -1,7 +1,7 @@
 /**
  *     Caption: Zaval Java Resource Editor
  *     @author:     Victor Krapivin
- *     @version:    1.3
+ *     @version:    2.0
  *
  * Zaval JRC Editor is a visual editor which allows you to manipulate 
  * localization strings for all Java based software with appropriate 
@@ -206,7 +206,7 @@ public class Split
              BundleSet set = bundle.getBundle();
              int items = set.getItemCount();
              out.writeChar((char)0xFEFF);
-             out.writeChars("#JRCE 1.3: do not modify this line\r\n\r\n");
+             out.writeChars("#JRC Editor 2.0: do not modify this line\r\n\r\n");
              for(int i=0;i<items;++i){
                 BundleItem bi = set.getItem(i);
                 Enumeration en= bi.getLanguages();

@@ -4,7 +4,7 @@
  *     $Date: 2002/03/28 9:24:42 $
  *
  *     @author:     Victor Krapivin
- *     @version:    1.3
+ *     @version:    2.0
  *
  * Zaval JRC Editor is a visual editor which allows you to manipulate 
  * localization strings for all Java based software with appropriate 
@@ -49,8 +49,8 @@ public interface TranslatorConstants
    public static final char KEY_SEPARATOR_2    = '_';
    public static final int CREATE_REQUIRED     = 9999;
    public static final int REMOVE_REQUIRED     = 9991;
-   public static final String OPEN_IMAGE       = "bitmap1.gif";
-   public static final String CLOSE_IMAGE      = "bitmap2.gif";
+   public static final String OPEN_IMAGE       = "BITMAP1.gif";
+   public static final String CLOSE_IMAGE      = "BITMAP2.gif";
    public static final String WARN_IMAGE       = "incomplete.gif";
    public static final String DEFAULT_LANG_KEY = "language";
    public static final String DEFAULT_LANGNAME = "Default";

@@ -219,12 +219,16 @@ implements ScrollArea, ScrollObject
       if (getNode(name) == null) return false;
       TreeNode f=getNode(name);
       if (isHidden(name)) return false;
-      selectedNode = f;
-      return true;
+      return selectNode(f);
     }
 
     public boolean selectNode (TreeNode tn)  {
        selectedNode = tn;
+       int viewCount = getViewCount();
+       int index = getIndex(selectedNode);
+       if (index == -1) index = ltree.e.indexOf(selectedNode);
+       if (index > viewCount-1) index = viewCount - 1;
+       checkSelection(index);
        return true;
     }
 
@@ -717,8 +721,7 @@ implements ScrollArea, ScrollObject
     public void drawTree()
     {
         Dimension d = size();
-        if ((d.width != viewWidth) || (d.height != viewHeight) || g1==null)
-        {
+        if ((d.width != viewWidth) || (d.height != viewHeight) || g1==null){
             if(d.width*d.height<=0) return;
 
             im1 = createImage(d.width, d.height);
@@ -756,9 +759,16 @@ implements ScrollArea, ScrollObject
         int lastOne   = ltree.v.size();
         int skipCount = 0;
         int viewCount = getViewCount();//getViewCount2();
-        for (int i=0; i<lastOne; i++)
-        {
-           TreeNode node=(TreeNode)ltree.v.elementAt(i);
+        for (int i=0; i<lastOne; ++i){
+           TreeNode node = null;
+           // This block is better than synchronization for every call to LevelTree
+           try{ node = (TreeNode)ltree.v.elementAt(i); }catch(Exception e){}
+
+           if(node==null){
+               g1.dispose();
+               g1 = null;
+               break;
+           }
 
            int x = posx + cellSize*(node.depth - 1);
            int y = posy + (i-skipCount)*cellSize;
@@ -1005,14 +1015,19 @@ implements ScrollArea, ScrollObject
         return false;
     }
 
+    public void openToNode(String name)
+    {
+       TreeNode t=getNode(name);
+       for(;t!=null;t=t.parent)
+          if(t.isExpandable() && !t.isExpanded()) t.toggle();
+       validate2();
+    }
+
     public void openNode(String name)
     {
        TreeNode t=getNode(name);
        if(t==null || t.isExpanded()) return;
-
-       if(t.isExpandable() && !t.isExpanded())
-         t.toggle();
-
+       if(t.isExpandable() && !t.isExpanded()) t.toggle();
        validate2();
     }
 
@@ -1020,12 +1035,10 @@ implements ScrollArea, ScrollObject
     {
        TreeNode t=getNode(name);
        if(t==null) return;
-       if(t.isExpandable() && t.isExpanded())
-       {
+       if(t.isExpandable() && t.isExpanded()){
          t.toggle();
          correctSelect(t);
        }
-
        validate2();
     }
 
@@ -1041,6 +1054,12 @@ implements ScrollArea, ScrollObject
 
     public void expandAll() {
       ltree.expandAll();
+      validate2();
+    }
+
+    public void collapseAll() {
+      ltree.collapseAll();
+      validate2();
     }
 
  // ========================================================================
@@ -1236,7 +1255,3 @@ implements ScrollArea, ScrollObject
      return textOffset;
    }
 }
-
-
-
-

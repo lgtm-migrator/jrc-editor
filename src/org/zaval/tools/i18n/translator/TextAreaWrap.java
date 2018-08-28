@@ -1,7 +1,7 @@
 /**
  *     Caption: Zaval Java Resource Editor
  *     @author:     Victor Krapivin
- *     @version:    1.3
+ *     @version:    2.0
  *
  * Zaval JRC Editor is a visual editor which allows you to manipulate 
  * localization strings for all Java based software with appropriate 
@@ -121,7 +121,10 @@ public class TextAreaWrap
 
     private void initControls()
     {
-        if(flavor==NATIVE) tf2 = new TextArea("", 3, 20, TextArea.SCROLLBARS_NONE);
+        if(flavor==NATIVE){ 
+            tf2 = new TextArea("", 3, 20, TextArea.SCROLLBARS_NONE);
+            tf2.enableInputMethods(true);
+        }
         else tf1 = new EmulatedTextArea( true, false, 3, 20 );
     }
 
@@ -162,5 +165,17 @@ public class TextAreaWrap
         }
         if(getControl().getInputContext()!=null)
             getControl().getInputContext().setCharacterSubsets(usedInputs);
+    }
+
+    public void selectAll()
+    {
+        if(flavor==NATIVE) tf2.selectAll();
+        else tf1.selectAll();
+    }
+
+    public Rectangle getCursorShape()
+    {
+        if(flavor==NATIVE) return null;
+        else return tf1.getCursorShape();
     }
 }
