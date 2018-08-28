@@ -1,9 +1,24 @@
 plugins {
 	id 'java'
 	id 'application'
+	id "com.diffplug.gradle.spotless" version "3.14.0"
 }
 
 mainClassName = 'org.zaval.tools.i18n.translator.Main'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+tasks.compileJava.options.encoding = 'UTF-8'
+tasks.compileTestJava.options.encoding = 'UTF-8'
+
+spotless {
+	java {
+		eclipse().configFile rootProject.file('resources/eclipse-jdt-formatter.xml')
+		removeUnusedImports()
+		trimTrailingWhitespace()
+		endWithNewline()
+	}
+}
 
 dependencies {
 	compile 'jakarta-regexp:jakarta-regexp:1.4'

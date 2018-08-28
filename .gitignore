@@ -3,6 +3,7 @@
 /build/
 /.idea/
 /out/
+/bin/
 
 # everywhere
 .settings/
