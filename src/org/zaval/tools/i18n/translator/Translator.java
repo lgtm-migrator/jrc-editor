@@ -4,7 +4,7 @@
  *     $Date: 2002/03/28 9:24:42 $
  *
  *     @author:     Victor Krapivin
- *     @version:    1.0
+ *     @version:    1.1
  *
  * Zaval JRC Editor is a visual editor which allows you to manipulate 
  * localization strings for all Java based software with appropriate 
@@ -77,6 +77,9 @@ implements TranslatorConstants
     private Menu langMenu, fileMenu;
     private MenuItem delMenu;
     private MenuItem aboutMenu;
+    private MenuItem expandTreeMenu, collapseTreeMenu, expandNodeMenu, collapseNodeMenu;
+    private MenuItem statisticsMenu;
+    private CheckboxMenuItem showNullsMenu;
 
     private EmulatedTextField commField = null;
     private IELabel sbl1, sbl2;
@@ -90,13 +93,16 @@ implements TranslatorConstants
     private Panel pane = new Panel();
     private Toolbar tool;
 
-    private String [] CLOSE_BUTTONS = { "Yes", "No", "Cancel" };
-    private String [] YESNO_BUTTONS = { "Yes", "No" };
+    private String [] CLOSE_BUTTONS = new String[3];
+    private String [] YESNO_BUTTONS = new String[2];
+    private String [] DELETE_BUTTONS = new String[3];
 
     private MenuItem[] tbar2menu;
 
     private static final int MAX_PICK_LENGTH = 40;
     private Vector pickList = new Vector(8);
+    private int nullsCount = 0;
+    private int notCompletedCount = 0;
 
     public Translator( String s, SafeResourceBundle res )
     {
@@ -104,10 +110,16 @@ implements TranslatorConstants
        rcTable = res;
 
        CLOSE_BUTTONS[0] = RC( "dialog.button.yes" );
-       YESNO_BUTTONS[0] = RC( "dialog.button.yes" );
        CLOSE_BUTTONS[1] = RC( "dialog.button.no" );
-       YESNO_BUTTONS[1] = RC( "dialog.button.no" );
        CLOSE_BUTTONS[2] = RC( "dialog.button.cancel" );
+
+       YESNO_BUTTONS[0] = RC( "dialog.button.yes" );
+       YESNO_BUTTONS[1] = RC( "dialog.button.no" );
+
+       DELETE_BUTTONS[0] = RC( "dialog.button.delete.all" );
+       DELETE_BUTTONS[1] = RC( "dialog.button.delete.this" );
+       DELETE_BUTTONS[2] = RC( "dialog.button.cancel" );
+
        imgres = new ToolkitResolver();
        this.setLayout(new BorderLayout(0,0));
        add("Center", pane);
@@ -124,7 +136,7 @@ implements TranslatorConstants
        tool.add(93,new IELabel(RC("menu.edit") + ":"));
        tool.add(6, new SpeedButton(imgres.getImage(SYS_DIR + "newlang.gif", this)));
        tool.add(7, new SpeedButton(imgres.getImage(SYS_DIR + "del.gif",     this)));
-       tool.add(94,new IELabel(RC("menu.help") + ":"));
+       tool.add(94,new IELabel(RC("menu.help") + ": "));
        tool.add(8, new SpeedButton(imgres.getImage(SYS_DIR + "about.gif",   this)));
        add("North", tool);
 
@@ -199,7 +211,15 @@ implements TranslatorConstants
        newLangMenu = new MenuItem( RC( "tools.translator.menu.new.lang" ) );
        delMenu = new MenuItem(RC( "tools.translator.menu.delete" ));
 
+       Menu treeMenu = new Menu( RC( "menu.tree" ) );
+       expandNodeMenu = new MenuItem( RC( "tools.translator.menu.node.expand" ) );
+       collapseNodeMenu = new MenuItem(RC( "tools.translator.menu.node.collapse" ));
+       expandTreeMenu = new MenuItem( RC( "tools.translator.menu.expand" ) );
+       collapseTreeMenu = new MenuItem(RC( "tools.translator.menu.collapse" ));
+
        Menu viewMenu = new Menu( RC( "menu.options" ) );
+       statisticsMenu = new MenuItem( RC( "tools.translator.menu.statistics" ) );
+       showNullsMenu = new CheckboxMenuItem( RC( "tools.translator.menu.nulls" ), false );
        langMenu = new Menu( RC( "tools.translator.menu.showres" ) );
        langMenu.disable();
 
@@ -219,12 +239,21 @@ implements TranslatorConstants
        editMenu.add(newLangMenu);
        editMenu.add(delMenu);
 
+       treeMenu.add(expandNodeMenu);
+       treeMenu.add(collapseNodeMenu);
+       treeMenu.addSeparator();
+       treeMenu.add(expandTreeMenu);
+       treeMenu.add(collapseTreeMenu);
+
        viewMenu.add( langMenu );
+       viewMenu.add( showNullsMenu );
+       viewMenu.add( statisticsMenu );
 
        helpMenu.add(aboutMenu);
 
        menuBar.add( fileMenu );
        menuBar.add( editMenu );
+       menuBar.add( treeMenu );
        menuBar.add( viewMenu );
        menuBar.add( helpMenu );
        setMenuBar( menuBar );
@@ -232,7 +261,7 @@ implements TranslatorConstants
        delDialog = new MessageBox2( this );
        delDialog.setIcon( imgres.getImage(SYS_DIR + "ogo.gif", delDialog));
        delDialog.setTitle( RC( "dialog.title.warning" ) );
-       delDialog.setButtons( YESNO_BUTTONS );
+       delDialog.setButtons( DELETE_BUTTONS );
        delDialog.addListener( this );
 
        closeDialog = new MessageBox2( this );
@@ -289,6 +318,13 @@ implements TranslatorConstants
            e.target = tbar2menu[pos];
        }
 
+       if ( e.target == statisticsMenu ) onStatistics();
+
+       if ( e.target == expandNodeMenu ) expand(tree.getSelectedNode());
+       if ( e.target == collapseNodeMenu ) collapse(tree.getSelectedNode());
+       if ( e.target == expandTreeMenu ) expand(tree.getRootNode());
+       if ( e.target == collapseTreeMenu ) collapse(tree.getRootNode());
+
        if ( e.target == newLangMenu ) onNewResource();
        if ( e.target == newBundleMenu ) onNewBundle();
        if ( e.target == closeMenu ){
@@ -304,6 +340,7 @@ implements TranslatorConstants
        if ( e.target == genMenu) onGenCode();
        if ( e.target == parseMenu) onParseCode();
        if ( e.target == aboutMenu) onAbout();
+       if ( e.target instanceof CheckboxMenuItem && e.target == showNullsMenu ) { setIndicators( tree.getRootNode() ); tree.repaint(); }
        if ( e.target instanceof CheckboxMenuItem )
            for ( int i = 0; i < langStates.size(); i++ ){
                LangState ls = getLangState(i);
@@ -326,7 +363,7 @@ implements TranslatorConstants
           exitInitiated = true;
        }
        if ( e.target == delDialog && e.arg instanceof Button &&
-             ((Button)e.arg).getLabel().equals( YESNO_BUTTONS[0])){
+             ((Button)e.arg).getLabel().equals( DELETE_BUTTONS[0])){
           String key = tree.getSelectedText();
           if ( key != null ){
              isDirty = true;
@@ -337,6 +374,27 @@ implements TranslatorConstants
              tree.repaint();                                                   
 
              bundle.getBundle().removeKeysBeginningWith(key);
+
+             wasSelectedKey = null;
+             setTranslations();
+          }
+       }
+       if ( e.target == delDialog && e.arg instanceof Button &&
+             ((Button)e.arg).getLabel().equals( DELETE_BUTTONS[1])){
+          String key = tree.getSelectedText();
+          if ( key != null ){
+             isDirty = true;
+             TreeNode tn = tree.getNode( wasSelectedKey );
+             if(tree.enumChild(tn) == null || tree.enumChild(tn).length == 0){
+               if ( tn != null ) tn = tn.parent;
+               tree.remove( key );
+               adjustIndicator( tn );
+               tree.repaint();                                                   
+
+               bundle.getBundle().removeKeysBeginningWith(key);
+             }else{
+               bundle.getBundle().removeKey(key);
+             }
 
              wasSelectedKey = null;
              setTranslations();
@@ -364,58 +422,65 @@ implements TranslatorConstants
 
     private void setTranslations()
     {
-       String newKey = tree.getSelectedText();
-       if ( wasSelectedKey != null ){
-          for ( int i = 0; i < langStates.size(); i++ ){
-             LangState ls = getLangState(i);
-             if(ls.hidden) continue;
-             String trans = ls.tf.getText();
-             BundleItem bi = bundle.getBundle().getItem(wasSelectedKey);
-             if(bi==null){
-                bundle.getBundle().addKey(wasSelectedKey);
-                bi = bundle.getBundle().getItem(wasSelectedKey);
-                if(bi==null) break;
-             }
-             if(bi.getTranslation(ls.name)==null || !bi.getTranslation(ls.name).equals(trans))
-                 isDirty = true ;
-             bundle.getBundle().updateValue(wasSelectedKey,ls.name,trans);
-          }
-          String comm = commField==null ? null : commField.getText();
-          if(comm!=null && comm.trim().length()==0) comm = null;
-          if(comm!=null){
-             BundleItem bi = bundle.getBundle().getItem(wasSelectedKey);
-             if(bi==null){
-                 bundle.getBundle().addKey(wasSelectedKey);
-                 bi = bundle.getBundle().getItem(wasSelectedKey);
-                 isDirty = true;
-             }
-             bi.setComment(comm);
-          }
-          adjustIndicator( tree.getNode( wasSelectedKey ) );
-          setIndicators(tree.getNode( wasSelectedKey ));
-          tree.repaint();
-       }
-       if ( newKey == null ) return;
-
-       BundleItem bi = bundle.getBundle().getItem(newKey);
-       for ( int i = 0; i < langStates.size(); i++ ){
+      String newKey = tree.getSelectedText();
+      if ( wasSelectedKey != null ) {
+        for ( int i = 0; i < langStates.size(); i++ ) {
           LangState ls = getLangState(i);
-          String ss = bi==null ? null : bi.getTranslation(ls.name);
-          if(ss==null) ss = "";
-          ls.tf.setText(ss);
-       }
-       String commText = bi == null ? null : bi.getComment();
-       if(commField!=null) commField.setText( commText==null ? "" : commText );
-       keynLab.setText("Key: " + newKey);
-       sbl2.setText(newKey);
+          if(ls.hidden) continue;
+          String trans = ls.tf.getText();
+          BundleItem bi = bundle.getBundle().getItem(wasSelectedKey);
+          if ( bi==null ) {
+            // do not add the translation implicitely - disable
+            // the language field
+            ls.tf.setVisible( false );
+            ls.label.setVisible( false );
+            commField.setEnabled( false );
+          } else {
+            if ( bi.getTranslation(ls.name)==null || !bi.getTranslation(ls.name).equals(trans) )
+              isDirty = true ;
+            bundle.getBundle().updateValue(wasSelectedKey,ls.name,trans);
+          }
+        }
+        String comm = commField==null ? null : commField.getText();
+        if ( comm!=null && comm.trim().length()==0 ) comm = null;
+        if ( comm!=null ) {
+          BundleItem bi = bundle.getBundle().getItem(wasSelectedKey);
+          if ( bi!=null ) bi.setComment(comm);
+        }
+        adjustIndicator( tree.getNode( wasSelectedKey ) );
+        setIndicators(tree.getNode( wasSelectedKey ));
+        tree.repaint();
+      }
+      if ( newKey == null ) return;
 
-       adjustIndicator( tree.getNode( newKey ) );
+      BundleItem bi = bundle.getBundle().getItem(newKey);
+      for ( int i = 0; i < langStates.size(); i++ ) {
+        LangState ls = getLangState(i);
+        String ss = bi==null ? null : bi.getTranslation(ls.name);
+        if(ss==null) ss = "";
+        if ( bi == null ) {
+          ls.tf.setVisible( false );
+          ls.label.setVisible( false );
+          commField.setEnabled( false );
+        } else {
+          ls.tf.setVisible( true );
+          ls.label.setVisible( true );
+          commField.setEnabled( true );
+        }
+        ls.tf.setText(ss);
+      }
+      String commText = bi == null ? " ** " + RC("tools.translator.message.noentry") + " **" : bi.getComment();
+      if ( commField!=null ) commField.setText( commText==null ? "" : commText );
+      keynLab.setText("Key: " + newKey);
+      keynLab.repaint();
+      sbl2.setText(newKey);
+      adjustIndicator( tree.getNode( newKey ) );
 
-       String startValue = "";
-       wasSelectedKey = newKey;
-       if ( wasSelectedKey != null ) startValue = wasSelectedKey + ".";
-       keyName.setText( startValue );
-       tree.repaint();
+      String startValue = "";
+      wasSelectedKey = newKey;
+      if ( wasSelectedKey != null ) startValue = wasSelectedKey + ".";
+      keyName.setText( startValue );
+      tree.repaint();
     }
 
     public String getValidKey()
@@ -445,6 +510,7 @@ implements TranslatorConstants
        if ( key != null ){
           addToTree( key );
           bundle.getBundle().addKey( key );
+          commField.setText("");
           isDirty = true;
           tree.selectNodeAndOpen( key );
           tree.repaint();
@@ -586,6 +652,15 @@ implements TranslatorConstants
        tree.setIndicator( tn.getText(), null );
        if ( isAbs && isPres ){
           tree.setIndicator( tn.getText(), SYS_DIR + WARN_IMAGE );
+          notCompletedCount++;
+       }else{
+         if(isAbs){
+           nullsCount++;
+           if(showNullsMenu.getState()){
+             tree.setIndicator( tn.getText(), SYS_DIR + WARN_IMAGE );
+             return true;
+           }
+         }
        }
        return isAbs && isPres;
     }
@@ -867,6 +942,24 @@ implements TranslatorConstants
        aboutDialog.show();
     }
 
+    private void onStatistics()
+    {
+       MessageBox2 sDialog = new MessageBox2( this );
+       String text;
+       nullsCount = 0;
+       notCompletedCount = 0;
+       setIndicators(tree.getRootNode());
+       text = RC( "tools.translator.label.statistics.lang" )+bundle.getBundle().getLangCount()+"\n";
+       text = text+RC( "tools.translator.label.statistics.record" )+bundle.getBundle().getItemCount()+"\n";
+       text = text+RC( "tools.translator.label.statistics.nulls" )+nullsCount+"\n";
+       text = text+RC( "tools.translator.label.statistics.notcompleted" )+notCompletedCount;
+       sDialog.setText( text );
+       sDialog.setTitle( RC( "dialog.title.info" ) );
+       String [] OK_BUT = { RC( "dialog.button.ok" ) };
+       sDialog.setButtons( OK_BUT );
+       sDialog.show();
+    }
+
     private void onGenCode()
     {
        try{
@@ -946,14 +1039,18 @@ implements TranslatorConstants
            BundleItem bi = bundle.getBundle().getItem(i);
            addToTree(bi.getId());
         }
-        /* ... and make all keys opened by default */
-        expand(tree.getRootNode());
+        /* ... and make all keys closed by default */
+//        expand(tree.getRootNode());
+        collapse(tree.getRootNode());
+
+        /* ... find first key, open it and select */
         if(bundle.getBundle().getItemCount() > 0){
            String id = bundle.getBundle().getItem(0).getId();
            tree.selectNodeAndOpen(id);
            wasSelectedKey = null;
            setTranslations();
         }
+
         tree.requestFocus();
 
         closeMenu.enable();
@@ -973,9 +1070,22 @@ implements TranslatorConstants
     private void expand(TreeNode tn)
     {
        if(tn!=null){
+           TreeNode [] children = tree.enumChild(tn);
+           if(children != null)
+             for(int i = 0; i < children.length; i++)
+               expand(children[i]);
            tree.openNode(tn.getText());
-           expand(tn.child);
-           expand(tn.sibling);
+       }
+    }
+
+    private void collapse(TreeNode tn)
+    {
+       if(tn!=null){
+           TreeNode [] children = tree.enumChild(tn);
+           if(children != null)
+             for(int i = 0; i < children.length; i++)
+               collapse(children[i]);
+           tree.closeNode(tn.getText());
        }
     }
 

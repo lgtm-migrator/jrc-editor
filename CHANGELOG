@@ -1,0 +1,21 @@
+jrc-editor (1.1.0) stable; urgency=low
+
+  * manipulations with empty entries.
+  * clipboard functionality fixed.
+  * startup script that works even if you invoke the script via a link.
+  * minor UI changes.
+  * delete non-leaf elements added
+  * tree expand/collapse manipulations added.
+  * statistics added.
+
+ -- Morten Raahede Knudsen <morten@bilpriser.dk>  Wed,  12 Jun 2002 16:44 +0200
+ -- Panu Hallfors <panu.hallfors@viloke.fi>  Mon,  15 Jul 2002 17:00 +0200
+ -- Alexander Ivanyukovich <a.ivanyukovich@zaval.org>  Mon,  12 Aug 2002 14:01:22 +0200
+
+jrc-editor (1.0.0) stable; urgency=low
+
+  * Initial Release.
+
+ -- Victor Krapivin <v.krapivin@zaval.org>  Thu,  7 Mar 2002 09:37:22 +0200
+ -- Alexander Ivanyukovich <a.ivanyukovich@zaval.org>  Thu,  7 Mar 2002 09:37:22 +0200
+ -- Mary Vashkevich <m.vashkevich@zaval.org>  Thu,  7 Mar 2002 09:37:22 +0200

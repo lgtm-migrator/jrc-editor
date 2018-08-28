@@ -4,7 +4,7 @@
  *     $Date: 2002/03/28 9:24:42 $
  *
  *     @author:     Victor Krapivin
- *     @version:    1.0
+ *     @version:    1.1
  *
  * Zaval JRC Editor is a visual editor which allows you to manipulate 
  * localization strings for all Java based software with appropriate 
@@ -601,11 +601,31 @@ extends Canvas
 
   private static String clipboard;
 
-  protected static synchronized void writeToClipboard(String s) {
-    clipboard = s;
+/**
+ *
+ * Contributed by <a href="mailto:morten@bilpriser.dk">Morten Raahede Knudsen</a>.
+ *
+ */
+  
+  protected static synchronized void writeToClipboard(String s)
+  {
+    java.awt.datatransfer.Clipboard c = java.awt.Toolkit.getDefaultToolkit().getSystemClipboard();
+    java.awt.datatransfer.StringSelection s2 = new java.awt.datatransfer.StringSelection(s);
+    c.setContents(s2,s2);
   }
 
-  protected static synchronized String readFromClipboard() {
-    return clipboard;
+  protected static synchronized String readFromClipboard()
+  {
+    java.awt.datatransfer.Clipboard c = java.awt.Toolkit.getDefaultToolkit().getSystemClipboard();
+    java.awt.datatransfer.Transferable t = c.getContents("e");
+
+    if(t.isDataFlavorSupported(java.awt.datatransfer.DataFlavor.stringFlavor))
+      try{
+        return (String)t.getTransferData(java.awt.datatransfer.DataFlavor.stringFlavor);
+      }
+      catch(Exception ex)
+      {
+      }
+    return "";
   }
 }

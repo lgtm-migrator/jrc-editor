@@ -1,0 +1,52 @@
+
+JAVAC=jcc
+JCFLAGS=../classes
+Jack=javacc
+
+OUTROOT=../classes
+SRCROOT=../src
+
+all: tools-compile compile                                              
+                                                                                
+install:
+    cp $(SRCROOT)/*.properties $(OUTROOT)
+    cd $(OUTROOT)
+    zip -r9 jrc-editor.jar *.properties org/*
+clean:
+    rm -rf $(OUTROOT)/*.properties $(OUTROOT)/org $(OUTROOT)/*.jar
+
+dist-clean:
+    rm -rf $(OUTROOT)/*.properties $(OUTROOT)/org
+
+tools-compile: $(SRCROOT)/org/zaval/tools/i18n/translator/JavaParser.flags 
+
+JCCLIST=\
+    $(SRCROOT)/org/zaval/tools/i18n/translator/JavaParser.java              \
+    $(SRCROOT)/org/zaval/tools/i18n/translator/JavaParserTokenManager.java  \
+    $(SRCROOT)/org/zaval/tools/i18n/translator/JavaParserConstants.java     \
+    $(SRCROOT)/org/zaval/tools/i18n/translator/ParseException.java   \
+    $(SRCROOT)/org/zaval/tools/i18n/translator/Token.java   \
+    $(SRCROOT)/org/zaval/tools/i18n/translator/TokenMgrError.java   \
+    $(SRCROOT)/org/zaval/tools/i18n/translator/JavaCharStream.java
+
+$(SRCROOT)/org/zaval/tools/i18n/translator/JavaParser.java             : $(SRCROOT)/org/zaval/tools/i18n/translator/JavaParser.flags
+
+$(SRCROOT)/org/zaval/tools/i18n/translator/JavaParserTokenManager.java : $(SRCROOT)/org/zaval/tools/i18n/translator/JavaParser.flags
+
+$(SRCROOT)/org/zaval/tools/i18n/translator/JavaParserConstants.java    : $(SRCROOT)/org/zaval/tools/i18n/translator/JavaParser.flags
+
+$(SRCROOT)/org/zaval/tools/i18n/translator/ParserError.java     : $(SRCROOT)/org/zaval/tools/i18n/translator/JavaParser.flags
+
+$(SRCROOT)/org/zaval/tools/i18n/translator/JavaCharStream.java: $(SRCROOT)/org/zaval/tools/i18n/translator/JavaParser.flags
+
+$(SRCROOT)/org/zaval/tools/i18n/translator/Token.java : $(SRCROOT)/org/zaval/tools/i18n/translator/JavaParser.flags
+
+$(SRCROOT)/org/zaval/tools/i18n/translator/TokenMgrError.java : $(SRCROOT)/org/zaval/tools/i18n/translator/JavaParser.flags
+
+$(SRCROOT)/org/zaval/tools/i18n/translator/JavaParser.flags : $(SRCROOT)/org/zaval/tools/i18n/translator/JavaParser.jj
+    cd $(SRCROOT)/org/zaval/tools/i18n/translator
+    $(Jack) JavaParser.jj
+    cd ../../../../..
+    touch $(SRCROOT)/org/zaval/tools/i18n/translator/JavaParser.flags
+
+compile:

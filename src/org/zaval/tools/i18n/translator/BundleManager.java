@@ -158,10 +158,12 @@ implements TranslatorConstants
          int q = line.indexOf('#');
 
          StringTokenizer st = new StringTokenizer(line, "=", true); // key = value
-         if(st.countTokens()<3) continue; // syntax error, ignored
+         if(st.countTokens()<2) continue; // syntax error, ignored
          String dname = st.nextToken().trim();
          st.nextToken(); // '='
-         String value = st.nextToken("");
+         String value = "";
+         if(st.hasMoreTokens()) // is there a assigned value
+           value = st.nextToken("");
 
          set.addLanguage(lang);
        //set.updateValue(DEFAULT_LANG_KEY, lang, set.getLanguage(lang).getLangDescription());
@@ -297,7 +299,7 @@ implements TranslatorConstants
       if ( fn.endsWith( RES_EXTENSION ) ){
          PrintStream f = new PrintStream(new FileOutputStream(fn));
          for( int j = 0; j < lines.size(); j++ )
-            f.print( toEscape( (String) lines.elementAt( j ) ) + "\r\n" );
+            f.print( toEscape( (String) lines.elementAt( j ) ) + System.getProperty("line.separator") );
          f.close();
       }
       else{

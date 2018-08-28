@@ -22,7 +22,7 @@ A {
 </head>
 <body bgcolor="#FFFFFF" text="#000000">
       <h2 align="center"><b>Zaval JRC Editor</b></h2>
-      <h4 align="center">Version 1.0</h4>
+      <h4 align="center">Version 1.1</h4>
 <h1 align="center"><b>User's Guide</b></h1>
 <p align="center">Zaval Creative Engineering Group</p>
 <p align="center"><a href="http://www.zaval.org">http://www.zaval.org</a></p>
@@ -42,8 +42,11 @@ A {
 <p>&nbsp;&nbsp;<a href="#new">Inserting new items.</a></p>
 <p>&nbsp;&nbsp;<a href="#delete">Deleting items.</a></p>
 <p>&nbsp;&nbsp;<a href="#new_lang">Adding new language.</a></p>
+<p>&nbsp;&nbsp;<a href="#tree">Tree manipulations.</a></p>
 <p>&nbsp;&nbsp;<a href="#import">Importing resources from *.java files.</a></p>
 <p>&nbsp;&nbsp;<a href="#generation">Resource stencil source code generation.</a></p>
+<p>&nbsp;&nbsp;<a href="#nulls">Null keys.</a></p>
+<p>&nbsp;&nbsp;<a href="#statistics">Statistics.</a></p>
 <p><a href="#limits">Product limitations.</a></p>
 <p><a href="#plans">Further product plans.</a></p>
 <p><a href="#support">Support available.</a></p>
@@ -149,8 +152,8 @@ A {
       <ul>
         <li>Select the appropriate key at the left panel.</li>
         <li>Press <b>Delete</b> button.</li>
+        <li>You will be asked either you want to remove this key with all sub-keys or this key only.</li>
       </ul>
-      <p><b>Caution:</b> all sub-keys will be removed as well.</p>
       <p><b>Note:</b> removing items from the .properties file may cause application to fail. Think over before you proceed. Unused items will do no harm to the application stability.</p>
 <h2><a name="new_lang">Adding new language</a></h2>
       <p>Adding new language is simple:</p>
@@ -186,12 +189,18 @@ A {
       </table>
       </center>
       <p>When edit field next to a language is left empty, then it defaults to English language.</p>
+<h2><a name="tree">Tree manipulations</a></h2>
+      <p>To make your life easier when working with really big files we added expand/collapse functionality to whole tree and any of its nodes - see <b>Tree</b> menu.</p>
 <h2><a name="import">Importing resources from *.java files</a></h2>
       <p>To simplify existing applications transfer to the resources usage you can use <b>Parse source…</b> feature. It goes through java sources, extracts text strings and builds tree-like structure based on class name/package name. Now you can import resources only from one file at a time and can't do iterations.</p>
       <p>Importing process doesn't get all strings but only those that look right: for example, it wouldn't import any single character strings.</p>
 <h2><a name="generation">Resource stencil source code generation</a></h2>
       <p>Stencil is a java source that contains all resource strings with their initialization and corresponding getters/setters. Initialization requires appropriate resource bundle.</p>
       <p>To generate use <b>File -> Generate source code…</b>.</p>
+<h2><a name="nulls">Null keys</a></h2>
+      <p>Null keys or blank keys are keys that have no value for all languages. Often it can be useful to see all of them (see <b>View -> Indicate blank resources</b>).</p>
+<h2><a name="statistics">Statistics</a></h2>
+      <p>Sometimes it is useful to see statistics over files you are working with, so we added this functionality (see <b>View -> Statistics</b>).</p>
 <h1><a name="limits">Product limitations</a></h1>
       <p>There are several product limitations that can be fixed in future versions:</p>
       <ul>
