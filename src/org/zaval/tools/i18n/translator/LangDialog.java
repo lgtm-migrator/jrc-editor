@@ -1,8 +1,5 @@
 /**
  *     Caption: Zaval Java Resource Editor
- *     $Revision: 0.37 $
- *     $Date: 2002/03/28 9:24:42 $
- *
  *     @author:     Victor Krapivin
  *     @version:    1.3
  *
@@ -39,33 +36,32 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * 
  */
-package org.zaval.awt.dialog;
+package org.zaval.tools.i18n.translator;
 
 import org.zaval.awt.*;
 
-import java.io.File;
 import java.awt.*;
 import java.util.*;
 
-public class EditDialog
+public class LangDialog
 extends Dialog
 {
-   private TextField edit;
-   private Button    ok, cancel;
-   private boolean   isApply;
+   private java.awt.List edit;
+   private Button ok, cancel;
+   private boolean isApply;
    private Component listener;
    private IELabel label;
 
-   public EditDialog(Frame f, String s, boolean b, Component l)
+   public LangDialog(Frame f, String s, boolean b, Component l)
    {
       super(f, s, b);
       setLayout(new GridBagLayout());
 
-      label = new IELabel( "Name" );
+      label = new IELabel( "List of languages" );
       constrain(this, label, 0,0,1,1,
          GridBagConstraints.NONE,GridBagConstraints.WEST,
          0.0,0.0,5,5,5,5);
-      constrain(this,edit = new TextField(20), 1,0,4,1,
+      constrain(this,edit = new java.awt.List(10, true), 0,1,4,1,
          GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,
          1.0,0.0,5,5,5,5);
 
@@ -77,7 +73,7 @@ extends Dialog
       p.add (ok);
       p.add (cancel);
 
-      constrain(this,p, 0,1,2,1,
+      constrain(this,p, 0,2,2,1,
          GridBagConstraints.NONE,
          GridBagConstraints.EAST,
          1.0,0.0,5,5,5,5);
@@ -86,13 +82,19 @@ extends Dialog
       pack();
    }
 
-   public void setText(String t) {
-     if (t == null) edit.setText("");
-     else           edit.setText(t);
+   public void setList(LangItem[] t) {
+      edit.clear();
+      if(t==null) return;
+      for(int j=0;j<t.length;++j){
+         String s = t[j].getLangId() + ": " + t[j].getLangDescription();
+         edit.add(s);
+      }
+      edit.select(0); // english is always selected
    }
 
-   public String getText() {
-     return edit.getText();
+   public String[] getList() {
+     edit.select(0); // english is always selected
+     return edit.getSelectedItems();
    }
 
    public void setButtonsCaption(String o, String c) {
@@ -107,19 +109,16 @@ extends Dialog
 
    public boolean handleEvent(Event e)
    {
-      if (e.id == Event.WINDOW_DESTROY || ( e.target == cancel && e.id == Event.ACTION_EVENT ) )
-      {
+      if (e.id == Event.WINDOW_DESTROY || ( e.target == cancel && e.id == Event.ACTION_EVENT ) ){
         isApply = false;
         dispose();
       }
 
-      if (e.target==ok && e.id==Event.ACTION_EVENT)
-      {
+      if (e.target==ok && e.id==Event.ACTION_EVENT){
         isApply = true;
-        listener.postEvent(new Event(this, e.ACTION_EVENT, edit.getText()));
+        listener.postEvent(new Event(this, e.ACTION_EVENT, null));
         dispose();
       }
-
       return super.handleEvent(e);
    }
 
@@ -188,7 +187,7 @@ extends Dialog
     public boolean keyDown( Event e, int key ){
       if ((e.target == ok && key == Event.ENTER) || (e.target == edit && key == Event.ENTER)){
         isApply = true;
-        listener.postEvent(new Event(this, e.ACTION_EVENT, edit.getText()));
+        listener.postEvent(new Event(this, e.ACTION_EVENT, null));
         dispose();
         return true;
       }

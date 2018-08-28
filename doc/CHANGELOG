@@ -1,3 +1,26 @@
+jrc-editor (1.3.1) stable; urgency=low
+
+  * Join/Split functionality has been added as separate non-interactive command-line tool
+  * Startup scripts renamed
+  * Documentation updated
+
+ -- Victor Krapivin <v.krapivin@zaval.org>  Tue,  5 Nov 2002 14:01:22 +0200
+ -- Strittmatter Stephan <Stephan.Strittmatter@gmx.de>  Tue,  5 Nov 2002 17:13:05 +0200
+ -- Alexander Ivanyukovich <a.ivanyukovich@zaval.org>  Tue,  5 Nov 2002 12:15:10 +0200
+
+jrc-editor (1.3.0) stable; urgency=low
+
+  * Join/Split functionality has been added
+  * Native and pure Java controls support enchanced
+  * Shortcuts navigation modified
+  * Main menu updated
+  * Startup scripts slightly changed
+  * German translation improved
+
+ -- Victor Krapivin <v.krapivin@zaval.org>  Mon,  4 Nov 2002 14:01:22 +0200
+ -- Strittmatter Stephan <Stephan.Strittmatter@gmx.de>  Mon,  21 Oct 2002 12:10:05 +0200
+ -- Alexander Ivanyukovich <a.ivanyukovich@zaval.org>  Tue,  4 Nov 2002 12:15:10 +0200
+
 jrc-editor (1.2.0) stable; urgency=low
 
   * Shortcuts navigation have added

@@ -22,7 +22,7 @@ A {
 </head>
 <body bgcolor="#FFFFFF" text="#000000">
       <h2 align="center"><b>Zaval JRC Editor</b></h2>
-      <h4 align="center">Version 1.2</h4>
+      <h4 align="center">Version 1.3</h4>
 <h1 align="center"><b>User's Guide</b></h1>
 <p align="center">Zaval Creative Engineering Group</p>
 <p align="center"><a href="http://www.zaval.org">http://www.zaval.org</a></p>
@@ -47,8 +47,12 @@ A {
 <p>&nbsp;&nbsp;<a href="#nav">Fast navigation.</a></p>
 <p>&nbsp;&nbsp;<a href="#import">Importing resources from *.java files.</a></p>
 <p>&nbsp;&nbsp;<a href="#generation">Resource stencil source code generation.</a></p>
+<p>&nbsp;&nbsp;<a href="#join_merge">Understanding Join/Merge features.</a></p>
 <p>&nbsp;&nbsp;<a href="#nulls">Null keys.</a></p>
 <p>&nbsp;&nbsp;<a href="#statistics">Statistics.</a></p>
+<p><a href#="config">Configuring Zaval JRC Editor</a></p>
+<p><a href#="command-line">Command-line tool</a></p>
+<p>&nbsp;&nbsp;<a href="command-line_options">Operating With Command-line version of JRC Editor</a></p>
 <p><a href="#limits">Product limitations.</a></p>
 <p><a href="#plans">Further product plans.</a></p>
 <p><a href="#support">Support available.</a></p>
@@ -72,6 +76,7 @@ A {
       <p>So, the Zaval JRC Editor (also known as Zaval Java Resource Editor) solution is small and easy-to-use visual editor for resource files.</p>
 
 <h2><a name="what_can">What Can You Do with the Zaval Java Resource Editor</a></h2>
+      <p>Zaval JRC Editor is not a simply editing tool - it provides rich and flexible way to manage text-based resources. In fact, you are able to make any distributed translations as you want in several forms outside JRCE. But in all cases you will need to merge all changes after translation and do a clean up texts being translated; and JRC Editor provides all necessary features to accomplish these tasks.</p>
       <p>The Zaval Java Resource Editor can be used for new and existing software localization, resources synchronization and any other resources manipulations.</p>
       <p>It provides full support for any language specific resources (it depends on the fonts and font metrics settings of the host OS at your computer). The target of this tool is localization strings manipulation for all Java-based software that has appropriate support embedded.</p>
 <h2><a name="when_to_use">When To Use the Zaval Java Resource Editor.</a></h2>
@@ -204,10 +209,54 @@ A {
 <h2><a name="generation">Resource stencil source code generation</a></h2>
       <p>Stencil is a java source that contains all resource strings with their initialization and corresponding getters/setters. Initialization requires appropriate resource bundle.</p>
       <p>To generate use <b>File -> Generate source code…</b>.</p>
+<h2><a name="join_merge">Understanding Join/Merge features</a></h2>
+      <p>You can use JRC Editor with the following way:</p>
+      <ol>
+        <li>Define new language inside JRC Editor;</li>
+        <li>Export only two languages: English and languages you've selected;</li>
+        <li>Send content being exported into unicode text file to any translators;</li>
+        <li>People who translates text works separately without intersections;</li>
+        <li>All content being translated able to merged back into common pool.</li>
+      </ol>
+      <p>As you see, initial and final phases can be managed efficiently with JRC Editor tool, but real translation process can be done either with JRC Editor or without it - you can choose the most appropriate method you need.</p>
 <h2><a name="nulls">Null keys</a></h2>
       <p>Null keys or blank keys are keys that have no value for all languages. Often it can be useful to see all of them (see <b>View -> Indicate blank resources</b>).</p>
 <h2><a name="statistics">Statistics</a></h2>
       <p>Sometimes it is useful to see statistics over files you are working with, so we added this functionality (see <b>View -> Statistics</b>).</p>
+<h1><a name="config">Configuring Zaval JRC Editor</a></h1>
+      <p>Some JRC Editor's functions can be configured via command-line options. These options are global and cannot be changed during JRC Editor execution. All options can be set via standard 'set' command, or can be attached to command line with '-D' parameter before main class name (the main class name is 'org.zaval.tools.i18n.translator.Main').</p>
+      <p>Options:</p>
+      <ul>
+        <li>'inputControls' provides support of input controls ('native' or 'ownerdraw'(default)).
+        <br><br>
+        In most cases 'native' is proper choice (for fully-unicode environment, such as WinNT/2K/XP, and Unix'es with *.UTF-8 locale settings). But if you are using old distributions (XFree 3.x for example, or Win95/98/Me, or you are using JDK 1.1.x on any platform) you may cause problems with typing unicode characters. This can be solved by using 'ownerdraw' setting.
+        <br><br>
+        <b>Note:</b> in some cases 'ownerdraw' parameter can cause incorrect typing of East Asian national key strokes, such as China, Japanese anod other (our controls has no support of composite key symbols); so we recommend to use 'native' text fields in this case.
+        </li>
+        <li>'key.locale.conversion'
+        <br><br>
+        This option provides dirty encoding conversions from ISO-8859-1 to any encoding specified in 'file.encoding' parameter. This option works fine only with 'ownerdraw' input controls selection. It allows working with hacked methods of internationalization in very old systems with incorrect keysyms (only too old XFree86 distributives with xmodmap localization can cause similar problems, so you should never faced with this option in your everyday work).
+        </li>
+      </ul>
+      <p><b>Example</b></p>
+      <p>To set inputControls to 'native' modify starting script as showed below:</p>
+      <p>java -DinputControls=native -cp classes/jrc-editor.jar org.zaval.tools.i18n.translator.Main %1 %2 %3 %4 %5 %6 %7 %8 %9</p>
+<h1><a name="command-line">Command-line tool</a></h1>
+      <p>Starting from v1.3.1 JRC Editor goes with command-line tool that allows you doing all resource bundles manipulations automatically, including split and merge features for every language you've set. Command line tool allows doing the same things as JRC Editor tool provides interactively, including source files parsing and code generation.</p>
+<h2><a name="command-line_options">Operating With Command-line version of JRC Editor</a></h2>
+      <p>JRC Editor command-line tool has the following syntax:</p>
+<i>join srcFile ... addFile</i><br>
+or<br>
+<i>split srcFile dstFile [lang ...]</i>
+<br><br>
+where<br>
+<ul>
+<li><b>srcFile</b> - a root file of properties bundle set. If this file does not exist it will be created automatically if needed; otherwise all data will be joined with content being added previously; the same keys will be replaced from addFile files if specified.</li>
+<li><b>dstFile</b> - XML or UCS16 text file. This file will be created from scratch (if file with the same name already exists it will be replaced). File type will be determined by extension of file specified (.txt, .java, or .xml can be used here).<br><br>
+You able to use this command to generate Java code stub files, but in this case all language parameters will be omitted. To use this feature you need to specify '.java' file extension here.</li>
+<li><b>addFile</b> - XML, Java, other bundle set or UCS-16 file. Content of these files will be joined with srcFile content, and srcFile will be replaced with new one. There is a common situation when the same keys exist in several files at once - join operation goes sequentially, so in this case last file will have higher priority.</li>
+<li><b>lang</b> - locale abbreviation (suffix of slave properties files). You can specify any language bi-literal codes here, such as en, ru, de, or any other values for east asian languages. All languages being specified will be added to appropriate target file. If no languages specified file will contain only key names without any translations.</li>
+</ul>
 <h1><a name="limits">Product limitations</a></h1>
       <p>There are several product limitations that can be fixed in future versions:</p>
       <ul>

@@ -189,8 +189,18 @@ implements TranslatorConstants
       if (fileName.endsWith( RES_EXTENSION)){
          DataInputStream in = new DataInputStream(new FileInputStream( fileName ));
          String line = null;
-         while((line=in.readLine())!=null) 
+         while((line=in.readLine())!=null) {
+             for(;;){
+                 line = line.trim();
+                 if(line.endsWith("\\")){
+                    String line2 = in.readLine();
+                    if(line2!=null) line = line.substring(0, line.length()-1) + line2;
+                    else break;
+                 }
+                 else break;
+             }
              res.addElement( fromEscape( line ) );
+         }
       }
       else{
          RandomAccessFile in = new RandomAccessFile( fileName, "r" );
@@ -237,6 +247,10 @@ implements TranslatorConstants
       StringBuffer res = new StringBuffer();
       for ( int i = 0; i < s.length(); i++ ){
          char ch = s.charAt( i );
+         if (ch == '\\' && i+1>=s.length()){
+            res.append(ch);
+            break;
+         }
          if ( ch != '\\' || ch == '\\' && s.charAt( i+1 ) != 'u' ) res.append( ch );
          else{
             res.append( (char) Integer.parseInt( s.substring( i+2, i+6 ), 16 ) );

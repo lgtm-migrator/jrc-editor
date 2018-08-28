@@ -4,7 +4,7 @@
  *     $Date: 2002/03/28 9:24:42 $
  *
  *     @author:     Victor Krapivin
- *     @version:    1.2
+ *     @version:    1.3
  *
  * Zaval JRC Editor is a visual editor which allows you to manipulate 
  * localization strings for all Java based software with appropriate 
@@ -70,11 +70,13 @@ implements TranslatorConstants
     private Panel textPanel = null;
     private Vector langStates = new Vector();
 
-    private MenuItem newBundleMenu, openBundleMenu,
+    private MenuItem newBundleMenu, openBundleMenu, openBundleMenuP,
          saveBundleMenu, saveAsBundleMenu,
          genMenu, parseMenu,
          saveXmlBundleMenu, saveUtfBundleMenu,
          loadXmlBundleMenu, loadUtfBundleMenu,
+         saveXmlBundleMenuP, saveUtfBundleMenuP,
+         loadXmlBundleMenuP, loadUtfBundleMenuP,
          closeMenu, exitMenu;
     private MenuItem newLangMenu;
     private Menu langMenu, fileMenu;
@@ -216,9 +218,9 @@ implements TranslatorConstants
 
        Menu editMenu = new Menu( RC( "menu.edit" ) );
 
-       editCopyMenu = new MenuItem( RC( "tools.translator.menu.edit.copy" ) , new MenuShortcut(KeyEvent.VK_C)  );
-       editCutMenu = new MenuItem( RC( "tools.translator.menu.edit.cut" ) , new MenuShortcut(KeyEvent.VK_X)  );
-       editPasteMenu = new MenuItem( RC( "tools.translator.menu.edit.paste" ) , new MenuShortcut(KeyEvent.VK_V)  );
+       editCopyMenu = new MenuItem( RC( "tools.translator.menu.edit.copy" ) /* , new MenuShortcut(KeyEvent.VK_C) */ );
+       editCutMenu = new MenuItem( RC( "tools.translator.menu.edit.cut" )  /* , new MenuShortcut(KeyEvent.VK_X) */ );
+       editPasteMenu = new MenuItem( RC( "tools.translator.menu.edit.paste" ) /* , new MenuShortcut(KeyEvent.VK_V) */ );
        editDeleteMenu = new MenuItem( RC( "tools.translator.menu.edit.delete" ) );
 
        newLangMenu = new MenuItem( RC( "tools.translator.menu.new.lang" ) , new MenuShortcut(KeyEvent.VK_L)  );
@@ -249,6 +251,12 @@ implements TranslatorConstants
        loadXmlBundleMenu = new MenuItem( RC( "tools.translator.menu.load.xml" ) );
        loadUtfBundleMenu = new MenuItem( RC( "tools.translator.menu.load.utf" ) );
 
+       saveXmlBundleMenuP= new MenuItem( RC( "tools.translator.menu.save.xml.part" ) );
+       saveUtfBundleMenuP= new MenuItem( RC( "tools.translator.menu.save.utf.part") );
+       loadXmlBundleMenuP= new MenuItem( RC( "tools.translator.menu.load.xml.part" ) );
+       loadUtfBundleMenuP= new MenuItem( RC( "tools.translator.menu.load.utf.part" ) );
+       openBundleMenuP   = new MenuItem( RC( "tools.translator.menu.load.part" ) );
+       
        fileMenu.add(newBundleMenu);
        fileMenu.add(openBundleMenu);
        fileMenu.add(saveBundleMenu);
@@ -277,10 +285,15 @@ implements TranslatorConstants
        viewMenu.add( statisticsMenu );
 
        toolMenu.add(loadXmlBundleMenu);
-       toolMenu.add(saveXmlBundleMenu);
-       toolMenu.addSeparator();
        toolMenu.add(loadUtfBundleMenu);
+       toolMenu.add(saveXmlBundleMenu);
        toolMenu.add(saveUtfBundleMenu);
+       toolMenu.addSeparator();
+       toolMenu.add(openBundleMenuP);
+       toolMenu.add(loadXmlBundleMenuP);
+       toolMenu.add(loadUtfBundleMenuP);
+       toolMenu.add(saveXmlBundleMenuP);
+       toolMenu.add(saveUtfBundleMenuP);
        toolMenu.addSeparator();
        toolMenu.add(genMenu);
        toolMenu.add(parseMenu);
@@ -380,6 +393,12 @@ implements TranslatorConstants
              EmulatedTextField cur = (EmulatedTextField)ccur;
              cur.blCopy();
           }
+          else if(ccur instanceof TextField){
+             TextField cur = (TextField)ccur;
+             java.awt.datatransfer.Clipboard c = java.awt.Toolkit.getDefaultToolkit().getSystemClipboard();
+             java.awt.datatransfer.StringSelection s2 = new java.awt.datatransfer.StringSelection(cur.getSelectedText());
+             c.setContents(s2,s2);
+          }
        }
        if ( e.target == editCutMenu){
           Component ccur = getFocusOwner();
@@ -388,6 +407,16 @@ implements TranslatorConstants
              cur.blCopy();
              cur.blDelete();
           }
+          else if(ccur instanceof TextField){
+             TextField cur = (TextField)ccur;
+             java.awt.datatransfer.Clipboard c = java.awt.Toolkit.getDefaultToolkit().getSystemClipboard();
+             java.awt.datatransfer.StringSelection s2 = new java.awt.datatransfer.StringSelection(cur.getSelectedText());
+             c.setContents(s2,s2);
+             if(cur.getSelectedText().length() > 0)
+                cur.setText(
+                    cur.getText().substring(0, cur.getSelectionStart()) + 
+                    cur.getText().substring(cur.getSelectionEnd()));
+          }
        }
        if ( e.target == editPasteMenu){
           Component ccur = getFocusOwner();
@@ -395,12 +424,44 @@ implements TranslatorConstants
              EmulatedTextField cur = (EmulatedTextField)ccur;
              cur.blPaste();
           }
+          else if(ccur instanceof TextField){
+             TextField cur = (TextField)ccur;
+
+             java.awt.datatransfer.Clipboard c = java.awt.Toolkit.getDefaultToolkit().getSystemClipboard();
+             java.awt.datatransfer.Transferable t = c.getContents("e");
+
+             String nt = "";
+             if(t.isDataFlavorSupported(java.awt.datatransfer.DataFlavor.stringFlavor))
+                try{
+                   nt = (String)t.getTransferData(java.awt.datatransfer.DataFlavor.stringFlavor);
+                }
+                catch(Exception ex){
+                }
+
+             if(cur.getSelectedText().length() > 0)
+                cur.setText(
+                    cur.getText().substring(0, cur.getSelectionStart()) + 
+                    nt +
+                    cur.getText().substring(cur.getSelectionEnd()));
+             else
+                cur.setText(
+                    cur.getText().substring(0, cur.getCaretPosition()) +
+                    nt +
+                    cur.getText().substring(cur.getCaretPosition()));
+          }
        }
        if ( e.target == editDeleteMenu){
           Component ccur = getFocusOwner();
           if(ccur instanceof EmulatedTextField){
              EmulatedTextField cur = (EmulatedTextField)ccur;
              cur.blDelete();
+          }
+          else if(ccur instanceof TextField){
+             TextField cur = (TextField)ccur;
+             if(cur.getSelectedText().length() > 0)
+                cur.setText(
+                    cur.getText().substring(0, cur.getSelectionStart()) + 
+                    cur.getText().substring(cur.getSelectionEnd()));
           }
        }
 
@@ -411,7 +472,7 @@ implements TranslatorConstants
           exitInitiated = false;
           onClose();
        }
-       if ( e.target == openBundleMenu ) onOpen();
+       if ( e.target == openBundleMenu ) onOpen(false);
        if ( e.target == saveBundleMenu ) onSave();
        if ( e.target == saveAsBundleMenu ) onSaveAs();
        if ( e.target == exitMenu ) onClose();
@@ -420,10 +481,18 @@ implements TranslatorConstants
        if ( e.target == genMenu) onGenCode();
        if ( e.target == parseMenu) onParseCode();
        if ( e.target == aboutMenu) onAbout();
-       if ( e.target == loadXmlBundleMenu) onLoadXml();
-       if ( e.target == saveXmlBundleMenu) onSaveXml();
-       if ( e.target == loadUtfBundleMenu) onLoadUtf();
-       if ( e.target == saveUtfBundleMenu) onSaveUtf();
+
+       if ( e.target == loadXmlBundleMenu) onLoadXml(false);
+       if ( e.target == saveXmlBundleMenu) onSaveXml(false);
+       if ( e.target == loadUtfBundleMenu) onLoadUtf(false);
+       if ( e.target == saveUtfBundleMenu) onSaveUtf(false);
+
+       if ( e.target == openBundleMenuP ) onOpen(true);
+       if ( e.target == loadXmlBundleMenuP) onLoadXml(true);
+       if ( e.target == saveXmlBundleMenuP) onSaveXml(true);
+       if ( e.target == loadUtfBundleMenuP) onLoadUtf(true);
+       if ( e.target == saveUtfBundleMenuP) onSaveUtf(true);
+
 
        if ( e.target instanceof CheckboxMenuItem && e.target == showNullsMenu ) { 
            setIndicators( tree.getRootNode() ); 
@@ -495,7 +564,7 @@ implements TranslatorConstants
               String patz = stretchPath(path);
               if(patz.equals(lbl)){
                  clear();
-                 readResources( path );
+                 readResources( path, false );
                  break;
               }
            }
@@ -812,24 +881,9 @@ implements TranslatorConstants
        bundle.getBundle().addLanguage("en");
        bundle.getBundle().addKey("creationDate");
        bundle.getBundle().updateValue("creationDate", "en", (new Date()).toLocaleString());
-       initData();
+       initData(false);
        setTitle(null);
        isDirty = false;
-    }
-
-    public void onOpen()
-    {
-       FileDialog openFileDialog1 = new FileDialog(this, RC( "tools.translator.label.opentitle" ), FileDialog.LOAD);
-       openFileDialog1.setDirectory(".");
-       String mask = "*" + RES_EXTENSION + ";" + "*" + INI_EXTENSION;
-       openFileDialog1.setFile( mask );
-       openFileDialog1.show();
-
-       String filename = openFileDialog1.getFile();
-       if( filename != null ){
-          clear();
-          readResources( openFileDialog1.getDirectory() + filename );
-       }
     }
 
     private SafeResourceBundle rcTable = null;
@@ -846,18 +900,39 @@ implements TranslatorConstants
        sbl2.setText(filename == null ? "" : filename);
     }
 
-    public void readResources( String fileName )
+    private void join(BundleManager bundle2, boolean part)
+    {
+       if(part){
+           BundleSet set = bundle2.getBundle();
+           int items = set.getItemCount();
+           for(int i=0;i<items;++i){
+              BundleItem bi = set.getItem(i);
+              bundle.getBundle().addKey(bi.getId());
+              Enumeration en= bi.getLanguages();
+              while(en.hasMoreElements()){    
+                  String lang = (String)en.nextElement();
+                  bundle.getBundle().addLanguage(lang);
+                  bundle.getBundle().updateValue(bi.getId(), lang, bi.getTranslation(lang));
+              }
+           }
+       }
+       else bundle = bundle2;
+    }
+
+    public void readResources( String fileName, boolean part )
     {
        setCursor( Cursor.WAIT_CURSOR );
        try{
-          bundle = new BundleManager(fileName);
+          BundleManager bundle2 = new BundleManager(fileName);
+          join(bundle2, part);
        }
        catch(Exception e){
           infoException(e);
        }
 
-       initControls();
-       initData();
+       if(!part) initControls();
+       else wasSelectedKey = null;
+       initData(part);
        setTitle( fileName );
        isDirty = false;
        addToPickList(fileName);
@@ -920,8 +995,9 @@ implements TranslatorConstants
        ls.box = new CheckboxMenuItem( langLab, false );
        ls.box.setState( true );
        ls.label = new IELabel( langLab + ":", IELabel.LEFT );
-       ls.tf = new EmulatedTextArea( true, false, 3, 20 );
-       ls.tf.setBackground( Color.white );
+       ls.tf = new TextAreaWrap();
+       ls.tf.getControl().setBackground( Color.white );
+       ls.tf.setLocale(new Locale(lang, ""));
 
        langStates.addElement(ls);
        langMenu.add( ls.box );
@@ -949,8 +1025,8 @@ implements TranslatorConstants
        c.gridx=1;
        c.insets.right = 5;
        c.insets.left = 0;
-       textLayout.setConstraints( ls.tf, c );
-       textPanel.add( ls.tf );
+       textLayout.setConstraints( ls.tf.getControl(), c );
+       textPanel.add( ls.tf.getControl() );
     }
 
     private void addToTree( String s )
@@ -1105,7 +1181,7 @@ implements TranslatorConstants
                  bundle.getBundle().addKey(key);
                  bundle.getBundle().updateValue(key, rlng, (String)ask.get(key));
              }
-             initData();
+             initData(false);
              setTitle( filename );
           }
        }
@@ -1114,7 +1190,7 @@ implements TranslatorConstants
        }
     }
 
-    private void initData()
+    private void initData(boolean part)
     {
         /* Initialize language set */
         for (int i = 0; i < bundle.getBundle().getLangCount(); ++i ){
@@ -1152,7 +1228,7 @@ implements TranslatorConstants
         repaint();
         isDirty = true;
         syncToolbar();
-        loadPickList();
+        if(!part) loadPickList();
     }
 
     private void expand(TreeNode tn)
@@ -1274,7 +1350,7 @@ implements TranslatorConstants
     }
 
     private void saveIni()
-{
+    {
         try{
            String path = SYS_DIR + "../jrc-editor.conf";
            IniFile ini = new IniFile(path);
@@ -1286,8 +1362,49 @@ implements TranslatorConstants
         }
     }
 
-    public void onSaveXml()
+    private String[] getLangSet()
     {
+       LangDialog ed = new LangDialog( this, RC( "tools.translator.label.choosetitle" ), true, this );
+       ed.setLabelCaption( RC( "tools.translator.label.chooselabel" ) );
+       ed.setButtonsCaption( RC( "dialog.button.ok" ), CLOSE_BUTTONS[2] );
+
+       LangItem[] lset = new LangItem[bundle.getBundle().getLangCount()];
+       for (int i = 0; i < lset.length; ++i )
+          lset[i] = bundle.getBundle().getLanguage(i);
+       ed.setList(lset);
+
+       Dimension d = ed.preferredSize();
+       d.width *= 2;
+       ed.resize( d );
+       ed.toCenter();
+       ed.show();
+       String[] ask = ed.getList();
+       if ( ask==null || ask.length <= 0 || !ed.isApply()) return null;
+       for(int i = 0; i < ask.length; ++i)
+          if(ask[i].indexOf(':') > 0) 
+             ask[i] = ask[i].substring(0, ask[i].indexOf(':')).trim();
+       return ask;
+    }
+
+    public void onOpen(boolean part)
+    {
+       FileDialog openFileDialog1 = new FileDialog(this, RC( "tools.translator.label.opentitle" ), FileDialog.LOAD);
+       openFileDialog1.setDirectory(".");
+       String mask = "*" + RES_EXTENSION + ";" + "*" + INI_EXTENSION;
+       openFileDialog1.setFile( mask );
+       openFileDialog1.show();
+
+       String filename = openFileDialog1.getFile();
+       if( filename != null ){
+          if(!part) clear();
+          readResources( openFileDialog1.getDirectory() + filename, part );
+       }
+    }
+
+    public void onSaveXml(boolean part)
+    {
+       String[] parts = part ? getLangSet() : null;
+       if(part && (parts==null || parts.length < 2)) return;
        FileDialog openFileDialog1 = new FileDialog(this, RC("tools.translator.label.saveastitle"), FileDialog.SAVE);
        String mask = "*.xml";
        openFileDialog1.setDirectory(".");
@@ -1311,6 +1428,7 @@ implements TranslatorConstants
                 out.writeChars("\t<key name=\"" + bi.getId() + "\">\n");
                 while(en.hasMoreElements()){    
                     String lang = (String)en.nextElement();
+                    if(part && !inArray(parts, lang)) continue;
                     out.writeChars("\t\t<value lang=\""+lang+"\">"+bi.getTranslation(lang)+"</value>\n");
                 }
                 out.writeChars("\t</key>\n");
@@ -1323,8 +1441,14 @@ implements TranslatorConstants
           }
     }
 
-    public void onSaveUtf()
+    public void onSaveUtf(boolean part)
     {
+       String[] parts = part ? getLangSet() : null;
+       if(part && (parts==null || parts.length < 2)) return;
+
+       for(int k=0;parts!=null && k<parts.length;++k)
+          System.err.println("+++ [" + parts[k] + "]");
+
        FileDialog openFileDialog1 = new FileDialog(this, RC("tools.translator.label.saveastitle"), FileDialog.SAVE);
        String mask = "*.txt";
        openFileDialog1.setDirectory(".");
@@ -1341,13 +1465,14 @@ implements TranslatorConstants
              BundleSet set = bundle.getBundle();
              int items = set.getItemCount();
              out.writeChar((char)0xFEFF);
-             out.writeChars("#JRCE 1.2: do not modify this line\r\n");
+             out.writeChars("#JRCE 1.3: do not modify this line\r\n\r\n");
              for(int i=0;i<items;++i){
                 BundleItem bi = set.getItem(i);
                 Enumeration en= bi.getLanguages();
                 out.writeChars("KEY=\"" + bi.getId() + "\":\r\n");
                 while(en.hasMoreElements()){    
                     String lang = (String)en.nextElement();
+                    if(part && !inArray(parts, lang)) continue;
                     out.writeChars("\t\""+lang+"\"=\""+bi.getTranslation(lang)+"\"\r\n");
                 }
                 out.writeChars("\r\n");
@@ -1357,6 +1482,13 @@ implements TranslatorConstants
           catch(Exception e){
              infoException(e);
           }
+    }
+
+    private boolean inArray(String[] array, String lang)
+    {
+        for(int j=0;j<array.length;++j)
+            if(array[j].equalsIgnoreCase(lang)) return true;
+        return false;
     }
 
     /*
@@ -1399,7 +1531,7 @@ implements TranslatorConstants
         }
     }
 
-    public void onLoadXml()
+    public void onLoadXml(boolean part)
     {
        FileDialog openFileDialog1 = new FileDialog(this, RC( "tools.translator.label.opentitle" ), FileDialog.LOAD);
        openFileDialog1.setDirectory(".");
@@ -1409,8 +1541,8 @@ implements TranslatorConstants
 
        String filename = openFileDialog1.getFile();
        if( filename != null ){
-          clear();
-          initControls();
+          if(!part) clear();
+          if(!part) initControls();
           bundle.getBundle().addLanguage("en");
 
           try{
@@ -1422,12 +1554,12 @@ implements TranslatorConstants
           catch(Exception e){
              infoException(e);
           }
-          initData();
+          initData(part);
           setTitle( filename );
        }
     }
 
-    public void onLoadUtf()
+    public void onLoadUtf(boolean part)
     {
        FileDialog openFileDialog1 = new FileDialog(this, RC( "tools.translator.label.opentitle" ), FileDialog.LOAD);
        openFileDialog1.setDirectory(".");
@@ -1437,8 +1569,8 @@ implements TranslatorConstants
 
        String filename = openFileDialog1.getFile();
        if( filename != null ){
-          clear();
-          initControls();
+          if(!part) clear();
+          if(!part) initControls();
           bundle.getBundle().addLanguage("en");
           try{
              filename = openFileDialog1.getDirectory() + filename;
@@ -1449,7 +1581,7 @@ implements TranslatorConstants
           catch(Exception e){
              infoException(e);
           }
-          initData();
+          initData(part);
           setTitle( filename );
        }
     }
@@ -1496,7 +1628,7 @@ implements TranslatorConstants
         for ( i = 0; i < langStates.size(); i++ ) {
             LangState ls = getLangState(i);
             if(ls.hidden) continue;
-            if(ls.tf==focused) break;
+            if(ls.tf.getControl()==focused) break;
         }
 
         if(i < langStates.size()){
