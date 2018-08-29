@@ -33,44 +33,30 @@ public class ContextMenuBar extends MenuBar {
 	public final static int EV_MENU_ENTER = EV_MENU_REDRAW + 2;
 	public final static int EV_MENU_REDRAWALL = EV_MENU_REDRAW + 3;
 
-	// ====================================================================
-
 	public Container parent = null;
 	ContextMenu act_menu = null;
 	boolean first = true;
 	ListenerSupport support = new ListenerSupport();
 
-	// ====================================================================
-
 	public ContextMenuBar(Container a_parent) {
 		parent = a_parent;
 	}
-
-	// ====================================================================
 
 	public ContextMenuBar() {
 		super();
 	}
 
-	// ====================================================================
-
 	public void addListener(Listener l) {
 		support.addListener(l);
 	}
-
-	// ====================================================================
 
 	public void removeListener(Listener l) {
 		support.removeListener(l);
 	}
 
-	// ====================================================================
-
 	public void setParent(Container a_parent) {
 		parent = a_parent;
 	}
-
-	// ====================================================================
 
 	public Dimension getParentSize() {
 		if (parent == null) {
@@ -81,28 +67,20 @@ public class ContextMenuBar extends MenuBar {
 		}
 	}
 
-	// ====================================================================
-
 	public void add(ContextMenu cm) {
 		cm.index = countMenus();
 		super.add(cm);
 	}
-
-	// ====================================================================
 
 	@Override
 	public void remove(int index) {
 		super.remove(index);
 	}
 
-	// ====================================================================
-
 	@Override
 	public void remove(MenuComponent mc) {
 		super.remove(mc);
 	}
-
-	// ====================================================================
 
 	public boolean init(int index, int x, int y) {
 		act_menu = get(index);
@@ -114,8 +92,6 @@ public class ContextMenuBar extends MenuBar {
 		first = true;
 		return true;
 	}
-
-	// ====================================================================
 
 	public void paint(Graphics gr) {
 		if (act_menu == null) {
@@ -130,8 +106,6 @@ public class ContextMenuBar extends MenuBar {
 		}
 	}
 
-	// ====================================================================
-
 	public boolean isRedraw() {
 		return first;
 	}
@@ -140,25 +114,17 @@ public class ContextMenuBar extends MenuBar {
 		return (parent != null) && (act_menu != null);
 	}
 
-	// ====================================================================
-
 	public ContextMenu get(int index) {
 		return (ContextMenu) super.getMenu(index);
 	}
-
-	// ====================================================================
 
 	public void disable(int index) {
 		get(index).disable();
 	}
 
-	// ====================================================================
-
 	public void enable(int index) {
 		get(index).enable();
 	}
-
-	// ====================================================================
 
 	public void repaint() {
 		if (parent == null) {
@@ -169,8 +135,6 @@ public class ContextMenuBar extends MenuBar {
 		gr.dispose();
 	}
 
-	// ====================================================================
-
 	public void repaintAll() {
 		first = true;
 		if ((act_menu != null) && (parent != null)) {
@@ -179,8 +143,6 @@ public class ContextMenuBar extends MenuBar {
 		}
 		repaint();
 	}
-
-	// ====================================================================
 
 	public void sendEvent(java.awt.Event evt) {
 		if ((parent == null) || (act_menu == null)) {
@@ -217,13 +179,10 @@ public class ContextMenuBar extends MenuBar {
 		}
 	}
 
-	// ====================================================================
-
 	public boolean handleEvent(java.awt.Event evt) {
 		if ((act_menu == null) || (!act_menu.isEnabled())) {
 			return false;
 		}
 		return act_menu.handleEvent(evt);
 	}
-
 }

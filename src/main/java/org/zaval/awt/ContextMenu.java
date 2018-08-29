@@ -49,27 +49,19 @@ public class ContextMenu extends Menu {
 		this.setFont(new Font("Dialog", Font.PLAIN, 12));
 	}
 
-	// ====================================================================
-
 	public ContextMenu(String name, int x, int y) {
 		this(name);
 		size.x = x;
 		size.y = y;
 	}
 
-	// ====================================================================
-
 	public boolean isActive() {
 		return act;
 	}
 
-	// ====================================================================
-
 	public void setActive(boolean a_act) {
 		act = a_act;
 	}
-
-	// ====================================================================
 
 	public void addCheckit(MenuItem mi, boolean state) {
 		this.add(mi);
@@ -81,27 +73,19 @@ public class ContextMenu extends Menu {
 		}
 	}
 
-	// ====================================================================
-
 	public void addCheckit(String name, boolean state) {
 		this.addCheckit(new MenuItem(name), state);
 	}
-
-	// ====================================================================
 
 	@Override
 	public void add(String name) {
 		this.add(new MenuItem(name));
 	}
 
-	// ====================================================================
-
 	@Override
 	public void addSeparator() {
 		super.addSeparator();
 	}
-
-	// ====================================================================
 
 	@Override
 	public void remove(int index) {
@@ -109,14 +93,10 @@ public class ContextMenu extends Menu {
 		super.remove(index);
 	}
 
-	// ====================================================================
-
 	@Override
 	public void remove(MenuComponent mc) {
 		super.remove(mc);
 	}
-
-	// ====================================================================
 
 	@Override
 	public MenuItem add(MenuItem mi) {
@@ -131,31 +111,21 @@ public class ContextMenu extends Menu {
 		return ret_mi;
 	}
 
-	// ====================================================================
-
 	public void recalc() {
 		recalc(getFont());
 	}
-
-	// ====================================================================
 
 	public Dimension getSize() {
 		return new Dimension(size.width, size.height);
 	}
 
-	// ====================================================================
-
 	public Rectangle getBounds() {
 		return new Rectangle(size.x, size.y, size.width, size.height);
 	}
 
-	// ====================================================================
-
 	public Dimension preferredSize() {
 		return new Dimension(size.width + (2 * hdist), size.height + (2 * vdist));
 	}
-
-	// ====================================================================
 
 	public void recalc(Font fnt) {
 		FontMetrics fm = Toolkit.getDefaultToolkit().getFontMetrics(fnt);
@@ -181,15 +151,11 @@ public class ContextMenu extends Menu {
 		}
 	}
 
-	// ====================================================================
-
 	@Override
 	public void setFont(Font fnt) {
 		super.setFont(fnt);
 		recalc();
 	}
-
-	// ====================================================================
 
 	private void drawSeparator(Graphics gr, int y) {
 		int x1 = size.x + 2;
@@ -201,8 +167,6 @@ public class ContextMenu extends Menu {
 		gr.drawLine(x1, y, x2, y);
 	}
 
-	// ====================================================================
-
 	public Rectangle getRedrawArea() {
 		int dy = size.y + vdist + vdist;
 		if (prev_option > act_option) {
@@ -212,8 +176,6 @@ public class ContextMenu extends Menu {
 			return new Rectangle(size.x, dy + (prev_option * stap), size.width, 2 * msize);
 		}
 	}
-
-	// ====================================================================
 
 	private void correctPos() {
 		if (getParent() == null) {
@@ -241,8 +203,6 @@ public class ContextMenu extends Menu {
 			size.y = 0;
 		}
 	}
-
-	// ====================================================================
 
 	public boolean paint(Graphics gr) {
 		if (!isEnabled()) {
@@ -272,25 +232,6 @@ public class ContextMenu extends Menu {
 		return true;
 	}
 
-	// ====================================================================
-
-/*  private void  drawCheckit(Graphics gr, int index, String name, int x, int y)
-  {
-String  state = (String)types.get(name);
-if (state!=null)
-{
- ContextMenuBar cmb = (ContextMenuBar)(getParent());
- if (state.equals("1"))
-  if (index == act_option)
-   gr.drawImage(mon , x, y, col_mark, cmb.parent);
-  else
-   gr.drawImage(on , x, y, col_mark, cmb.parent);
-// else                   gr.drawImage(off, size.x + hdist/4, size.y + vdist + add, cmb.parent);
-}
-  }*/
-
-	// ====================================================================
-
 	private void drawCheckit(Graphics gr, int index, String name, int x, int y) {
 		String state = (String) types.get(name);
 		if (state != null) {
@@ -300,12 +241,9 @@ if (state!=null)
 					gr.drawLine(x + (hdist / 3) + i, ((y + stap) - htext) + vdist, x + (hdist / 2) + i, y + stap);
 					gr.drawLine(x + (hdist / 2) + i, y + stap, ((x + hdist) - 3) + i, ((y + stap) - htext) + vdist);
 				}
-				// else                   gr.drawImage(off, size.x + hdist/4, size.y + vdist + add, cmb.parent);
 			}
 		}
 	}
-
-	// ====================================================================
 
 	private void drawOption(Graphics gr, int index) {
 		if (index >= countItems()) {
@@ -343,8 +281,6 @@ if (state!=null)
 
 	}
 
-	// ====================================================================
-
 	public boolean paintPart(Graphics gr) {
 		if (!isEnabled()) {
 			return false;
@@ -363,21 +299,15 @@ if (state!=null)
 		return true;
 	}
 
-	// ====================================================================
-
 	public boolean paint(Graphics gr, int x, int y) {
 		setPos(x, y);
 		return paint(gr);
 	}
 
-	// ====================================================================
-
 	public void setPos(int x, int y) {
 		size.x = x;
 		size.y = y;
 	}
-
-	// ====================================================================
 
 	public void pressKey(Event evt) {
 		int num = countItems();
@@ -398,8 +328,6 @@ if (state!=null)
 		}
 	}
 
-	// ====================================================================
-
 	public boolean isCheckit(int act) {
 		MenuItem mi = getItem(act);
 		if (mi == null) {
@@ -410,8 +338,6 @@ if (state!=null)
 		}
 		return false;
 	}
-
-	// ====================================================================
 
 	public void invCheckit(int act) {
 		if (!isCheckit(act)) {
@@ -426,8 +352,6 @@ if (state!=null)
 		}
 	}
 
-	// ====================================================================
-
 	public void pressEnter() {
 		MenuItem mi = getItem(act_option);
 		if (mi.isEnabled()) {
@@ -436,13 +360,9 @@ if (state!=null)
 		}
 	}
 
-	// ====================================================================
-
 	public void pressExit() {
 		sendEvent(ContextMenuBar.EV_MENU_EXIT);
 	}
-
-	// ====================================================================
 
 	private boolean incOption() {
 		int num = countItems();
@@ -469,8 +389,6 @@ if (state!=null)
 		return false;
 	}
 
-	// ====================================================================
-
 	private boolean decOption() {
 		int num = countItems();
 		if (num <= 0) {
@@ -495,8 +413,6 @@ if (state!=null)
 		}
 		return false;
 	}
-
-	// ====================================================================
 
 	public void pressMouse(Event evt) {
 		int num = countItems();
@@ -523,8 +439,6 @@ if (state!=null)
 		}
 	}
 
-	// ====================================================================
-
 	public boolean inside(int x, int y) {
 		if ((x > (size.x + size.width)) || (x < size.x) || (y > (size.y + size.height)) || (y < size.y)) {
 			return false;
@@ -532,9 +446,6 @@ if (state!=null)
 		return true;
 	}
 
-	// ====================================================================
-
-//  int isLeftKey = 0;
 	public boolean handleEvent(Event evt) {
 		switch (evt.id) {
 			case Event.MOUSE_EXIT:
@@ -557,22 +468,16 @@ if (state!=null)
 				pressMouse(evt);
 				break;
 			case Event.MOUSE_DOWN: {
-				/*if (evt.modifiers != 4) isLeftKey = 1;
-				else                    isLeftKey = 1;*/
 				pressMouse(evt);
 			}
 				break;
-			case Event.MOUSE_UP: //if (isLeftKey == 1)
-			{
+			case Event.MOUSE_UP: {
 				pressMouse(evt);
-				//isLeftKey = 0;
 			}
 				break;
 		}
-		return true; //super.handleEvent(evt);
+		return true;
 	}
-
-	// ====================================================================
 
 	private void sendEvent(int id) {
 		if (getParent() == null) {
@@ -599,7 +504,4 @@ if (state!=null)
 			((ContextMenuBar) (getParent())).sendEvent(evt);
 		}
 	}
-
-	// ====================================================================
-
 }

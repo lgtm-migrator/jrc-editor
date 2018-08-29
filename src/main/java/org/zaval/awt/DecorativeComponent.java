@@ -149,10 +149,8 @@ public abstract class DecorativeComponent {
 	}
 
 	protected void invalidate() {
-		//System.out.println ("invalidate()1" + isValid);
 		if (isValid) {
 			isValid = false;
-			//System.out.println ("invalidate()");
 			invalidatePerform();
 		}
 	}
@@ -160,7 +158,6 @@ public abstract class DecorativeComponent {
 	protected void validate() {
 		if (!isValid) {
 			isValid = true;
-			//System.out.println ("validate()");
 			validatePerform();
 		}
 	}

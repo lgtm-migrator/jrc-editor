@@ -133,7 +133,6 @@ public class InputIniFile extends Object {
 			st.nextToken(); // '='
 			String value = st.nextToken("").trim();
 			hash.put(key, value);
-			// System.err.println(key + "=["+value+"]");
 		}
 	}
 }

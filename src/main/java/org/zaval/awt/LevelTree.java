@@ -23,25 +23,6 @@ import java.util.Vector;
 
 import org.zaval.awt.peer.TreeNode;
 
-// ========================================================================
-//  08/08/97    Added function CAF
-// ========================================================================
-//
-//    public TreeNode getNode      (String name)
-//    public boolean  insertChild  (String name, String addname)
-//    public boolean  insertChild  (String name, String addname, String im1, String im2)
-//    public boolean  insertNext   (String name, String addname)
-//    public boolean  insertNext   (String name, String addname, String im1, String im2)
-//    public boolean  insertRoot   (String addname)
-//    public boolean  insertRoot   (String addname, String im1, String im2)
-//    public boolean  setImages    (String name, String img1, String img2)
-//    public boolean  setImageOpen (String name, String img)
-//    public boolean  setImageClose(String name, String img)
-//    public boolean  changeText   (String name, String newname)
-//
-// ========================================================================
-// ========================================================================
-
 public class LevelTree {
 	// constants for insertion
 	public static final int CHILD = 0;
@@ -54,16 +35,13 @@ public class LevelTree {
 	private ImageResolver imgres; // To autosetup
 
 	private int count = 0; // Number of nodes in the tree
-	private int viewCount = 0;// Number of viewable nodes in the tree
-								// (A node is viewable if all of its
-								// parents are expanded.)
+	private int viewCount = 0;// Number of viewable nodes in the tree (A node is viewable if all of its parents are expanded.)
 
 	private String treeStructure[];
 	String delim = ".";
 
 	private Hashtable nameCache = new Hashtable();
 
-	// constructors
 	public LevelTree() {
 		count = 0;
 	}
@@ -174,10 +152,7 @@ public class LevelTree {
 		return false;
 	}
 
-// ========================================================================
 // This functions will be added on caf
-// ========================================================================
-
 	public TreeNode getNode(String name) {
 		if (name == null) {
 			return null;
@@ -194,13 +169,9 @@ public class LevelTree {
 		return null;
 	}
 
-	// ========================================================================
-
 	public boolean insertChild(String name, String addname) {
 		return insertChild(name, addname, null, null);
 	}
-
-	// ========================================================================
 
 	public boolean insertChild(String name, String addname, String im1, String im2) {
 		if ((name == null) || (addname == null)) {
@@ -214,13 +185,9 @@ public class LevelTree {
 		return true;
 	}
 
-	// ========================================================================
-
 	public boolean insertNext(String name, String addname) {
 		return insertNext(name, addname, null, null);
 	}
-
-	// ========================================================================
 
 	public boolean insertNext(String name, String addname, String im1, String im2) {
 		if ((name == null) || (addname == null)) {
@@ -235,13 +202,9 @@ public class LevelTree {
 		return true;
 	}
 
-// ========================================================================
-
 	public boolean insertRoot(String addname) {
 		return insertRoot(addname, null, null);
 	}
-
-// ========================================================================
 
 	public boolean insertRoot(String addname, String im1, String im2) {
 		if (addname == null) {
@@ -253,13 +216,9 @@ public class LevelTree {
 		return insertChild(rootNode.text, addname, im1, im2);
 	}
 
-// ========================================================================
-
 	public boolean setImages(String name, String img1, String img2) {
 		return setImageOpen(name, img1) && setImageClose(name, img2);
 	}
-
-// ========================================================================
 
 	public boolean setImageOpen(String name, String img) {
 		if ((name == null) || (img == null)) {
@@ -273,8 +232,6 @@ public class LevelTree {
 		return true;
 	}
 
-// ========================================================================
-
 	public boolean setImageClose(String name, String img) {
 		if ((name == null) || (img == null)) {
 			return false;
@@ -287,8 +244,6 @@ public class LevelTree {
 		return true;
 	}
 
-// ========================================================================
-
 	public boolean changeText(String name, String newname) {
 		if ((name == null) || (newname == null)) {
 			return false;
@@ -298,15 +253,10 @@ public class LevelTree {
 		return true;
 	}
 
-// ========================================================================
-
 	public void setNamesDelim(String delim) {
 		this.delim = delim;
 	}
-
-// ========================================================================
-// end add
-// ========================================================================
+	// end add
 
 	// add new node to level 0
 	public void append(TreeNode newNode) {
@@ -509,7 +459,6 @@ public class LevelTree {
 		// for internal processing. Depths of nodes are set,
 		// and viewCount and viewWidest is set.
 		v = new Vector(count);
-		//  nameCache = new Hashtable();
 
 		if (count < 1) {
 			viewCount = 0;
@@ -563,17 +512,6 @@ public class LevelTree {
 		TreeNode node;
 
 		tempStructure = treeStructure;
-
-		//entry = tempStructure[0];
-
-		// if(findLastPreSpace(entry) > -1)
-		// {
-		//    throw new InvalidTreeNodeException();
-		//  }
-
-		//   node = new TreeNode(entry.trim());
-		//  node.setDepth(0);
-		//  append(node);
 
 		node = new TreeNode("root");
 		node.setDepth(0);
@@ -633,7 +571,6 @@ public class LevelTree {
 				insert(node, currentNode, NEXT);
 			}
 		}
-//        topVisibleNode = rootNode.child;
 	}
 
 	private int findLastPreSpace(String s) {
@@ -731,8 +668,6 @@ public class LevelTree {
 		return t.getHide();
 	}
 
-	// ========================================================================
-
 	public void expandAll() {
 		recount();
 		if (e == null) {
@@ -754,8 +689,6 @@ public class LevelTree {
 			tn.collapse();
 		}
 	}
-
-	// ========================================================================
 
 	public TreeNode findNode(String name, String d) {
 		recount();
@@ -801,8 +734,6 @@ public class LevelTree {
 		view(r.sibling, s);
 	}
 
-	// ========================================================================
-
 	public TreeNode getNode2(String name) {
 		recount();
 		StringTokenizer st = new StringTokenizer(name, this.delim);
@@ -824,8 +755,6 @@ public class LevelTree {
 		return parent;
 	}
 
-// ========================================================================
-
 	protected int getNumChild(TreeNode parent) {
 		recount();
 		if (parent == null) {
@@ -839,8 +768,6 @@ public class LevelTree {
 		}
 		return count;
 	}
-
-// ========================================================================
 
 	protected TreeNode getChild(TreeNode parent, String nameChild) {
 		recount();
@@ -857,8 +784,6 @@ public class LevelTree {
 		}
 		return null;
 	}
-
-// ========================================================================
 
 	public TreeNode[] enumChild(String name) {
 		recount();
@@ -877,8 +802,6 @@ public class LevelTree {
 		}
 		return enumChild(parent);
 	}
-
-// ========================================================================
 
 	public TreeNode[] enumChild(TreeNode tn) {
 		recount();

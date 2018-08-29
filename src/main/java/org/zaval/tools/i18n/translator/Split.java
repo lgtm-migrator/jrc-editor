@@ -123,7 +123,6 @@ public class Split {
 			}
 		}
 		catch (Exception e) {
-			//infoException(fileName, e);
 			throw e;
 		}
 	}
@@ -198,9 +197,9 @@ public class Split {
 		return false;
 	}
 
-	/*
-	    Reading unicode (UCS16) file stream into memory
-	*/
+	/**
+	 * Reading unicode (UCS16) file stream into memory
+	 */
 	private String getBody(String file) throws IOException {
 		char ch;
 		DataInputStream in = new DataInputStream(new FileInputStream(file));
@@ -249,7 +248,6 @@ public class Split {
 				fillTable(tbl);
 			}
 			catch (Exception e) {
-				// infoException(fileName, e);
 				throw e;
 			}
 		}
@@ -265,7 +263,6 @@ public class Split {
 				fillTable(tbl);
 			}
 			catch (Exception e) {
-				// infoException(fileName, e);
 				throw e;
 			}
 		}
@@ -338,8 +335,6 @@ public class Split {
 			System.err.println(eio.getMessage());
 		}
 		catch (Exception e) {
-			// if(e.getMessage()!=null && e.getMessage().trim().length()>0)
-			//     System.err.println(e.getMessage());
 			e.printStackTrace();
 			System.out.println("Usage:\n"
 				+ "\tjrc-split join srcFile ... addFile\n"

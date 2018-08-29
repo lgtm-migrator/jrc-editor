@@ -27,8 +27,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 
-//========================================================================
-
 public class WinIniFile {
 	public static final int MAX_LEN_LINE = 256;
 	public static final int CREATE = 1;
@@ -41,8 +39,6 @@ public class WinIniFile {
 	private char buf[] = new char[WinIniFile.MAX_LEN_LINE];
 	private String begSecSymb = "[";
 	private String endSecSymb = "]";
-
-	//========================================================================
 
 	public WinIniFile(String name, int flag) throws IOException {
 		this.name = name;
@@ -60,20 +56,14 @@ public class WinIniFile {
 		}
 	}
 
-	//========================================================================
-
 	public WinIniFile(String name) throws IOException {
 		this.name = name;
 		init(new FileInputStream(name));
 	}
 
-	//========================================================================
-
 	public WinIniFile(InputStream is) throws IOException {
 		init(is);
 	}
-
-	//========================================================================
 
 	public void init(InputStream is) throws IOException {
 		String data = new String();
@@ -126,8 +116,6 @@ public class WinIniFile {
 		dis = null;
 	}
 
-	//========================================================================
-
 	private String readLine(InputStream is) throws IOException {
 		int res = -1, i = 0;
 		while (((res = is.read()) > 0) && (res != '\n') && (i < buf.length)) {
@@ -140,8 +128,6 @@ public class WinIniFile {
 		return new String(buf, 0, i).trim();
 	}
 
-	//========================================================================
-
 	private void writeLine(RandomAccessFile raf, String data) throws IOException {
 		byte buf[] = new byte[data.length()];
 		data.getBytes(0, data.length(), buf, 0);
@@ -149,8 +135,6 @@ public class WinIniFile {
 		raf.write(0x0D);
 		raf.write(0x0A);
 	}
-
-	//========================================================================
 
 	public String getValue(String section, String name) {
 		Hashtable tab = (Hashtable) sections.get(section.toLowerCase());
@@ -160,8 +144,6 @@ public class WinIniFile {
 		return (String) tab.get(name.toLowerCase());
 	}
 
-	//========================================================================
-
 	public String getValue(String name) {
 		Hashtable tab = foundSection(name.toLowerCase());
 		if (tab == null) {
@@ -169,8 +151,6 @@ public class WinIniFile {
 		}
 		return (String) tab.get(name.toLowerCase());
 	}
-
-	//========================================================================
 
 	public Hashtable getSection(String name) {
 		return (Hashtable) sections.get(name.toLowerCase());
@@ -231,8 +211,6 @@ public class WinIniFile {
 		return 0;
 	}
 
-	//========================================================================
-
 	public int putValue(String name, String value) {
 		Hashtable tab = foundSection(name.toLowerCase());
 		if (tab == null) {
@@ -242,8 +220,6 @@ public class WinIniFile {
 		return 0;
 	}
 
-	//========================================================================
-
 	public int delSection(String name) {
 		if (sections == null) {
 			return -1;
@@ -251,8 +227,6 @@ public class WinIniFile {
 		sections.remove(name.toLowerCase());
 		return 0;
 	}
-
-	//========================================================================
 
 	public int delValue(String section, String name) {
 		Hashtable tab = getSection(section.toLowerCase());
@@ -263,8 +237,6 @@ public class WinIniFile {
 		return 0;
 	}
 
-	//========================================================================
-
 	public int putSection(String name) {
 		if ((sections == null) || (sections.get(name.toLowerCase()) != null)) {
 			return -1;
@@ -272,8 +244,6 @@ public class WinIniFile {
 		sections.put(name.toLowerCase(), new Hashtable());
 		return 0;
 	}
-
-	//========================================================================
 
 	public int flush(String name) throws IOException {
 		if (sections == null) {
@@ -305,8 +275,6 @@ public class WinIniFile {
 		return 0;
 	}
 
-	//========================================================================
-
 	public int flush() throws IOException {
 		if (this.name == null) {
 			return -1;
@@ -314,13 +282,9 @@ public class WinIniFile {
 		return flush(name);
 	}
 
-	//========================================================================
-
 	public String getName() {
 		return name;
 	}
-
-	//========================================================================
 
 	public void setSectionSymbols(String beg, String end) {
 		begSecSymb = beg;

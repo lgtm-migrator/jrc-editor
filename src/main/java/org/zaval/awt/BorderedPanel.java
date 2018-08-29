@@ -66,14 +66,8 @@ public class BorderedPanel extends Panel {
 		return insets;
 	}
 
-/*    public Insets insets() {
-  return insets;
-}*/
-
 	@Override
 	public void paint(Graphics g) {
-		// System.err.println("+++ " + this + ": " + (type == NONE?"NONE":"VISIBLE"));
-		// this.list(System.err,0);
 		if (type == NONE) {
 			Rectangle r = bounds();
 			g.setColor(getParent().getBackground());
@@ -85,8 +79,8 @@ public class BorderedPanel extends Panel {
 		Dimension d = size();
 		int x = 0;
 		int y = 0;
-		int x2 = d.width - 1;// - 2;
-		int y2 = d.height - 1;// - 2;
+		int x2 = d.width - 1;
+		int y2 = d.height - 1;
 
 		leftLine(g, x, y, x2, y2);
 		rightLine(g, x, y, x2, y2);
@@ -145,7 +139,6 @@ public class BorderedPanel extends Panel {
 			case SUNKEN: {
 				g.setColor(colors[0]);
 				g.drawLine(x2, y, x2, y2 - 1); // Topright to bottomright
-				//  g.drawLine(x2 - 1, y+1, x2 - 1, y2 - 1);  // Topright to bottomright
 			}
 				break;
 			case RAISED2:
@@ -218,7 +211,6 @@ public class BorderedPanel extends Panel {
 
 	@Override
 	public void hide() {
-		//System.err.println("--- " + this + ": " + type + "/" + prevMode);
 		if (hideMode == 0) {
 			super.hide();
 		}
@@ -244,7 +236,6 @@ public class BorderedPanel extends Panel {
 
 	@Override
 	public void show() {
-		// System.err.println("*** " + this + ": " + type + "/" + prevMode);
 		if (hideMode == 0) {
 			super.show();
 		}
@@ -257,7 +248,6 @@ public class BorderedPanel extends Panel {
 			}
 			setType(prevMode);
 			prevMode = -1;
-			//    System.err.println("*** " + this + ": VALIDATE as " + type + "/" + prevMode);
 			try {
 				super.hide();
 				super.show();

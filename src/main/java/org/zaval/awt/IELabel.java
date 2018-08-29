@@ -100,8 +100,6 @@ public class IELabel extends Canvas {
 
 			gr.setColor(getBackground());
 
-			//gr.setColor(Color.white);
-
 			gr.fillRect(0, 0, b.width - 1, b.height - 1);
 
 			gr.setColor(getForeground());

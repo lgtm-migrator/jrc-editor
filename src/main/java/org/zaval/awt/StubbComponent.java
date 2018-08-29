@@ -24,7 +24,6 @@ import java.awt.Event;
 import java.awt.Graphics;
 
 public class StubbComponent extends Canvas {
-//   private Image img;
 	private int size = 16;
 
 	@Override
@@ -46,14 +45,7 @@ public class StubbComponent extends Canvas {
 
 	@Override
 	public void paint(Graphics g) {
-		/*  Dimension d = size();
-		  if (img == null || img.getWidth(this) != d.width || !isValid())
-		  {
-		img = createImage(d.width, d.width);
-		Graphics gr = img.getGraphics();    */
 		draw(g);
-		/*    }
-		    g.drawImage(img,0,0, this);*/
 	}
 
 	protected void draw(Graphics g) {

@@ -123,21 +123,13 @@ class BundleManager implements TranslatorConstants {
 		Vector fileNames = getResFiles(dir, baseFileName, ext);
 		for (int i = 0; i < fileNames.size(); i++) {
 			String fn = (String) fileNames.elementAt(i);
-			// long t1 = System.currentTimeMillis();
 			readResource(dir + fn, determineLanguage(fn));
-			// long t2 = System.currentTimeMillis();
-			// System.err.println("      ... ["+determineLanguage(fn)+"]: " + (t2 - t1) + "ms");
 		}
 	}
 
 	private void readResource(String fullName, String lang) throws IOException {
-		// long t1 = System.currentTimeMillis();
 		Vector lines = getLines(fullName);
-		// long t2 = System.currentTimeMillis();
 		proceedLines(lines, lang, fullName);
-		// long t3 = System.currentTimeMillis();
-		// System.err.println("          ... read stream = " + (t2 - t1) + "ms");
-		// System.err.println("          ... parse lines = " + (t3 - t2) + "ms");
 	}
 
 	private void readResource(InputStream in, String lang) throws IOException {

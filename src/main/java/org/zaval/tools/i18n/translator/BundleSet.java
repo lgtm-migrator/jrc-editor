@@ -96,9 +96,6 @@ class BundleSet implements TranslatorConstants {
 	}
 
 	BundleItem getItem(String key) {
-		//  int j = getItemIndex(key);
-		//  if(j<0) return null;
-		//  return getItem(j);
 		return (BundleItem) nameCache.get(key);
 	}
 
@@ -115,15 +112,6 @@ class BundleSet implements TranslatorConstants {
 
 	BundleItem addKey(String key) {
 		BundleItem ask = getItem(key);
-		/*  for(j=0;j<k;++j){
-		    BundleItem bi = getItem(j);
-		    q = bi.getId().compareTo(key);
-		    if(q==0) return bi;
-		    else if(q>0){
-		        items.insertElementAt(ask = new BundleItem(key), j);
-		        return ask;
-		    }
-		} */
 		if (ask == null) {
 			items.addElement(ask = new BundleItem(key));
 			nameCache.put(key, ask);
@@ -211,7 +199,6 @@ class BundleSet implements TranslatorConstants {
 		lines.addElement("# Java Resource Bundle");
 		lines.addElement("# Modified by Zaval JRC Editor (C) Zaval CE Group");
 		lines.addElement("# http://www.zaval.org/products/jrc-editor/");
-		//lines.addElement(makeLine(DEFAULT_LANG_KEY, lang.getLangDescription()));
 		lines.addElement("#");
 		lines.addElement("");
 

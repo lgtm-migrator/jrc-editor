@@ -17,7 +17,6 @@
 
 package org.zaval.awt;
 
-//import java.io.Serializable;
 import java.awt.Color;
 import java.awt.Graphics;
 

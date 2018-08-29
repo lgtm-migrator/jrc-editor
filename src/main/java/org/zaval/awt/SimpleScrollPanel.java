@@ -45,7 +45,7 @@ public class SimpleScrollPanel extends Panel implements LayoutManager {
 		comp = c;
 		hor = new Scrollbar(Scrollbar.HORIZONTAL);
 		ver = new Scrollbar(Scrollbar.VERTICAL);
-		setLayout(this); // new BorderLayout(0,0));
+		setLayout(this);
 
 		panel = new Panel();
 		panel.setLayout(null);
@@ -152,14 +152,12 @@ public class SimpleScrollPanel extends Panel implements LayoutManager {
 		}
 		else {
 			return auf;
-//   return oops(auf,zet);
 		}
 	}
 
 	@Override
 	public Dimension minimumLayoutSize(Container parent) {
 		Dimension zet = comp.minimumSize();
-//   return zet;
 		if ((zet.width == 0) || (zet.height == 0)) {
 			zet = comp.size();
 		}

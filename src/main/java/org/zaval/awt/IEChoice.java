@@ -50,8 +50,6 @@ public class IEChoice extends Panel {
 		this.ids = ids;
 		this.items = items;
 
-		// System.err.println("+++ " + ids);
-
 		Choice c = new Choice();
 		for (i = 0; i < k; ++i) {
 			c.addItem((String) items.elementAt(i));
@@ -63,7 +61,6 @@ public class IEChoice extends Panel {
 	}
 
 	public void select(String value) {
-		// System.err.println("+++ set " + value + " " + ids);
 		if (value == null) {
 			value = lastval;
 		}
@@ -84,7 +81,6 @@ public class IEChoice extends Panel {
 				return null;
 			}
 		}
-		// System.err.println("+++ get " + lastval);
 		return lastval;
 	}
 
@@ -173,13 +169,9 @@ public class IEChoice extends Panel {
 
 	@Override
 	public boolean handleEvent(Event e) {
-		// if(e.id==e.GOT_FOCUS) return true;
-		// if(e.id==e.LOST_FOCUS && e.target!=ch) return false;
 		if ((e.target != this) && (e.target != ch)) {
 			return super.handleEvent(e);
 		}
-		// if (e.id!=e.MOUSE_MOVE && e.id!=e.MOUSE_ENTER && e.id!=e.MOUSE_EXIT)
-		//    System.err.println(e);
 		if (isSelectionEvent(e)) {
 			try {
 				String s = (String) ids.elementAt(ch.getSelectedIndex());
@@ -189,7 +181,6 @@ public class IEChoice extends Panel {
 			}
 			return true;
 		}
-		// if (e.target == ch) e.target = this;
 		return super.handleEvent(e);
 	}
 
@@ -275,7 +266,6 @@ public class IEChoice extends Panel {
 		else if (e.target == this) {
 			return true;
 		}
-		// return true;
 		return false;
 	}
 
@@ -300,11 +290,9 @@ public class IEChoice extends Panel {
 
 	private void sendSelectionEvent(String s) {
 		if (!s.equals(lastval)) {
-			// System.err.println("+++ sse " + s + "," + lastval);
 			lastval = s;
 			getParent().postEvent(new Event(this, Event.ACTION_EVENT, s));
 		}
-		// fakeFix();
 	}
 
 	private void fakeFix() {
@@ -331,13 +319,10 @@ public class IEChoice extends Panel {
 			super.addNotify();
 		}
 		catch (Exception efck) {
-			// System.err.println("INI Error: " + efck + " for " + getChoice());
-			// efck.printStackTrace();
 		}
 	}
 
 	public void select(int i) {
-		// System.err.println("+++ set " + i);
 		if ((i < 0) && !checkIeHack()) {
 			Choice x = getChoice();
 			int j = 0, k = x.countItems();

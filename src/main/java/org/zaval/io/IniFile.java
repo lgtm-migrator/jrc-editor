@@ -194,7 +194,6 @@ public class IniFile {
 		}
 		catch (IOException e) {
 			System.out.println("Loader getValue():" + e);
-			//e.printStackTrace();
 			return null;
 		}
 		finally {
@@ -217,7 +216,6 @@ public class IniFile {
 		}
 		catch (IOException e) {
 			System.out.println("Loader setValue():" + e);
-			//e.printStackTrace();
 			return -1;
 		}
 		finally {

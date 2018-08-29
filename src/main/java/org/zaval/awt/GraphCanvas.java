@@ -61,5 +61,4 @@ public class GraphCanvas extends Canvas {
 			gr.drawLine(0, i * 10, w, i * 10);
 		}
 	}
-
 }

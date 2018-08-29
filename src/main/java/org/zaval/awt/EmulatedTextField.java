@@ -784,10 +784,8 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 	}
 
 	/**
-	 *
 	 * Contributed by <a href="mailto:morten@bilpriser.dk">Morten Raahede Knudsen</a>.
 	 */
-
 	protected static synchronized void writeToClipboard(String s) {
 		java.awt.datatransfer.Clipboard c = java.awt.Toolkit.getDefaultToolkit().getSystemClipboard();
 		java.awt.datatransfer.StringSelection s2 = new java.awt.datatransfer.StringSelection(s);

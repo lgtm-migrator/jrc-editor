@@ -73,7 +73,6 @@ public class Align implements AlignConstants {
 	/**
 	 * Returns the align type as String value.
 	 * @return  String value of the align property.
-	 * </FONT>
 	 */
 	public String getAlignString() {
 		return alignStr;

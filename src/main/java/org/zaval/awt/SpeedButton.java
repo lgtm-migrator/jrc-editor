@@ -82,8 +82,6 @@ public class SpeedButton extends Canvas {
 		filt = (ButtonImageFilter) filt.clone();
 		filt.setup(light, border, w, h, b);
 
-		//ImageFilter cropfilter = new CropImageFilter(0, 0, w, h);
-		//ImageProducer prod = new FilteredImageSource(src.getSource(), cropfilter);
 		ImageProducer prod = src.getSource();
 		ImageProducer ip = new FilteredImageSource(prod, filt);
 		return createImage(ip);

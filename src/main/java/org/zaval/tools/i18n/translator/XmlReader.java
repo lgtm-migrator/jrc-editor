@@ -68,14 +68,6 @@ class XmlReader {
 		String name = prefix + xmap + "!";
 
 		Enumeration en;
-		/*
-		en = root.enumerateAttributeNames();
-		while (en.hasMoreElements()) {
-		    Object key = en.nextElement();
-		    Object val = root.getAttribute((String)key);
-		    place.put(name + key, val);
-		}
-		*/
 		if (root.getContent() != null) {
 			place.put(prefix + xmap, root.getContent());
 		}

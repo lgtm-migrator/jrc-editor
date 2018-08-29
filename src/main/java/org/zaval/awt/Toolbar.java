@@ -92,7 +92,6 @@ public class Toolbar extends Panel implements LayoutManager {
 
 		if ((real.width == 0) || (real.height == 0)) {
 			return;
-			// double cfx  = (double)real.width/(double)want.width;
 		}
 
 		x = p_i.left;
@@ -102,7 +101,7 @@ public class Toolbar extends Panel implements LayoutManager {
 		for (j = 0; j < v.length; ++j) {
 			Component c = v[j];
 			Dimension d = c.preferredSize();
-			w = d.width; //(int)((double)d.width * cfx);
+			w = d.width;
 			h = real.height;
 
 			c.resize(w, h);

@@ -21,47 +21,32 @@ import java.awt.Event;
 import java.awt.Graphics;
 import java.awt.MenuItem;
 
-// ====================================================================
 import org.zaval.awt.peer.TreeNode;
-
-// =================================================================
 
 public class GraphTree extends SymTree {
 	ContextMenuBar menubar = null;
-
-// =================================================================
 
 	public GraphTree() {
 		super();
 	}
 
-	// =================================================================
-
 	public GraphTree(TreeNode tn) {
 		super();
 	}
-
-	// =================================================================
 
 	public GraphTree(ContextMenuBar a_menubar) {
 		this();
 		menubar = a_menubar;
 	}
 
-// =================================================================
-
 	public void setMenuBar(ContextMenuBar mb) {
 		menubar = mb;
 		menubar.setParent(this);
 	}
 
-// =================================================================
-
 	public ContextMenuBar getMenuBar() {
 		return menubar;
 	}
-
-// =================================================================
 
 	public void setContextMenu(String name, int index) {
 		TreeNode tn = getNode(name);
@@ -70,8 +55,6 @@ public class GraphTree extends SymTree {
 		}
 		tn.setContextMenu(index);
 	}
-
-// =================================================================
 
 	public void setContextMenu(String name, ContextMenu cm) {
 		TreeNode tn = getNode(name);
@@ -88,8 +71,6 @@ public class GraphTree extends SymTree {
 		setContextMenu(name, menubar.countMenus() - 1);
 	}
 
-	// =================================================================
-
 	public ContextMenu getContextMenu(String name) {
 		TreeNode tn = getNode(name);
 		if ((menubar == null) || (tn == null) || (tn.getContextMenu() < 0)) {
@@ -98,8 +79,6 @@ public class GraphTree extends SymTree {
 		return menubar.get(tn.getContextMenu());
 	}
 
-// =================================================================
-
 	public int addMenu(ContextMenu menu) {
 		if (menu == null) {
 			return -1;
@@ -107,8 +86,6 @@ public class GraphTree extends SymTree {
 		menubar.add(menu);
 		return menubar.countMenus() - 1;
 	}
-
-// =================================================================
 
 	@Override
 	public void update(Graphics gr) {
@@ -125,8 +102,6 @@ public class GraphTree extends SymTree {
 		}
 	}
 
-// =================================================================
-
 	int isRightKey = 0;
 
 	@Override
@@ -140,8 +115,6 @@ public class GraphTree extends SymTree {
 		}
 		return true;
 	}
-
-// =================================================================
 
 	@Override
 	public boolean mouseUp(Event evt, int x, int y) {
@@ -160,8 +133,6 @@ public class GraphTree extends SymTree {
 		return super.mouseUp(evt, x, y);
 	}
 
-// =================================================================
-
 	@Override
 	public boolean action(Event evt, Object what) {
 		if (evt.target instanceof MenuItem) {
@@ -173,8 +144,6 @@ public class GraphTree extends SymTree {
 		}
 	}
 
-// =================================================================
-
 	@Override
 	public boolean handleEvent(Event evt) {
 		if (evt.key == '\t') {
@@ -185,8 +154,6 @@ public class GraphTree extends SymTree {
 		}
 		return super.handleEvent(evt);
 	}
-
-// =================================================================
 
 	@Override
 	public boolean postEvent(Event evt) {
@@ -211,8 +178,6 @@ public class GraphTree extends SymTree {
 		}
 	}
 
-	// =================================================================
-
 	public void enableAll() {
 		if (menubar == null) {
 			return;
@@ -223,16 +188,12 @@ public class GraphTree extends SymTree {
 		}
 	}
 
-	// =================================================================
-
 	public void setContextMenu(TreeNode tn, int index) {
 		if ((tn == null) || (menubar.get(index) == null)) {
 			return;
 		}
 		tn.setContextMenu(index);
 	}
-
-	// =================================================================
 
 	public ContextMenu getContextMenu(TreeNode tn) {
 		if (tn == null) {

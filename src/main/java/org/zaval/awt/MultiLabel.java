@@ -70,7 +70,6 @@ public class MultiLabel extends Canvas {
 		this.align = align;
 		this.LMAX = LMAX;
 		newLabel(text);
-		//measure();
 	}
 
 	public MultiLabel(String text, int align) {

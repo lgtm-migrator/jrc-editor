@@ -142,14 +142,11 @@ public class ExGridLayout implements LayoutManager {
 			catch (Throwable t) {
 			}
 
-			//System.err.print("Vendor: "+jven+", JDK version: "+jver);
 			if (!jver.startsWith("1.0") && jven.startsWith("Microsoft")) {
 				hackIE401 = 1;
 			}
 			else {
 				hackIE401 = 0;
-				//if(hackIE401==1) System.err.println(", hack is needed");
-				//else System.err.println();
 			}
 		}
 	}
@@ -190,21 +187,10 @@ public class ExGridLayout implements LayoutManager {
 			sizes[i].height += gb.insets.top + gb.insets.bottom;
 			bags[i++] = gb;
 			k = gb.gridx + gb.gridwidth;
-			// if(k>MAX_X){
-			//    System.err.println("X_over: "+comps+","+sizes[i-1]+","+k+
-			//       gb.gridx+","+gb.gridwidth);
-			//    k=MAX_X;
-			// }
 			cols = Math.max(cols, k);
 			k = gb.gridy + gb.gridheight;
-			// if(k>MAX_Y){
-			//    System.err.println("Y_over: "+comps+","+sizes[i-1]+","+k+
-			//       gb.gridy+","+gb.gridheight);
-			//    k=MAX_Y;
-			// }
 			rows = Math.max(rows, k);
 		}
-		// System.err.println("Cols="+cols+", rows="+rows);
 
 		for (i = 0; i < cols; ++i) {
 			widths[i] = MIN_W;
@@ -238,8 +224,6 @@ public class ExGridLayout implements LayoutManager {
 		int i, j;
 
 		Dimension d = getSize(parent, true);
-		//d.width  -= pz.left+pz.right;
-		//d.height -= pz.top+pz.bottom;
 
 		if ((r.width < 5) || (r.height < 5)) {
 			return; // too small control area
@@ -284,7 +268,6 @@ public class ExGridLayout implements LayoutManager {
 			w -= gb.insets.right + gb.insets.left;
 			h -= gb.insets.bottom + gb.insets.top;
 			if ((w <= 0) || (h <= 0)) {
-				// comps[i].hide();
 				continue;
 			}
 
@@ -302,10 +285,6 @@ public class ExGridLayout implements LayoutManager {
 				z.width = w;
 				z.height = h;
 			}
-			// if(gb.fill==gb.NONE){
-			//    w=z.width;
-			//    h=z.height;
-			// }
 
 			if (w > z.width) {
 				int wrap = w - z.width;
@@ -338,7 +317,6 @@ public class ExGridLayout implements LayoutManager {
 			h = (int) ((fy * h) + 0.5);
 			w = (int) ((fx * w) + 0.5);
 
-			// if(comps[i].isVisible()) comps[i].show();
 			comps[i].resize(w, h);
 			comps[i].move((int) (x * fx) + pz.left, (int) (y * fy) + pz.top);
 			// IE 4.01 bugfix
@@ -348,8 +326,6 @@ public class ExGridLayout implements LayoutManager {
 			}
 		}
 	}
-
-// -----------------------------------
 
 	@Override
 	public void addLayoutComponent(String name, Component comp) {
@@ -371,14 +347,12 @@ public class ExGridLayout implements LayoutManager {
 
 	@Override
 	public void layoutContainer(Container parent) {
-//   System.err.println("Arrange: "+parent);
 		boolean isVis = parent.isVisible();
 		if (isVis) {
 			parent.hide();
 		}
 		try {
 			arrange(parent);
-//      System.err.println("Arranged "+parent);
 		}
 		finally {
 			if (isVis) {

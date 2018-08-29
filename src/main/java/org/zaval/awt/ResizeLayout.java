@@ -56,8 +56,6 @@ public class ResizeLayout implements LayoutManager {
 		}
 	}
 
-// -----------------------------------
-
 	@Override
 	public void addLayoutComponent(String name, Component comp) {
 	}

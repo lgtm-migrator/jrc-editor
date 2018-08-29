@@ -492,7 +492,6 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 				invokeAutoFit();
 			}
 			// actually, we should just list all events that tree can handle itself.
-			// if ( e.key != (int)'\t' && e.key != Event.F4 && e.key != Event.F10) return true;
 		}
 		return super.handleEvent(e);
 	}
@@ -876,12 +875,10 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			if ((comm != null) && (comm.trim().length() == 0)) {
 				comm = null;
 			}
-			//if ( comm!=null ) {
 			BundleItem bi = bundle.getBundle().getItem(wasSelectedKey);
 			if (bi != null) {
 				bi.setComment(comm);
 			}
-			//}
 			adjustIndicator(tree.getNode(wasSelectedKey));
 			setIndicators(tree.getNode(wasSelectedKey));
 			tree.repaint();
@@ -925,17 +922,6 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		}
 		keyName.setText(startValue);
 		tree.repaint();
-
-		/*if(bi==null){
-		ctNodeRenameMenu.disable();
-		ctNodeDeleteMenu.disable();
-		renMenu.disable();
-		  }
-		  else{
-		ctNodeDeleteMenu.enable();
-		renMenu.enable();
-		ctNodeRenameMenu.enable();
-		  }*/
 	}
 
 	public String getValidKey() {
@@ -1280,14 +1266,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		}
 	}
 
-	private void makeReplaceImpl()
-	/*
-	    BundleItem curItemForReplace
-	    LangItem curLangForReplace
-	    String searchCriteria
-	    String replaceTo
-	*/
-	{
+	private void makeReplaceImpl() {
 		String lang = curLangForReplace.getLangId();
 		String val = curItemForReplace.getTranslation(lang);
 		if (searchRegex) {
@@ -1314,7 +1293,6 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 				}
 			}
 		}
-		// System.err.println("["+lang+"] '"+curItemForReplace.getTranslation(lang)+"' => '"+val+"'");
 		curItemForReplace.setTranslation(lang, val);
 
 		if (tree.getSelectedText().equals(curItemForReplace.getId())) {
@@ -1527,13 +1505,8 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			sbl2.setText(RC("tools.translator.progress.loadfiles"));
 			sbl2.repaint();
 			try {
-				// long t1 = System.currentTimeMillis();
 				BundleManager bundle2 = new BundleManager(fileName);
-				// long t2 = System.currentTimeMillis();
 				join(bundle2, part);
-				// long t3 = System.currentTimeMillis();
-				// System.err.println("    ...parse = " + (t2 - t1 ) + "ms");
-				// System.err.println("    ...join = " + (t3 - t2 ) + "ms");
 			}
 			catch (Exception e) {
 				infoException(e);
@@ -1541,20 +1514,14 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			sbl2.setText(RC("tools.translator.progress.maketree"));
 			sbl2.repaint();
 
-			// long t4 = System.currentTimeMillis();
 			if (!part) {
 				initControls();
 			}
 			else {
 				wasSelectedKey = null;
-				// long t5 = System.currentTimeMillis();
-				// System.err.println("    ...init controls = " + (t5 - t4 ) + "ms");
 			}
 
-			// long t6 = System.currentTimeMillis();
 			initData(part);
-			// long t7 = System.currentTimeMillis();
-			// System.err.println("    ...init data = " + (t7 - t6 ) + "ms");
 		}
 	};
 
@@ -1813,10 +1780,6 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		BundleItem bi = bundle.getBundle().getItem(0);
 		addToTree(bi.getId());
 
-		// Fire tree filling asynchronously
-		// (new Thread(new Runnable(){
-		//     public void run(){
-		// long t1 = System.currentTimeMillis();
 		for (int i = 1; i < bundle.getBundle().getItemCount(); ++i) {
 			BundleItem bi2 = bundle.getBundle().getItem(i);
 			addToTree(bi2.getId());
@@ -1825,14 +1788,10 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 				sbl2.repaint();
 			}
 		}
-		// long t2 = System.currentTimeMillis();
-		// System.err.println("    ... add keys into tree = " + (t2-t1) + "ms");
 		setAllIndicators();
 		sbl2.setText("");
 		sbl2.repaint();
 		setCursor(Cursor.DEFAULT_CURSOR);
-		//     }
-		// })).start();
 
 		/* ... and make all keys closed by default */
 
@@ -1854,7 +1813,6 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		textPanel.invalidate();
 		validate();
 		repaint();
-		//  isDirty = true;
 		syncToolbar();
 		if (!part) {
 			loadPickList();
@@ -1928,7 +1886,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			return;
 		}
 		for (; j < fileMenu.countItems();) {
-			fileMenu.remove(j); //fileMenu.countItems()-1);
+			fileMenu.remove(j);
 		}
 	}
 
@@ -2158,9 +2116,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		return false;
 	}
 
-	/*
-	    Reading unicode (UCS16) file stream into memory
-	*/
+	/**
+	 * Reading unicode (UCS16) file stream into memory
+	 */
 	private String getBody(String file) throws IOException {
 		char ch;
 		DataInputStream in = new DataInputStream(new FileInputStream(file));
@@ -2564,11 +2522,6 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			int curHS = scrPanel.getHScrollbar().isVisible() ? scrPanel.getHScrollbar().getValue() : 0;
 			int curVS = scrPanel.getVScrollbar().isVisible() ? scrPanel.getVScrollbar().getValue() : 0;
 
-			//   System.out.println("ETF AS:" +
-			//       "shape=("+r1.x+","+r1.y+";"+r1.width+"x"+r1.height+"); "+
-			//       "viewport=("+s1.width+"x"+s1.height+"); " +
-			//       "curS=(h="+curHS+",v="+curVS+") " );
-
 			if (((r1.x + r1.width) >= (s1.width + curHS))
 				|| ((r1.y + r1.height) >= (s1.height + curVS))
 				|| (r1.x < curHS)
@@ -2589,8 +2542,6 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 				if (r1.y < curVS) {
 					newX = r1.y;
 				}
-
-				//        System.out.println("\tnewX="+newX+", newY="+newY + " of ["+s2.width+"x"+s2.height+"]");
 				scrPanel.scroll(newX, newY);
 			}
 		}

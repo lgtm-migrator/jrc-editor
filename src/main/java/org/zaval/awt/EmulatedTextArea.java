@@ -403,12 +403,7 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 				maxTextWidth = len;
 			}
 		}
-/*     if ( getParent() != null && ( oldLN != lineText.size() || maxTextWidth != oldMW ) )
-     {
-Event e = new Event(this, ScrollPanel.RECALC_LAYOUT, this);
-getParent().postEvent(e);
-     }
-*/ }
+	}
 
 	@Override
 	protected void setPos(int p) {
@@ -477,12 +472,7 @@ getParent().postEvent(e);
 				shift.x = w - cursorLocation.x;
 			}
 		}
-/*     if ( getParent() != null )
-     {
-Event e = new Event(this, Event.SCROLL_ABSOLUTE, this);
-getParent().postEvent(e);
-     }
-*/ return res;
+		return res;
 	}
 
 	protected int getLinePos(int ln, FontMetrics fm, int pix) {
@@ -541,5 +531,4 @@ getParent().postEvent(e);
 			recalcLines(0);
 		}
 	}
-
 }

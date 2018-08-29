@@ -523,7 +523,6 @@ public class Notebook extends Panel implements LayoutManager {
 					g.setFont(fReg);
 				}
 
-				// if (iTabsPosition == TOP)
 				if (iTabsStyle == ROUNDED) {
 					p.addPoint(x3 - 1, y2 + 1);
 					p.addPoint(x4 + 1, y2 + 1);
@@ -538,11 +537,7 @@ public class Notebook extends Panel implements LayoutManager {
 				Polygon p2 = justPolygon(p, iTabsPosition == TOP);
 				g.fillPolygon(p2);
 
-				// Boolean bool = (Boolean) vEnabled.elementAt(w);
-				// if (bool.booleanValue())
 				g.setColor(caption);
-				// else
-				//     g.setColor(Color.gray);
 
 				int dx = (npages[w].img == null) ? 0 : IMAGE_SIZE;
 

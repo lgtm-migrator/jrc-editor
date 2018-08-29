@@ -84,8 +84,7 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 	}
 
 	@Override
-	public void setBackground(Color c) //// new
-	{
+	public void setBackground(Color c) {
 		if (storedColor != null) {
 			c = storedColor;
 		}
@@ -361,10 +360,6 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 
 	public void init() {
 	}
-
-	/*public void setModal( boolean b )
-	{
-	}*/
 
 	@Override
 	public boolean keyDown(Event e, int key) {
