@@ -13,6 +13,7 @@ tasks.compileTestJava.options.encoding = 'UTF-8'
 
 spotless {
 	java {
+		licenseHeaderFile rootProject.file('resources/license.java')
 		eclipse().configFile rootProject.file('resources/eclipse-jdt-formatter.xml')
 		removeUnusedImports()
 		trimTrailingWhitespace()

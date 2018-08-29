@@ -15,12 +15,3 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package org.zaval.awt.image;
-
-import java.awt.image.*;
-
-public abstract class ButtonImageFilter extends RGBImageFilter implements Cloneable {
-	public abstract void setup(int light, int border, int width, int height, boolean b);
-
-	public abstract int filterRGB(int x, int y, int rgb);
-}

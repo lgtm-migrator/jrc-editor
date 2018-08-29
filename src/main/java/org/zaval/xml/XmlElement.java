@@ -1,11 +1,33 @@
 /*
-    This code based upon NanoXML 2.2 sources
-*/
+ * Copyright (C) 2001-2002  Zaval Creative Engineering Group (http://www.zaval.org)
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * (version 2) as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ */
 
 package org.zaval.xml;
 
-import java.io.*;
-import java.util.*;
+/*
+ * This code based upon NanoXML 2.2 sources
+ */
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 public class XmlElement {
 	static final long serialVersionUID = 6685035139346394777L;
@@ -230,6 +252,7 @@ public class XmlElement {
 		this.name = name;
 	}
 
+	@Override
 	public String toString() {
 		try {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -329,7 +352,7 @@ public class XmlElement {
 					writer.write(';');
 					break;
 				default:
-					int unicode = (int) ch;
+					int unicode = ch;
 					if ((unicode < 32) || (unicode > 126)) {
 						writer.write('&');
 						writer.write('#');
