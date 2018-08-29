@@ -1,7 +1,9 @@
 plugins {
 	id 'java'
 	id 'application'
+	id 'eclipse'
 	id "com.diffplug.gradle.spotless" version "3.14.0"
+	id "ca.coglinc2.javacc" version "3.0.0"
 }
 
 mainClassName = 'org.zaval.tools.i18n.translator.Main'
@@ -13,6 +15,7 @@ tasks.compileTestJava.options.encoding = 'UTF-8'
 
 spotless {
 	java {
+		target 'src/**/*.java'
 		licenseHeaderFile rootProject.file('resources/license.java')
 		eclipse().configFile rootProject.file('resources/eclipse-jdt-formatter.xml')
 		removeUnusedImports()
@@ -23,15 +26,28 @@ spotless {
 
 dependencies {
 	compile 'jakarta-regexp:jakarta-regexp:1.4'
-
 }
 
 repositories {
 	jcenter()
 }
 
+sourceSets {
+	main {
+		java {
+			srcDir compileJavacc.outputDirectory
+		}
+	}
+}
+
+eclipseClasspath.dependsOn("compileJavacc")
+
+compileJavacc {
+	inputDirectory = file('src/main/javacc')
+	outputDirectory = file(project.buildDir.absolutePath + '/generated/javacc')
+}
+
 wrapper {
 	gradleVersion = '4.10'
 	distributionType = Wrapper.DistributionType.ALL
 }
-
