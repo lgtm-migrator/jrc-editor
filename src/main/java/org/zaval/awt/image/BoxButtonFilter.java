@@ -17,12 +17,11 @@
 
 package org.zaval.awt.image;
 
-import java.awt.image.*;
-
 public class BoxButtonFilter extends ButtonImageFilter {
 	private int light, border, width, height;
 	private boolean pressed;
 
+	@Override
 	public void setup(int light, int border, int w, int h, boolean b) {
 		this.light = light;
 		this.border = border;
@@ -31,12 +30,14 @@ public class BoxButtonFilter extends ButtonImageFilter {
 		pressed = b;
 	}
 
+	@Override
 	public Object clone() {
 		ButtonImageFilter b = new BoxButtonFilter();
 		b.setup(light, border, width, height, pressed);
 		return b;
 	}
 
+	@Override
 	public int filterRGB(int x, int y, int rgb) {
 		boolean brighter = light > 0;
 		int percent = 100;
@@ -45,7 +46,7 @@ public class BoxButtonFilter extends ButtonImageFilter {
 		int hb = height - border;
 		int wb = width - border;
 
-		if (x >= border && y >= border && y <= hb && x <= wb)
+		if ((x >= border) && (y >= border) && (y <= hb) && (x <= wb)) {
 			if (pressed) {
 				brighter = false;
 				percent = defpercent >> 1;
@@ -55,15 +56,16 @@ public class BoxButtonFilter extends ButtonImageFilter {
 				percent = defpercent >> 1;
 				//  return rgb & 0xFFFFFFFF;
 			}
-		else if (x < border && y < height - x) {
+		}
+		else if ((x < border) && (y < (height - x))) {
 			brighter = !pressed;
 			percent = defpercent;
 		}
-		else if (y < border && x < width - y) {
+		else if ((y < border) && (x < (width - y))) {
 			brighter = !pressed;
 			percent = defpercent;
 		}
-		else if (x >= wb || y >= hb) {
+		else if ((x >= wb) || (y >= hb)) {
 			brighter = pressed;
 			percent = defpercent;
 		}
@@ -76,14 +78,14 @@ public class BoxButtonFilter extends ButtonImageFilter {
 		int b = (rgb >> 0) & 0xff;
 		int npercent = 100 - percent;
 		if (brighter) {
-			r = (255 - ((255 - r) * (npercent) / 100));
-			g = (255 - ((255 - g) * (npercent) / 100));
-			b = (255 - ((255 - b) * (npercent) / 100));
+			r = (255 - (((255 - r) * (npercent)) / 100));
+			g = (255 - (((255 - g) * (npercent)) / 100));
+			b = (255 - (((255 - b) * (npercent)) / 100));
 		}
 		else {
-			r = (r * (npercent) / 100);
-			g = (g * (npercent) / 100);
-			b = (b * (npercent) / 100);
+			r = ((r * (npercent)) / 100);
+			g = ((g * (npercent)) / 100);
+			b = ((b * (npercent)) / 100);
 		}
 		return (r << 16) | (g << 8) | (b << 0) | 0xFF000000;
 	}

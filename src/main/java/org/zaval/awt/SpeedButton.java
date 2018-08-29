@@ -17,10 +17,16 @@
 
 package org.zaval.awt;
 
-import org.zaval.awt.image.*;
-import java.awt.*;
-import java.awt.image.*;
-import java.util.*;
+import java.awt.Canvas;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.image.FilteredImageSource;
+import java.awt.image.ImageProducer;
+
+import org.zaval.awt.image.BoxButtonFilter;
+import org.zaval.awt.image.ButtonImageFilter;
 
 public class SpeedButton extends Canvas {
 	private static final int FREE = 1;
@@ -42,16 +48,18 @@ public class SpeedButton extends Canvas {
 		if (border < 0) {
 			border = -border;
 			border = (w * border) / 100;
-			if (border < 2)
+			if (border < 2) {
 				border = 2;
+			}
 		}
 		init(src, getFilter(src, filt, light, border, false), getFilter(src, filt, -light, border, true),
 			getFilter(src, filt, -Math.abs(light), 0, false));
 	}
 
 	public SpeedButton(Image src, Image up, Image down, Image dis) {
-		if (src == null)
+		if (src == null) {
 			w = h = 0;
+		}
 		else {
 			w = src.getWidth(this);
 			h = src.getHeight(this);
@@ -90,49 +98,63 @@ public class SpeedButton extends Canvas {
 		repaint();
 	}
 
+	@Override
 	public Dimension preferredSize() {
-		if (w < 0)
+		if (w < 0) {
 			w = 0;
-		if (h < 0)
+		}
+		if (h < 0) {
 			h = 0;
+		}
 		return new Dimension(w, h);
 	}
 
+	@Override
 	public void paint(Graphics gr) {
 		Dimension d = size();
 		int ww = d.width;
 		int hh = d.height;
 
-		if (disImg != null && !isEnabled())
+		if ((disImg != null) && !isEnabled()) {
 			gr.drawImage(disImg, 0, 0, ww, hh, this);
-		else if (state == FREE && normImg != null)
+		}
+		else if ((state == FREE) && (normImg != null)) {
 			gr.drawImage(normImg, 0, 0, ww, hh, this);
-		else if (state == DOWN && downImg != null)
+		}
+		else if ((state == DOWN) && (downImg != null)) {
 			gr.drawImage(downImg, 0, 0, ww, hh, this);
-		else if (state == UP && upImg != null)
+		}
+		else if ((state == UP) && (upImg != null)) {
 			gr.drawImage(upImg, 0, 0, ww, hh, this);
+		}
 	}
 
+	@Override
 	public boolean mouseUp(Event ev, int x, int y) {
-		if (!isEnabled() || state == FREE)
+		if (!isEnabled() || (state == FREE)) {
 			return true;
+		}
 		setState(UP);
 		getParent().postEvent(new Event(this, Event.ACTION_EVENT, null));
 		return true;
 	}
 
+	@Override
 	public boolean mouseDown(Event ev, int x, int y) {
-		if (!isEnabled())
+		if (!isEnabled()) {
 			return true;
+		}
 		setState(DOWN);
 		return true;
 	}
 
+	@Override
 	public boolean mouseEnter(Event ev, int x, int y) {
 		setState(UP);
 		return true;
 	}
 
+	@Override
 	public boolean mouseExit(Event ev, int x, int y) {
 		setState(FREE);
 		return true;

@@ -17,7 +17,14 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.Graphics;
+import java.awt.Insets;
+import java.awt.Panel;
+import java.awt.Rectangle;
 
 public class BorderedPanel extends Panel {
 	public static final int NONE = 0;
@@ -40,18 +47,21 @@ public class BorderedPanel extends Panel {
 	}
 
 	public void setType(int t) {
-		if (type == t)
+		if (type == t) {
 			return;
+		}
 		type = t;
 		repaint();
 	}
 
 	public void setHideMode(int m) {
-		if (hideMode == m)
+		if (hideMode == m) {
 			return;
+		}
 		hideMode = m;
 	}
 
+	@Override
 	public Insets getInsets() {
 		return insets;
 	}
@@ -60,6 +70,7 @@ public class BorderedPanel extends Panel {
   return insets;
 }*/
 
+	@Override
 	public void paint(Graphics g) {
 		// System.err.println("+++ " + this + ": " + (type == NONE?"NONE":"VISIBLE"));
 		// this.list(System.err,0);
@@ -205,35 +216,45 @@ public class BorderedPanel extends Panel {
 
 	int prevMode = -1;
 
+	@Override
 	public void hide() {
 		//System.err.println("--- " + this + ": " + type + "/" + prevMode);
-		if (hideMode == 0)
+		if (hideMode == 0) {
 			super.hide();
+		}
 		else {
-			if (type == NONE)
+			if (type == NONE) {
 				return;
+			}
 			prevMode = type;
 			setType(NONE);
 		}
 	}
 
+	@Override
 	public boolean isVisible() {
-		if (hideMode == 0)
+		if (hideMode == 0) {
 			return super.isVisible();
-		if (type == NONE)
+		}
+		if (type == NONE) {
 			return false;
+		}
 		return true;
 	}
 
+	@Override
 	public void show() {
 		// System.err.println("*** " + this + ": " + type + "/" + prevMode);
-		if (hideMode == 0)
+		if (hideMode == 0) {
 			super.show();
+		}
 		else {
-			if (!super.isVisible())
+			if (!super.isVisible()) {
 				super.show();
-			if (prevMode < 0)
+			}
+			if (prevMode < 0) {
 				return;
+			}
 			setType(prevMode);
 			prevMode = -1;
 			//    System.err.println("*** " + this + ": VALIDATE as " + type + "/" + prevMode);
@@ -251,14 +272,17 @@ public class BorderedPanel extends Panel {
 	}
 
 	// X11 fixes to avoid wrong repaints
+	@Override
 	public boolean mouseMove(Event e, int x, int y) {
 		return true;
 	}
 
+	@Override
 	public boolean mouseExit(Event e, int x, int y) {
 		return true;
 	}
 
+	@Override
 	public boolean mouseEnter(Event e, int x, int y) {
 		return true;
 	}

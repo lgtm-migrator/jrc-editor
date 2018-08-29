@@ -17,8 +17,9 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
 //import java.io.Serializable;
+import java.awt.Color;
+import java.awt.Graphics;
 
 public class IECheckbox extends BaseCheckbox {
 	public IECheckbox() {
@@ -38,18 +39,22 @@ public class IECheckbox extends BaseCheckbox {
 		setAlign(align);
 	}
 
+	@Override
 	public void paint(Graphics g, int x, int y, int width, int height) {
 		int yy = posY + height;
 		int xx = posX + width;
 
 		if (isEnabled()) {
-			if (mouse_down)
+			if (mouse_down) {
 				g.setColor(Color.lightGray);
-			else
+			}
+			else {
 				g.setColor(Color.white);
+			}
 		}
-		else
+		else {
 			g.setColor(Color.lightGray);
+		}
 
 		g.fillRect(x, y, width, height);
 
@@ -67,10 +72,12 @@ public class IECheckbox extends BaseCheckbox {
 		g.drawLine(xx - 1, y + 1, xx - 1, yy - 1);
 
 		if (state) {
-			if (isEnabled())
+			if (isEnabled()) {
 				g.setColor(Color.black);
-			else
+			}
+			else {
 				g.setColor(Color.gray);
+			}
 
 			g.drawLine(x + 3, y + 5, x + 3, y + 7);
 			g.drawLine(x + 4, y + 6, x + 4, y + 8);

@@ -17,8 +17,8 @@
 
 package org.zaval.awt;
 
-import java.awt.Insets;
 import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.Rectangle;
 
 public class AlignArea extends Align {
@@ -33,35 +33,42 @@ public class AlignArea extends Align {
 	private boolean isValid = false;
 	private Rectangle rect;
 
+	@Override
 	public void setAlign(int a) {
-		if (getAlign() == a)
+		if (getAlign() == a) {
 			return;
+		}
 		super.setAlign(a);
 		invalidate();
 	}
 
 	public void setSize(Dimension d) {
-		if (d != null && size != null) {
-			if (d.width == size.width && d.height == size.height)
+		if ((d != null) && (size != null)) {
+			if ((d.width == size.width) && (d.height == size.height)) {
 				return;
+			}
 		}
 
 		invalidate();
-		if (d == null)
+		if (d == null) {
 			size = null;
-		else
+		}
+		else {
 			size = new Dimension(d.width, d.height);
+		}
 	}
 
 	public Dimension getSize() {
-		if (size == null)
+		if (size == null) {
 			return null;
+		}
 		return new Dimension(size.width, size.height);
 	}
 
 	public void setSizeAlignObj(Dimension d) {
-		if (sx == d.width && sy == d.height)
+		if ((sx == d.width) && (sy == d.height)) {
 			return;
+		}
 		invalidate();
 		sx = d.width;
 		sy = d.height;
@@ -72,14 +79,17 @@ public class AlignArea extends Align {
 	}
 
 	public void setInsets(Insets i) {
-		if (i != null && i.top == insets.top && i.left == insets.left && i.right == insets.right && i.bottom == insets.bottom)
+		if ((i != null) && (i.top == insets.top) && (i.left == insets.left) && (i.right == insets.right) && (i.bottom == insets.bottom)) {
 			return;
+		}
 
 		invalidate();
-		if (i == null)
+		if (i == null) {
 			insets = null;
-		else
+		}
+		else {
 			insets = new Insets(i.top, i.left, i.bottom, i.right);
+		}
 	}
 
 	public Insets getInsets() {
@@ -87,8 +97,9 @@ public class AlignArea extends Align {
 	}
 
 	public void setMode(int m) {
-		if (mode == m)
+		if (mode == m) {
 			return;
+		}
 		invalidate();
 		mode = m;
 	}
@@ -99,8 +110,9 @@ public class AlignArea extends Align {
 
 	public Rectangle getAlignRectangle() {
 		if (isValid()) {
-			if (rect == null)
+			if (rect == null) {
 				return null;
+			}
 			return new Rectangle(rect.x, rect.y, rect.width, rect.height);
 		}
 
@@ -117,15 +129,19 @@ public class AlignArea extends Align {
 		int a = getAlign();
 		Rectangle r = new Rectangle(xx / 2, yy / 2, wx, wy);
 
-		if ((a & LEFT) > 0)
+		if ((a & LEFT) > 0) {
 			r.x = insets.left;
-		else if ((a & RIGHT) > 0)
+		}
+		else if ((a & RIGHT) > 0) {
 			r.x = xx - insets.right;
+		}
 
-		if ((a & TOP) > 0)
+		if ((a & TOP) > 0) {
 			r.y = insets.top;
-		else if ((a & BOTTOM) > 0)
+		}
+		else if ((a & BOTTOM) > 0) {
 			r.y = yy - insets.bottom;
+		}
 
 		rect = r;
 		validate();
@@ -161,8 +177,9 @@ public class AlignArea extends Align {
 
 	public static boolean isBelongArea(AlignArea a, int x, int y) {
 		Rectangle r = a.getAlignRectangle();
-		if (r == null)
+		if (r == null) {
 			return false;
+		}
 
 		switch (a.getMode()) {
 			case AlignArea.INSIDE:

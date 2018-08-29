@@ -17,10 +17,29 @@
 
 package org.zaval.awt.dialog;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Button;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Frame;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.LayoutManager;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.Window;
+import java.util.Enumeration;
+import java.util.Vector;
 
-import org.zaval.awt.*;
+import org.zaval.awt.AlignConstants;
+import org.zaval.awt.ResultField;
+import org.zaval.awt.StaticImage;
+import org.zaval.awt.TextAlignArea;
 
 public class MessageBox2 extends Dialog implements LayoutManager {
 	private StaticImage icon = null;
@@ -47,12 +66,13 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 		TextAlignArea area = text.getAlignArea();
 		if (area != null) {
 			area.setMultiLine(true);
-			area.setAlign(Align.TLEFT);
+			area.setAlign(AlignConstants.TLEFT);
 			area.setInsets(new Insets(10, 0, 10, 0));
 		}
 		add(text);
 	}
 
+	@Override
 	public void show() {
 		pack();
 		Dimension d1 = preferredSize();
@@ -63,37 +83,49 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 		super.show();
 	}
 
+	@Override
 	public void setBackground(Color c) //// new
 	{
-		if (storedColor != null)
+		if (storedColor != null) {
 			c = storedColor;
+		}
 		storedColor = c;
-		if (text != null)
+		if (text != null) {
 			text.setBackground(c);
-		if (icon != null)
+		}
+		if (icon != null) {
 			icon.setBackground(c);
-		for (int i = 0; buttons != null && i < buttons.size(); i++)
+		}
+		for (int i = 0; (buttons != null) && (i < buttons.size()); i++) {
 			((Component) buttons.elementAt(i)).setBackground(c);
+		}
 		super.setBackground(c);
 	}
 
+	@Override
 	public void setForeground(Color c) {
 		super.setForeground(c);
-		if (text != null)
+		if (text != null) {
 			text.setForeground(c);
-		if (icon != null)
+		}
+		if (icon != null) {
 			icon.setForeground(c);
-		for (int i = 0; i < buttons.size(); i++)
+		}
+		for (int i = 0; i < buttons.size(); i++) {
 			((Component) buttons.elementAt(i)).setForeground(c);
+		}
 	}
 
 	public void setButtons(Vector b) {
-		if (buttons != null)
-			for (int i = 0; i < buttons.size(); i++)
+		if (buttons != null) {
+			for (int i = 0; i < buttons.size(); i++) {
 				remove((Component) buttons.elementAt(i));
+			}
+		}
 		buttons = b;
-		for (int i = 0; i < buttons.size(); i++)
+		for (int i = 0; i < buttons.size(); i++) {
 			add((Component) buttons.elementAt(i));
+		}
 		invalidate();
 		validate();
 	}
@@ -119,10 +151,12 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 	}
 
 	public void setIcon(Image icon1) {
-		if (icon != null)
+		if (icon != null) {
 			remove(icon);
-		if (icon1 == null)
+		}
+		if (icon1 == null) {
 			return;
+		}
 		icon = new StaticImage(icon1);
 		add(icon);
 	}
@@ -143,13 +177,14 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 		listeners.removeElement(ls);
 	}
 
+	@Override
 	public boolean action(Event e, Object o) {
 		if (e.target instanceof Button) {
 			pressedButton = (Button) e.target;
 			Enumeration els = listeners.elements();
 			while (els.hasMoreElements()) {
 				Component listener = (Component) els.nextElement();
-				listener.postEvent(new Event(this, Event.ACTION_EVENT, (Button) e.target));
+				listener.postEvent(new Event(this, Event.ACTION_EVENT, e.target));
 			}
 			hide();
 			return true;
@@ -158,36 +193,41 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 	}
 
 	private void setDefFontMetrics() {
-		if (text != null && text.getAlignArea().getFontMetrics() == null) {
+		if ((text != null) && (text.getAlignArea().getFontMetrics() == null)) {
 			Font font = getFont();
-			if (font == null)
+			if (font == null) {
 				return;
+			}
 			FontMetrics fm = getFontMetrics(font);
-			if (fm == null)
+			if (fm == null) {
 				return;
+			}
 			text.getAlignArea().setFontMetrics(fm);
 		}
 	}
 
 	private Dimension getIconSize() {
-		if (icon == null)
+		if (icon == null) {
 			return new Dimension(0, 0);
+		}
 		return icon.preferredSize();
 	}
 
 	private Dimension getTextSize(int maxwidth) {
-		if (text == null)
+		if (text == null) {
 			return new Dimension(0, 0);
+		}
 		setDefFontMetrics();
 
 		int prefwidth = 0;
 		int prefheight = 0;
 		TextAlignArea align = text.getAlignArea();
-		if (align != null && align.getFontMetrics() != null) {
+		if ((align != null) && (align.getFontMetrics() != null)) {
 			FontMetrics fm = align.getFontMetrics();
 			String[] str = TextAlignArea.breakString(align.getText(), fm, maxwidth);
-			for (int i = 0; i < str.length; i++)
-				prefwidth = Math.max(fm.stringWidth(str[i]), prefwidth);
+			for (String element : str) {
+				prefwidth = Math.max(fm.stringWidth(element), prefwidth);
+			}
 			prefheight = fm.getHeight() * Math.min(maxlinecount, str.length);
 			Insets ins = align.getInsets();
 			prefwidth += ins.left + ins.right;
@@ -201,11 +241,12 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 	}
 
 	private Dimension getButtonsSize() {
-		if (buttons == null || buttons.size() == 0)
+		if ((buttons == null) || (buttons.size() == 0)) {
 			return new Dimension(0, 0);
+		}
 		int h = 23, w = 48; // minimum height and width
 		for (int i = 0; i < buttons.size(); i++) {
-			Component z = getButton(i);
+			getButton(i);
 			Dimension d = getButton(i).preferredSize();
 			h = Math.max(d.height, h);
 			w = Math.max(d.width, w);
@@ -217,16 +258,19 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 		int w, h;
 		w = Math.max(0, (area.width - size.width) / 2);
 		h = Math.max(0, (area.height - size.height) / 2);
-		return new Rectangle(area.x + w, area.y + h, area.width - w * 2, area.height - h * 2);
+		return new Rectangle(area.x + w, area.y + h, area.width - (w * 2), area.height - (h * 2));
 	}
 
 // LayoutManager implementation
+	@Override
 	public void addLayoutComponent(String s, Component component) {
 	}
 
+	@Override
 	public void removeLayoutComponent(Component component) {
 	}
 
+	@Override
 	public Dimension preferredLayoutSize(Container parent) {
 		Insets ins = insets();
 		Dimension d;
@@ -236,25 +280,29 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 		int prefheight = d.height;
 
 		d = getIconSize();
-		if (d.width != 0)
+		if (d.width != 0) {
 			d.width += ICON_TEXT_GAP;
+		}
 		prefwidth += d.width;
 		prefheight = Math.max(d.height, prefheight);
 
 		d = getButtonsSize();
-		prefwidth = Math.max(prefwidth, (d.width + w) * buttons.size() + w);
-		prefheight += d.height + h * 2 + INDENT;
-		if (prefwidth < d2.width / 4)
+		prefwidth = Math.max(prefwidth, ((d.width + w) * buttons.size()) + w);
+		prefheight += d.height + (h * 2) + INDENT;
+		if (prefwidth < (d2.width / 4)) {
 			prefwidth = d2.width / 4;
-		Dimension d111 = new Dimension(prefwidth + ins.left + ins.right + 2 * INDENT, prefheight + ins.top + ins.bottom + 2 * INDENT);
+		}
+		Dimension d111 = new Dimension(prefwidth + ins.left + ins.right + (2 * INDENT), prefheight + ins.top + ins.bottom + (2 * INDENT));
 		return d111;
 
 	}
 
+	@Override
 	public Dimension minimumLayoutSize(Container parent) {
 		return preferredLayoutSize(parent);
 	}
 
+	@Override
 	public void layoutContainer(Container parent) {
 		Dimension size = parent.size();
 		Insets inss = insets();
@@ -265,7 +313,7 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 		Dimension isize = getIconSize();
 		Dimension tsize = getTextSize(width - isize.width - ICON_TEXT_GAP);
 		Dimension bsize = getButtonsSize();
-		height -= bsize.height + h * 2;
+		height -= bsize.height + (h * 2);
 		height = Math.max(height, Math.max(isize.height, tsize.height));
 		if (icon != null) {
 			Dimension d = icon.preferredSize();
@@ -275,19 +323,22 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 		}
 		if (text != null) {
 			int addIc = isize.width;
-			if (isize.width > 0)
+			if (isize.width > 0) {
 				addIc += ICON_TEXT_GAP;
-			if (width - tsize.width > 3 * addIc)
+			}
+			if ((width - tsize.width) > (3 * addIc)) {
 				addIc = 0;
-			else
+			}
+			else {
 				addIc -= (width - tsize.width - addIc) / 2;
+			}
 			Rectangle r = getPosition(new Rectangle(insl + addIc, inst, width - addIc, height), tsize);
 			text.move(r.x, r.y);
 			text.resize(r.width, r.height);
 		}
 		int x, y;
 		y = height + inst + h;
-		x = (width - (bsize.width + w) * buttons.size() - w) / 2 + w + insl;
+		x = ((width - ((bsize.width + w) * buttons.size()) - w) / 2) + w + insl;
 		for (int i = 0; i < buttons.size(); i++) {
 			getButton(i).move(x, y);
 			getButton(i).resize(bsize);
@@ -295,6 +346,7 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 		}
 	}
 
+	@Override
 	public boolean handleEvent(Event e) {
 		if (e.id == Event.WINDOW_DESTROY) {
 			hide();
@@ -314,15 +366,16 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 	{
 	}*/
 
+	@Override
 	public boolean keyDown(Event e, int key) {
-		if (e.target instanceof Button && key == Event.ENTER) {
-			Window wnd = null;
+		if ((e.target instanceof Button) && (key == Event.ENTER)) {
 			Component p = this;
-			while (p != null && !(p instanceof Window))
+			while ((p != null) && !(p instanceof Window)) {
 				p = p.getParent();
-			if (p == null)
+			}
+			if (p == null) {
 				return false;
-			wnd = (Window) p;
+			}
 			p.action(e, null);
 			return true;
 		}

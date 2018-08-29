@@ -17,8 +17,11 @@
 
 package org.zaval.awt;
 
-import java.util.*;
-import org.zaval.awt.peer.*;
+import java.util.Hashtable;
+import java.util.StringTokenizer;
+import java.util.Vector;
+
+import org.zaval.awt.peer.TreeNode;
 
 // ========================================================================
 //  08/08/97    Added function CAF
@@ -58,7 +61,6 @@ public class LevelTree {
 	private String treeStructure[];
 	String delim = ".";
 
-	private String selectedNode;
 	private Hashtable nameCache = new Hashtable();
 
 	// constructors
@@ -86,7 +88,7 @@ public class LevelTree {
 	// position = NEXT inserts the new node as the next sibling
 	// position = PREVIOUS inserts the new node as the previous sibling
 	public void insert(TreeNode newNode, TreeNode relativeNode, int position) {
-		if (newNode == null || relativeNode == null) {
+		if ((newNode == null) || (relativeNode == null)) {
 			return;
 		}
 		if (exists(relativeNode) == false) {
@@ -122,42 +124,52 @@ public class LevelTree {
 	}
 
 	boolean viewable(TreeNode node) {
-		for (int i = 0; i < viewCount; i++)
-			if (node == v.elementAt(i))
+		for (int i = 0; i < viewCount; i++) {
+			if (node == v.elementAt(i)) {
 				return true;
+			}
+		}
 		return false;
 	}
 
 	boolean viewable(String s) {
-		if (s == null)
+		if (s == null) {
 			return false;
+		}
 		for (int i = 0; i < viewCount; i++) {
 			TreeNode tn = (TreeNode) v.elementAt(i);
-			if (tn.text != null && s.equals(tn.text))
+			if ((tn.text != null) && s.equals(tn.text)) {
 				return true;
+			}
 		}
 		return false;
 	}
 
 	public boolean exists(TreeNode node) {
-		if (nameCache.get(node.text) != null)
+		if (nameCache.get(node.text) != null) {
 			return true;
-		for (int i = 0; i < count; i++)
-			if (node == e.elementAt(i))
+		}
+		for (int i = 0; i < count; i++) {
+			if (node == e.elementAt(i)) {
 				return true;
+			}
+		}
 		return false;
 	}
 
 	public boolean exists(String s) {
-		if (s == null)
+		if (s == null) {
 			return false;
-		if (nameCache.get(s) != null)
+		}
+		if (nameCache.get(s) != null) {
 			return true;
+		}
 
 		for (int i = 0; i < count; i++) {
 			TreeNode tn = (TreeNode) e.elementAt(i);
-			if (tn.text != null && s.equals(tn.text))
+			if ((tn.text != null) && s.equals(tn.text)) {
 				return true;
+			}
 		}
 		return false;
 	}
@@ -167,14 +179,17 @@ public class LevelTree {
 // ========================================================================
 
 	public TreeNode getNode(String name) {
-		if (name == null)
+		if (name == null) {
 			return null;
-		if (nameCache.get(name) != null)
+		}
+		if (nameCache.get(name) != null) {
 			return (TreeNode) nameCache.get(name);
+		}
 		for (int i = 0; i < count; i++) {
 			TreeNode tn = (TreeNode) e.elementAt(i);
-			if (tn.text != null && name.equals(tn.text))
+			if ((tn.text != null) && name.equals(tn.text)) {
 				return tn;
+			}
 		}
 		return null;
 	}
@@ -188,11 +203,13 @@ public class LevelTree {
 	// ========================================================================
 
 	public boolean insertChild(String name, String addname, String im1, String im2) {
-		if ((name == null) || (addname == null))
+		if ((name == null) || (addname == null)) {
 			return false;
+		}
 		TreeNode tn = getNode(name);
-		if (tn == null)
+		if (tn == null) {
 			return false;
+		}
 		insert(new TreeNode(addname, im1, im2), tn, LevelTree.CHILD);
 		return true;
 	}
@@ -206,12 +223,14 @@ public class LevelTree {
 	// ========================================================================
 
 	public boolean insertNext(String name, String addname, String im1, String im2) {
-		if ((name == null) || (addname == null))
+		if ((name == null) || (addname == null)) {
 			return false;
+		}
 		TreeNode tn = getNode(name);
 		TreeNode root = getRootNode();
-		if ((tn == null) || (root == null) || (tn.text.equals(root.text)))
+		if ((tn == null) || (root == null) || (tn.text.equals(root.text))) {
 			return false;
+		}
 		insert(new TreeNode(addname, im1, im2), tn, LevelTree.NEXT);
 		return true;
 	}
@@ -225,10 +244,12 @@ public class LevelTree {
 // ========================================================================
 
 	public boolean insertRoot(String addname, String im1, String im2) {
-		if (addname == null)
+		if (addname == null) {
 			return false;
-		if (getRootNode() == null)
+		}
+		if (getRootNode() == null) {
 			append(new TreeNode("root"));
+		}
 		return insertChild(rootNode.text, addname, im1, im2);
 	}
 
@@ -241,11 +262,13 @@ public class LevelTree {
 // ========================================================================
 
 	public boolean setImageOpen(String name, String img) {
-		if ((name == null) || (img == null))
+		if ((name == null) || (img == null)) {
 			return false;
+		}
 		TreeNode tn = getNode(name);
-		if (tn == null)
+		if (tn == null) {
 			return false;
+		}
 		tn.setExpandedImage(img);
 		return true;
 	}
@@ -253,11 +276,13 @@ public class LevelTree {
 // ========================================================================
 
 	public boolean setImageClose(String name, String img) {
-		if ((name == null) || (img == null))
+		if ((name == null) || (img == null)) {
 			return false;
+		}
 		TreeNode tn = getNode(name);
-		if (tn == null)
+		if (tn == null) {
 			return false;
+		}
 		tn.setCollapsedImage(img);
 		return true;
 	}
@@ -265,8 +290,9 @@ public class LevelTree {
 // ========================================================================
 
 	public boolean changeText(String name, String newname) {
-		if ((name == null) || (newname == null))
+		if ((name == null) || (newname == null)) {
 			return false;
+		}
 		TreeNode tn = getNode(name);
 		tn.setText(newname);
 		return true;
@@ -303,8 +329,9 @@ public class LevelTree {
 			newNode.parent = relativeNode;
 			newNode.setDepth(relativeNode.getDepth() + 1);
 			String prop = relativeNode.getStringProperty("PATH");
-			if (prop.length() > 0)
+			if (prop.length() > 0) {
 				prop += delim;
+			}
 			newNode.setStringProperty("PATH", prop + newNode.text);
 			e.addElement(newNode);
 			count++;
@@ -318,21 +345,24 @@ public class LevelTree {
 	}
 
 	protected void addBefore(TreeNode whereNode, TreeNode newNode, TreeNode mark) {
-		if (whereNode == null || newNode == null || mark == null)
+		if ((whereNode == null) || (newNode == null) || (mark == null)) {
 			return;
+		}
 
 		TreeNode rel = whereNode;
-		if (whereNode.child == mark || whereNode.child == null) {
+		if ((whereNode.child == mark) || (whereNode.child == null)) {
 			newNode.sibling = whereNode.child;
 			whereNode.child = newNode;
 		}
 		else {
 			whereNode = whereNode.child;
-			while (whereNode.sibling != null && whereNode.sibling != mark)
+			while ((whereNode.sibling != null) && (whereNode.sibling != mark)) {
 				whereNode = whereNode.sibling;
+			}
 			;
-			if (whereNode.sibling != null)
+			if (whereNode.sibling != null) {
 				newNode.sibling = whereNode.sibling;
+			}
 			whereNode.sibling = newNode;
 		}
 		setResolver(newNode, imgres);
@@ -342,8 +372,9 @@ public class LevelTree {
 
 		String prop = whereNode.getStringProperty("PATH");
 
-		if (prop.length() > 0)
+		if (prop.length() > 0) {
 			prop += delim;
+		}
 		newNode.setStringProperty("PATH", prop + newNode.text);
 		e.insertElementAt(newNode, e.indexOf(mark));
 		count++;
@@ -355,12 +386,15 @@ public class LevelTree {
 
 		String s = siblingNode.getStringProperty("PATH");
 		int index = s.lastIndexOf(delim);
-		if (index >= 0)
+		if (index >= 0) {
 			newNode.setStringProperty("PATH", s.substring(0, index) + delim + newNode.text);
-		else
+		}
+		else {
 			newNode.setStringProperty("PATH", newNode.text);
-		while (tempNode.sibling != null)
+		}
+		while (tempNode.sibling != null) {
 			tempNode = tempNode.sibling;
+		}
 		tempNode.sibling = newNode;
 		newNode.parent = tempNode.parent;
 		newNode.setDepth(tempNode.getDepth());
@@ -487,8 +521,9 @@ public class LevelTree {
 	}
 
 	private void vectorize(TreeNode node) {
-		if (node == null)
+		if (node == null) {
 			return;
+		}
 		nameCache.put(node.text, node);
 
 		if (!node.hidden) {
@@ -544,11 +579,11 @@ public class LevelTree {
 		node.setDepth(0);
 		append(node);
 
-		for (int i = 0; i < tempStructure.length; i++) {
+		for (String element : tempStructure) {
 			TreeNode currentNode;
 			int indentLevel;
 
-			entry = tempStructure[i];
+			entry = element;
 			indentLevel = findLastPreSpace(entry) + 1;
 
 			if (indentLevel == -1) {
@@ -606,12 +641,12 @@ public class LevelTree {
 
 		length = s.length();
 
-		if (s.charAt(0) != ' ' && s.charAt(0) != '\t') {
+		if ((s.charAt(0) != ' ') && (s.charAt(0) != '\t')) {
 			return 0;
 		}
 
 		for (int i = 1; i < length; i++) {
-			if (s.charAt(i) != ' ' && s.charAt(i) != '\t') {
+			if ((s.charAt(i) != ' ') && (s.charAt(i) != '\t')) {
 				return i;
 			}
 		}
@@ -626,8 +661,9 @@ public class LevelTree {
 	}
 
 	private void setResolver(TreeNode t, ImageResolver imgres) {
-		if (t != null)
+		if (t != null) {
 			t.setResolver(imgres);
+		}
 		int i;
 		for (i = 0; i < e.size(); ++i) {
 			TreeNode c = (TreeNode) e.elementAt(i);
@@ -637,51 +673,61 @@ public class LevelTree {
 
 	public void show(String name) {
 		TreeNode t = getNode(name);
-		if (t != null)
+		if (t != null) {
 			t.setHide(false);
+		}
 	}
 
 	public void hide(String name) {
 		TreeNode t = getNode(name);
-		if (t != null)
+		if (t != null) {
 			t.setHide(true);
+		}
 	}
 
 	public void setCaption(String name, String caption) {
 		TreeNode t = getNode(name);
-		if (t == null)
+		if (t == null) {
 			return;
+		}
 		t.setCaption(caption);
 	}
 
 	public void openNode(String name) {
 		TreeNode t = getNode(name);
-		if (t == null)
+		if (t == null) {
 			return;
-		if (t.isExpandable() && !t.isExpanded())
+		}
+		if (t.isExpandable() && !t.isExpanded()) {
 			t.toggle();
+		}
 	}
 
 	public void closeNode(String name) {
 		TreeNode t = getNode(name);
-		if (t == null)
+		if (t == null) {
 			return;
-		if (t.isExpandable() && t.isExpanded())
+		}
+		if (t.isExpandable() && t.isExpanded()) {
 			t.toggle();
+		}
 	}
 
 	public void toggleNode(String name) {
 		TreeNode t = getNode(name);
-		if (t == null)
+		if (t == null) {
 			return;
-		if (t.isExpandable())
+		}
+		if (t.isExpandable()) {
 			t.toggle();
+		}
 	}
 
 	public boolean isHidden(String name) {
 		TreeNode t = getNode(name);
-		if (t == null)
+		if (t == null) {
 			return false;
+		}
 		return t.getHide();
 	}
 
@@ -689,8 +735,9 @@ public class LevelTree {
 
 	public void expandAll() {
 		recount();
-		if (e == null)
+		if (e == null) {
 			return;
+		}
 		for (int i = 0; i < e.size(); i++) {
 			TreeNode tn = (TreeNode) e.elementAt(i);
 			tn.expand();
@@ -699,8 +746,9 @@ public class LevelTree {
 
 	public void collapseAll() {
 		recount();
-		if (e == null)
+		if (e == null) {
 			return;
+		}
 		for (int i = 0; i < e.size(); i++) {
 			TreeNode tn = (TreeNode) e.elementAt(i);
 			tn.collapse();
@@ -713,35 +761,40 @@ public class LevelTree {
 		recount();
 
 		TreeNode r = getRootNode();
-		if (r == null)
+		if (r == null) {
 			return null;
+		}
 
 		TreeNode ch = r.child;
 		StringTokenizer st = new StringTokenizer(name, d);
 
-		if (!st.hasMoreElements())
+		if (!st.hasMoreElements()) {
 			return null;
+		}
 
 		String n = (String) st.nextElement();
 		while (ch != null) {
-			if (ch.caption != null && ch.caption.equalsIgnoreCase(n)) {
-				if (!st.hasMoreElements())
+			if ((ch.caption != null) && ch.caption.equalsIgnoreCase(n)) {
+				if (!st.hasMoreElements()) {
 					return ch;
+				}
 				else {
 					n = (String) st.nextElement();
 					ch = ch.child;
 				}
 			}
-			else
+			else {
 				ch = ch.sibling;
+			}
 		}
 		return null;
 	}
 
 	public void view(TreeNode r, String s) {
 		recount();
-		if (r == null)
+		if (r == null) {
 			return;
+		}
 
 		System.out.println(s + r.caption);
 		view(r.child, s + " ");
@@ -757,13 +810,15 @@ public class LevelTree {
 		if (st.hasMoreElements()) {
 			parent = getNode(st.nextToken());
 		}
-		else
+		else {
 			return null;
+		}
 		while (st.hasMoreElements()) {
 			String childName = st.nextToken();
 			TreeNode child = getChild(parent, childName);
-			if (child == null)
+			if (child == null) {
 				return null;
+			}
 			parent = child;
 		}
 		return parent;
@@ -773,8 +828,9 @@ public class LevelTree {
 
 	protected int getNumChild(TreeNode parent) {
 		recount();
-		if (parent == null)
+		if (parent == null) {
 			return -1;
+		}
 		TreeNode next = parent.child;
 		int count = 0;
 		while (next != null) {
@@ -788,13 +844,15 @@ public class LevelTree {
 
 	protected TreeNode getChild(TreeNode parent, String nameChild) {
 		recount();
-		if (parent == null || parent.child == null || nameChild == null)
+		if ((parent == null) || (parent.child == null) || (nameChild == null)) {
 			return null;
+		}
 		int size = getNumChild(parent);
 		TreeNode next = parent.child;
 		for (int i = 0; i < size; i++) {
-			if (nameChild.equalsIgnoreCase(next.getText()))
+			if (nameChild.equalsIgnoreCase(next.getText())) {
 				return next;
+			}
 			next = next.sibling;
 		}
 		return null;
@@ -806,13 +864,15 @@ public class LevelTree {
 		recount();
 		StringTokenizer st = new StringTokenizer(name, this.delim);
 		TreeNode parent = null;
-		if (st.hasMoreElements())
+		if (st.hasMoreElements()) {
 			parent = getNode(st.nextToken());
+		}
 		while (st.hasMoreElements()) {
 			String childName = st.nextToken();
 			TreeNode child = getChild(parent, childName);
-			if (child == null)
+			if (child == null) {
 				return null;
+			}
 			parent = child;
 		}
 		return enumChild(parent);
@@ -822,8 +882,9 @@ public class LevelTree {
 
 	public TreeNode[] enumChild(TreeNode tn) {
 		recount();
-		if (tn == null || tn.child == null)
+		if ((tn == null) || (tn.child == null)) {
 			return null;
+		}
 		int size = getNumChild(tn);
 		TreeNode tns[] = new TreeNode[size];
 		TreeNode next = tn.child;

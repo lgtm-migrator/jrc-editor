@@ -17,57 +17,73 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Insets;
+import java.awt.Rectangle;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 public class TextAlignArea extends AlignArea {
 	public static final int STRING_GAP = 0;
 
 	private String text;
 	private String[] strs = new String[0];
-	private String deliver = "/p";
 	private FontMetrics fontMetrics = null;
 	private boolean isMulti = false;
 
 	public TextAlignArea() {
-		setAlign(Align.LEFT);
+		setAlign(AlignConstants.LEFT);
 	}
 
+	@Override
 	protected int getWidth(int s, Dimension size) {
-		if (fontMetrics == null || text == null)
+		if ((fontMetrics == null) || (text == null)) {
 			return -1;
+		}
 
-		if (!isMulti)
+		if (!isMulti) {
 			return fontMetrics.stringWidth(text);
+		}
 
 		int max = -1;
-		for (int i = 0; i < strs.length; i++) {
-			int len = fontMetrics.stringWidth(strs[i]);
-			if (max < len)
+		for (String str : strs) {
+			int len = fontMetrics.stringWidth(str);
+			if (max < len) {
 				max = len;
+			}
 		}
 		return max;
 	}
 
+	@Override
 	protected int getHeight(int s, Dimension size) {
-		if (fontMetrics == null || text == null)
+		if ((fontMetrics == null) || (text == null)) {
 			return -1;
-		if (!isMulti)
+		}
+		if (!isMulti) {
 			return fontMetrics.getHeight();
-		return fontMetrics.getHeight() * strs.length + (strs.length - 1) * STRING_GAP;
+		}
+		return (fontMetrics.getHeight() * strs.length) + ((strs.length - 1) * STRING_GAP);
 	}
 
+	@Override
 	protected void recalc() {
 		Dimension d = getSize();
-		if (fontMetrics == null)
+		if (fontMetrics == null) {
 			strs = null;
-		else
+		}
+		else {
 			strs = breakString(text, fontMetrics, d.width);
+		}
 	}
 
 	public void setMultiLine(boolean b) {
-		if (isMulti == b)
+		if (isMulti == b) {
 			return;
+		}
 		isMulti = b;
 		invalidate();
 	}
@@ -78,8 +94,9 @@ public class TextAlignArea extends AlignArea {
 	}
 
 	public void setText(String t) {
-		if (t != null && text != null && t.equals(text))
+		if ((t != null) && (text != null) && t.equals(text)) {
 			return;
+		}
 		text = t;
 		invalidate();
 	}
@@ -97,17 +114,17 @@ public class TextAlignArea extends AlignArea {
 	}
 
 	private void drawText(Graphics gr, String text, int xs, int ys, int max) {
-		int comml = 0, commr = 0, j = 0;
+		int commr = 0;
 		StringTokenizer st = new StringTokenizer(text, ":");
 		String left = st.nextToken() + ":";
 		String right = st.nextToken();
 
 		FontMetrics fm = fontMetrics;
-		comml += fm.stringWidth(left);
+		fm.stringWidth(left);
 		commr += fm.stringWidth(right);
 
 		gr.drawString(left, xs, ys);
-		gr.drawString(right, xs + max - commr, ys);
+		gr.drawString(right, (xs + max) - commr, ys);
 	}
 
 	private void drawJText(Graphics gr, String text, int xs, int ys, int max) {
@@ -133,30 +150,36 @@ public class TextAlignArea extends AlignArea {
 		Rectangle r = getAlignRectangle();
 
 		int h = fontMetrics.getHeight();
-		int y = r.y + fontMetrics.getHeight() + offy - fontMetrics.getDescent();
+		int y = (r.y + fontMetrics.getHeight() + offy) - fontMetrics.getDescent();
 		g.setColor(col);
 
 		int x = r.x + offx;
-		if (isMulti)
+		if (isMulti) {
 			for (int i = 0; i < strs.length; i++) {
-				if ((getAlign() & Align.RIGHT) > 0) {
+				if ((getAlign() & AlignConstants.RIGHT) > 0) {
 					int len = fontMetrics.stringWidth(strs[i]);
-					if (len > d.width)
+					if (len > d.width) {
 						x = ins.left + offx;
-					else
-						x = r.x + offx + r.width - len;
+					}
+					else {
+						x = (r.x + offx + r.width) - len;
+					}
 				}
-				if ((getAlign() & Align.FIT) > 0)
+				if ((getAlign() & AlignConstants.FIT) > 0) {
 					drawText(g, strs[i], x, y, d.width);
-				else if (i + 1 != strs.length && (getAlign() & Align.JUSTIFY) > 0)
+				}
+				else if (((i + 1) != strs.length) && ((getAlign() & AlignConstants.JUSTIFY) > 0)) {
 					drawJText(g, strs[i], x, y, d.width);
-				else
+				}
+				else {
 					g.drawString(strs[i], x, y);
+				}
 				y += (h + STRING_GAP);
 			}
-
-		else
+		}
+		else {
 			g.drawString(text, r.x, y);
+		}
 	}
 
 	public static void next(String s, String[] res) {
@@ -167,8 +190,9 @@ public class TextAlignArea extends AlignArea {
 			return;
 		}
 
-		if (index == 0)
+		if (index == 0) {
 			index++;
+		}
 		res[0] = s.substring(index);
 		res[1] = s.substring(0, index);
 	}
@@ -196,10 +220,12 @@ public class TextAlignArea extends AlignArea {
 					String token = null;
 					next(ss, ps);
 
-					if (ps[1] != null)
+					if (ps[1] != null) {
 						token = ps[1];
-					else
+					}
+					else {
 						token = ps[0];
+					}
 					ss = ps[0];
 
 					int len = fm.stringWidth(token);
@@ -221,18 +247,21 @@ public class TextAlignArea extends AlignArea {
 						tw += len;
 					}
 
-					if (ps[1] == null)
+					if (ps[1] == null) {
 						break;
+					}
 				}
 
-				if (c > 0)
+				if (c > 0) {
 					vvv.addElement(tk);
+				}
 
 			}
 
 			String[] strs = new String[vvv.size()];
-			for (int i = 0; i < vvv.size(); i++)
+			for (int i = 0; i < vvv.size(); i++) {
 				strs[i] = (String) vvv.elementAt(i);
+			}
 			return strs;
 		}
 		return null;

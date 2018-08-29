@@ -17,8 +17,13 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.LayoutManager;
+import java.awt.Panel;
+import java.awt.Point;
+import java.awt.Rectangle;
 
 public class ResizeLayout implements LayoutManager {
 	private int fix = -1;
@@ -38,68 +43,84 @@ public class ResizeLayout implements LayoutManager {
 	private void layoutAll(Container c) {
 		int i;
 		LayoutManager l = c.getLayout();
-		if (l != null)
+		if (l != null) {
 			l.layoutContainer(c);
+		}
 		Component[] o = c.getComponents();
 		c.repaint();
 
-		for (i = 0; i < o.length; ++i)
-			if (o[i] instanceof Container)
+		for (i = 0; i < o.length; ++i) {
+			if (o[i] instanceof Container) {
 				layoutAll((Container) o[i]);
+			}
+		}
 	}
 
 // -----------------------------------
 
+	@Override
 	public void addLayoutComponent(String name, Component comp) {
 	}
 
+	@Override
 	public void removeLayoutComponent(Component comp) {
 	}
 
+	@Override
 	public Dimension preferredLayoutSize(Container parent) {
 		int i;
 		Panel left = null, right = null;
 		Component[] obj = parent.getComponents();
 		for (i = 0; i < obj.length; ++i) {
 			if (obj[i] instanceof Panel) {
-				if (left == null)
+				if (left == null) {
 					left = (Panel) obj[i];
-				else if (right == null)
+				}
+				else if (right == null) {
 					right = (Panel) obj[i];
-				else
+				}
+				else {
 					break;
+				}
 			}
 		}
 
 		Dimension d1 = left.preferredSize();
-		if (fix != -1)
+		if (fix != -1) {
 			d1.width = fix;
+		}
 		Dimension d2 = right.preferredSize();
 		return new Dimension(d1.width + d2.width + 5, Math.max(d1.height, d2.height));
 	}
 
+	@Override
 	public Dimension minimumLayoutSize(Container parent) {
 		int i;
 		Panel left = null, right = null;
 		Component[] obj = parent.getComponents();
 		for (i = 0; i < obj.length; ++i) {
 			if (obj[i] instanceof Panel) {
-				if (left == null)
+				if (left == null) {
 					left = (Panel) obj[i];
-				else if (right == null)
+				}
+				else if (right == null) {
 					right = (Panel) obj[i];
-				else
+				}
+				else {
 					break;
+				}
 			}
 		}
 
 		Dimension d1 = left.minimumSize();
-		if (fix != -1)
+		if (fix != -1) {
 			d1.width = fix;
+		}
 		Dimension d2 = right.minimumSize();
 		return new Dimension(d1.width + d2.width + 5, Math.max(d1.height, d2.height));
 	}
 
+	@Override
 	public void layoutContainer(Container parent) {
 		int i;
 		Panel left = null, right = null;
@@ -107,15 +128,19 @@ public class ResizeLayout implements LayoutManager {
 		Component[] obj = parent.getComponents();
 		for (i = 0; i < obj.length; ++i) {
 			if (obj[i] instanceof Panel) {
-				if (left == null)
+				if (left == null) {
 					left = (Panel) obj[i];
-				else if (right == null)
+				}
+				else if (right == null) {
 					right = (Panel) obj[i];
-				else
+				}
+				else {
 					break;
+				}
 			}
-			else if (rl == null)
+			else if (rl == null) {
 				rl = obj[i];
+			}
 		}
 
 		Rectangle r = parent.bounds();

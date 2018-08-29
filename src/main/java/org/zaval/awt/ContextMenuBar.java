@@ -17,11 +17,15 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
-import java.applet.*;
-import java.util.*;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.MenuBar;
+import java.awt.MenuComponent;
+import java.awt.Rectangle;
 
-import org.zaval.awt.event.*;
+import org.zaval.awt.event.Listener;
+import org.zaval.awt.event.ListenerSupport;
 
 public class ContextMenuBar extends MenuBar {
 	public final static int EV_MENU_REDRAW = 0xFFF0;
@@ -69,10 +73,12 @@ public class ContextMenuBar extends MenuBar {
 	// ====================================================================
 
 	public Dimension getParentSize() {
-		if (parent == null)
+		if (parent == null) {
 			return null;
-		else
+		}
+		else {
 			return parent.size();
+		}
 	}
 
 	// ====================================================================
@@ -84,12 +90,14 @@ public class ContextMenuBar extends MenuBar {
 
 	// ====================================================================
 
+	@Override
 	public void remove(int index) {
 		super.remove(index);
 	}
 
 	// ====================================================================
 
+	@Override
 	public void remove(MenuComponent mc) {
 		super.remove(mc);
 	}
@@ -110,14 +118,16 @@ public class ContextMenuBar extends MenuBar {
 	// ====================================================================
 
 	public void paint(Graphics gr) {
-		if (act_menu == null)
+		if (act_menu == null) {
 			return;
+		}
 		if (first) {
 			first = false;
 			act_menu.paint(gr);
 		}
-		else
+		else {
 			act_menu.paintPart(gr);
+		}
 	}
 
 	// ====================================================================
@@ -127,7 +137,7 @@ public class ContextMenuBar extends MenuBar {
 	}
 
 	public boolean isActive() {
-		return parent != null && act_menu != null;
+		return (parent != null) && (act_menu != null);
 	}
 
 	// ====================================================================
@@ -151,8 +161,9 @@ public class ContextMenuBar extends MenuBar {
 	// ====================================================================
 
 	public void repaint() {
-		if (parent == null)
+		if (parent == null) {
 			return;
+		}
 		Graphics gr = parent.getGraphics();
 		paint(gr);
 		gr.dispose();
@@ -162,7 +173,7 @@ public class ContextMenuBar extends MenuBar {
 
 	public void repaintAll() {
 		first = true;
-		if (act_menu != null && parent != null) {
+		if ((act_menu != null) && (parent != null)) {
 			Rectangle r = act_menu.getBounds();
 			parent.repaint(r.x, r.y, r.width, r.height);
 		}
@@ -172,8 +183,9 @@ public class ContextMenuBar extends MenuBar {
 	// ====================================================================
 
 	public void sendEvent(java.awt.Event evt) {
-		if ((parent == null) || (act_menu == null))
+		if ((parent == null) || (act_menu == null)) {
 			return;
+		}
 		switch (evt.id) {
 			case ContextMenuBar.EV_MENU_REDRAW: {
 				repaint();
@@ -198,8 +210,9 @@ public class ContextMenuBar extends MenuBar {
 					e.put("event", evt);
 					support.perform(e);
 				}
-				else
+				else {
 					parent.postEvent(evt);
+				}
 			}
 		}
 	}
@@ -207,8 +220,9 @@ public class ContextMenuBar extends MenuBar {
 	// ====================================================================
 
 	public boolean handleEvent(java.awt.Event evt) {
-		if ((act_menu == null) || (!act_menu.isEnabled()))
+		if ((act_menu == null) || (!act_menu.isEnabled())) {
 			return false;
+		}
 		return act_menu.handleEvent(evt);
 	}
 

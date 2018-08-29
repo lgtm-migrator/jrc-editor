@@ -17,9 +17,16 @@
 
 package org.zaval.tools.i18n.translator;
 
-import java.io.*;
-import java.awt.*;
-import java.util.*;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.io.RandomAccessFile;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 class BundleManager implements TranslatorConstants {
 	private BundleSet set;
@@ -65,8 +72,9 @@ class BundleManager implements TranslatorConstants {
 		fn = baseName(fn);
 		int ind = fn.lastIndexOf('_');
 		int in2 = ind > 0 ? fn.lastIndexOf('_', ind - 1) : -1;
-		if (in2 < 0 && ind > 0)
+		if ((in2 < 0) && (ind > 0)) {
 			in2 = ind;
+		}
 		return in2 >= 0 ? fn.substring(0, in2) : fn;
 	}
 
@@ -74,20 +82,25 @@ class BundleManager implements TranslatorConstants {
 		File f = new File(dir);
 		String bpn = purifyFileName(baseFileName);
 		String[] fs = f.list();
-		if (fs.length == 0)
+		if (fs.length == 0) {
 			return null;
+		}
 		Vector res = new Vector();
 		for (int i = 0; i < fs.length; ++i) {
-			if (!fs[i].startsWith(bpn))
+			if (!fs[i].startsWith(bpn)) {
 				continue;
+			}
 			String bfn = purifyFileName(fs[i]);
-			if (!bfn.equals(bpn))
+			if (!bfn.equals(bpn)) {
 				continue;
-			if (!extName(fs[i]).equals(defExt))
+			}
+			if (!extName(fs[i]).equals(defExt)) {
 				continue;
+			}
 			File f2 = new File(dir + fs[i]);
-			if (!f2.isDirectory())
+			if (!f2.isDirectory()) {
 				res.addElement(fs[i]);
+			}
 		}
 		return res;
 	}
@@ -96,8 +109,9 @@ class BundleManager implements TranslatorConstants {
 		fn = baseName(fn);
 		int ind = fn.lastIndexOf('_');
 		int in2 = ind > 0 ? fn.lastIndexOf('_', ind - 1) : -1;
-		if (in2 < 0 && ind > 0)
+		if ((in2 < 0) && (ind > 0)) {
 			in2 = ind;
+		}
 		return in2 >= 0 ? fn.substring(in2 + 1) : "en";
 	}
 
@@ -139,27 +153,30 @@ class BundleManager implements TranslatorConstants {
 		for (int i = 0; i < lines.size(); i++) {
 			String line = (String) lines.elementAt(i);
 			line = line.trim();
-			if (line.length() == 0)
+			if (line.length() == 0) {
 				continue;
+			}
 			if (line.startsWith("#")) {
 				lastComment = line.substring(1);
 				continue;
 			}
-			int q = line.indexOf('#');
-			// if(q>0) line = line.substring(0, q).trim();
+			line.indexOf('#');
 
 			StringTokenizer st = new StringTokenizer(line, "=", true); // key = value
-			if (st.countTokens() < 2)
+			if (st.countTokens() < 2) {
 				continue; // syntax error, ignored
+			}
 			String dname = st.nextToken().trim();
 			st.nextToken(); // '='
 			String value = "";
-			if (st.hasMoreTokens())
+			if (st.hasMoreTokens()) {
 				value = st.nextToken("");
+			}
 
 			BundleItem bi = set.getItem(dname);
-			if (bi == null)
+			if (bi == null) {
 				bi = set.addKey(dname);
+			}
 			bi.setTranslation(lang, value);
 			bi.setComment(lastComment);
 			lastComment = null;
@@ -169,8 +186,9 @@ class BundleManager implements TranslatorConstants {
 
 	void setComment(String key, String comment) {
 		BundleItem bi = set.getItem(key);
-		if (bi == null)
+		if (bi == null) {
 			return;
+		}
 		bi.setComment(comment);
 	}
 
@@ -184,13 +202,16 @@ class BundleManager implements TranslatorConstants {
 					line = line.trim();
 					if (line.endsWith("\\")) {
 						String line2 = in.readLine();
-						if (line2 != null)
+						if (line2 != null) {
 							line = line.substring(0, line.length() - 1) + line2;
-						else
+						}
+						else {
 							break;
+						}
 					}
-					else
+					else {
 						break;
+					}
 				}
 				res.addElement(fromEscape(line));
 			}
@@ -202,20 +223,23 @@ class BundleManager implements TranslatorConstants {
 			int factor1 = 1;
 			int factor2 = 256;
 			for (;;) {
-				if (in.length() - in.getFilePointer() == 0)
+				if ((in.length() - in.getFilePointer()) == 0) {
 					break;
-				int i = in.readUnsignedByte() * factor1 + in.readUnsignedByte() * factor2;
+				}
+				int i = (in.readUnsignedByte() * factor1) + (in.readUnsignedByte() * factor2);
 				if (i == 0xFFFE) {
 					factor1 = 256;
 					factor2 = 1;
 				}
-				if (i != 0x0D && i != 0xFFFE && i != 0xFEFF && i != 0xFFFF)
-					if (i != 0x0A)
+				if ((i != 0x0D) && (i != 0xFFFE) && (i != 0xFEFF) && (i != 0xFFFF)) {
+					if (i != 0x0A) {
 						sb.append((char) i);
+					}
 					else {
 						res.addElement(fromEscape(sb.toString()));
 						sb.setLength(0);
 					}
+				}
 			}
 			in.close();
 		}
@@ -231,13 +255,16 @@ class BundleManager implements TranslatorConstants {
 				line = line.trim();
 				if (line.endsWith("\\")) {
 					String line2 = in.readLine();
-					if (line2 != null)
+					if (line2 != null) {
 						line = line.substring(0, line.length() - 1) + line2;
-					else
+					}
+					else {
 						break;
+					}
 				}
-				else
+				else {
 					break;
+				}
 			}
 			res.addElement(fromEscape(line));
 		}
@@ -249,16 +276,19 @@ class BundleManager implements TranslatorConstants {
 		StringBuffer res = new StringBuffer();
 		for (int i = 0; i < s.length(); i++) {
 			char ch = s.charAt(i);
-			int val = (int) ch;
-			if (ch == '\r')
+			int val = ch;
+			if (ch == '\r') {
 				continue;
-			if (val >= 0 && val < 128 && ch != '\n' && ch != '\\')
+			}
+			if ((val >= 0) && (val < 128) && (ch != '\n') && (ch != '\\')) {
 				res.append(ch);
+			}
 			else {
 				res.append("\\u");
 				String hex = Integer.toHexString(val);
-				for (int j = 0; j < 4 - hex.length(); j++)
+				for (int j = 0; j < (4 - hex.length()); j++) {
 					res.append("0");
+				}
 				res.append(hex);
 			}
 		}
@@ -269,12 +299,13 @@ class BundleManager implements TranslatorConstants {
 		StringBuffer res = new StringBuffer(s.length());
 		for (int i = 0; i < s.length(); i++) {
 			char ch = s.charAt(i);
-			if (ch == '\\' && i + 1 >= s.length()) {
+			if ((ch == '\\') && ((i + 1) >= s.length())) {
 				res.append(ch);
 				break;
 			}
-			if (ch != '\\')
+			if (ch != '\\') {
 				res.append(ch);
+			}
 			else {
 				switch (s.charAt(i + 1)) {
 					case 'u':
@@ -315,8 +346,9 @@ class BundleManager implements TranslatorConstants {
 			lastind = ind + from.length();
 			ind += from.length() - 1;
 		}
-		if (lastind == 0)
+		if (lastind == 0) {
 			return line;
+		}
 		res.append(line.substring(lastind));
 		return res.toString();
 	}
@@ -331,13 +363,15 @@ class BundleManager implements TranslatorConstants {
 
 	void store(String lng, String fn) throws IOException {
 		LangItem lang = set.getLanguage(lng);
-		if (fn == null)
+		if (fn == null) {
 			fn = lang.getLangFile();
+		}
 		else {
 			String tmpFn = fn;
 			tmpFn = dirName(tmpFn) + purifyFileName(tmpFn);
-			if (set.getLanguage(0) != lang)
+			if (set.getLanguage(0) != lang) {
 				tmpFn += "_" + lang.getLangId();
+			}
 			tmpFn += RES_EXTENSION;
 			fn = tmpFn;
 			lang.setLangFile(fn);
@@ -351,8 +385,9 @@ class BundleManager implements TranslatorConstants {
 		Vector lines = set.store(lang.getLangId());
 		if (fn.endsWith(RES_EXTENSION)) {
 			PrintStream f = new PrintStream(new FileOutputStream(fn));
-			for (int j = 0; j < lines.size(); j++)
+			for (int j = 0; j < lines.size(); j++) {
 				f.print(toEscape((String) lines.elementAt(j)) + System.getProperty("line.separator"));
+			}
 			f.close();
 		}
 		else {
@@ -364,8 +399,8 @@ class BundleManager implements TranslatorConstants {
 				s = replace(s, "\n", toEscape("\n"));
 				for (int k = 0; k < s.length(); k++) {
 					char ch = s.charAt(k);
-					f.write(((int) ch) & 255);
-					f.write(((int) ch) >> 8);
+					f.write((ch) & 255);
+					f.write((ch) >> 8);
 				}
 				f.write(0x0D);
 				f.write(0x00);

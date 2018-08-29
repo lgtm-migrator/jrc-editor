@@ -17,8 +17,12 @@
 
 package org.zaval.io;
 
-import java.io.*;
-import java.util.*;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Hashtable;
+import java.util.StringTokenizer;
 
 public class InputIniFile extends Object {
 	private Hashtable hash;
@@ -58,18 +62,22 @@ public class InputIniFile extends Object {
 
 	public boolean getBoolean(String key) throws IOException {
 		String s = getString(key);
-		if ("True".equalsIgnoreCase(s))
+		if ("True".equalsIgnoreCase(s)) {
 			return true;
-		if ("On".equalsIgnoreCase(s))
+		}
+		if ("On".equalsIgnoreCase(s)) {
 			return true;
-		if ("1".equals(s))
+		}
+		if ("1".equals(s)) {
 			return true;
+		}
 		return false;
 	}
 
 	public synchronized void close() throws IOException {
-		if (in != null)
+		if (in != null) {
 			in.close();
+		}
 		in = null;
 	}
 
@@ -78,33 +86,39 @@ public class InputIniFile extends Object {
 	private String readLine(DataInputStream in) throws IOException {
 		String x = postponed == null ? in.readLine() : postponed;
 		postponed = null;
-		if (x == null)
+		if (x == null) {
 			return x;
+		}
 		x = x.trim();
 
 		while (x.endsWith("\\")) {
 			String v = in.readLine();
-			if (v == null)
+			if (v == null) {
 				break;
+			}
 			if (!v.startsWith(" ")) {
 				postponed = v;
 				break;
 			}
 			int i = v.indexOf('#');
 			if (i > 0) {
-				if (v.endsWith("\\"))
+				if (v.endsWith("\\")) {
 					v = v.substring(0, i) + " \\";
-				else
+				}
+				else {
 					v = v.substring(0, i);
+				}
 			}
 			x = x.substring(0, x.length() - 1) + v.trim();
 		}
 
 		int j = x.indexOf('#');
-		if (j == 0)
+		if (j == 0) {
 			return "";
-		if (j > 0)
+		}
+		if (j > 0) {
 			x = x.substring(0, j);
+		}
 		return x;
 	}
 
@@ -112,8 +126,9 @@ public class InputIniFile extends Object {
 		String line = null;
 		while ((line = readLine(in)) != null) {
 			StringTokenizer st = new StringTokenizer(line, "=", true); // key = value
-			if (st.countTokens() < 3)
+			if (st.countTokens() < 3) {
 				continue; // syntax error, ignored
+			}
 			String key = st.nextToken().trim();
 			st.nextToken(); // '='
 			String value = st.nextToken("").trim();

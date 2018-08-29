@@ -17,8 +17,14 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Insets;
+import java.awt.Rectangle;
 
 public class ResultField extends Canvas {
 	TextAlignArea alignArea = new TextAlignArea();
@@ -33,8 +39,9 @@ public class ResultField extends Canvas {
 	}
 
 	public void set3D(boolean b) {
-		if (b == is3D)
+		if (b == is3D) {
 			return;
+		}
 		is3D = b;
 		repaint();
 	}
@@ -52,25 +59,30 @@ public class ResultField extends Canvas {
 		repaint();
 	}
 
+	@Override
 	public void setFont(Font f) {
 		super.setFont(f);
 		alignArea.invalidate();
 	}
 
+	@Override
 	public void reshape(int x, int y, int w, int h) {
 		super.reshape(x, y, w, h);
 		alignArea.setSize(new Dimension(w, h));
 	}
 
+	@Override
 	public void resize(int w, int h) {
 		super.resize(w, h);
 		alignArea.setSize(new Dimension(w, h));
 	}
 
+	@Override
 	public void paint(Graphics g) {
 		super.paint(g);
-		if (alignArea.getFontMetrics() == null)
+		if (alignArea.getFontMetrics() == null) {
 			alignArea.setFontMetrics(getFontMetrics(getFont()));
+		}
 
 		if (is3D) {
 			Dimension d = size();
@@ -88,30 +100,37 @@ public class ResultField extends Canvas {
 		alignArea.draw(g, getForeground());
 	}
 
+	@Override
 	public Dimension preferredSize() {
-		if (!isValid())
+		if (!isValid()) {
 			validate();
+		}
 		Rectangle r = alignArea.getAlignRectangle();
 		return new Dimension(r.width, r.height);
 	}
 
+	@Override
 	public boolean mouseDown(Event e, int x, int y) {
 		requestFocus();
 		return true;
 	}
 
+	@Override
 	public boolean mouseUp(Event e, int x, int y) {
 		return true;
 	}
 
+	@Override
 	public boolean mouseMove(Event e, int x, int y) {
 		return true;
 	}
 
+	@Override
 	public boolean mouseExit(Event e, int x, int y) {
 		return true;
 	}
 
+	@Override
 	public boolean mouseEnter(Event e, int x, int y) {
 		return true;
 	}

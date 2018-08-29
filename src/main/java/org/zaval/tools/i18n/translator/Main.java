@@ -17,9 +17,11 @@
 
 package org.zaval.tools.i18n.translator;
 
-import java.io.*;
-import java.awt.*;
-import java.util.*;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.io.File;
+import java.util.Locale;
+
 import org.zaval.util.SafeResourceBundle;
 
 public class Main {
@@ -27,20 +29,22 @@ public class Main {
 		String altDir = System.getProperty("my.root.dir");
 		File f = new File(altDir != null ? altDir : ".");
 		String path = f.getAbsolutePath();
-		if (path.endsWith("."))
+		if (path.endsWith(".")) {
 			path = path.substring(0, path.length() - 1);
+		}
 		path += "/images/";
 
 		Translator t = null;
 		if (arg.length > 0) {
 			t = new Translator(path, new SafeResourceBundle("jrc-editor", Locale.getDefault()), arg[0]);
 		}
-		else
+		else {
 			t = new Translator(path, new SafeResourceBundle("jrc-editor", Locale.getDefault()));
+		}
 
 		Dimension gdz = Toolkit.getDefaultToolkit().getScreenSize();
-		int optimalX = gdz.width / 4 * 3;
-		int optimalY = gdz.height / 4 * 3;
+		int optimalX = (gdz.width / 4) * 3;
+		int optimalY = (gdz.height / 4) * 3;
 		t.move((gdz.width - optimalX) / 2, (gdz.height - optimalY) / 2);
 		t.resize(optimalX, optimalY);
 		t.show();

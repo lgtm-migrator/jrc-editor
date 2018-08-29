@@ -17,8 +17,9 @@
 
 package org.zaval.tools.i18n.translator;
 
-import java.io.*;
-import java.util.*;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 
 class SrcGenerator {
 	private PrintStream out = null;
@@ -69,8 +70,9 @@ class SrcGenerator {
 
 	private String makeVarName(BundleItem bi) {
 		String ask = bi.getTranslation("__var");
-		if (ask != null)
+		if (ask != null) {
 			return ask;
+		}
 		ask = makeVarName(bi.getId());
 		bi.setTranslation("__var", ask);
 		return ask;
@@ -78,8 +80,9 @@ class SrcGenerator {
 
 	private String makeFunName(BundleItem bi) {
 		String ask = bi.getTranslation("__varF");
-		if (ask != null)
+		if (ask != null) {
 			return ask;
+		}
 		ask = capitalize(makeVarName(bi.getId()));
 		bi.setTranslation("__varF", ask);
 		return ask;
@@ -88,18 +91,21 @@ class SrcGenerator {
 	private String makeVarName(String key) {
 		String s = key.toLowerCase();
 		int j1 = s.lastIndexOf('.');
-		if (j1 < 0)
+		if (j1 < 0) {
 			return s;
+		}
 		int j2 = s.lastIndexOf('.', j1 - 1);
-		if (j2 < 0)
+		if (j2 < 0) {
 			j2 = -1;
+		}
 		s = s.substring(j2 + 1, j1) + capitalize(s.substring(j1 + 1));
 		return s;
 	}
 
 	private String capitalize(String s) {
-		if (s.length() < 2)
+		if (s.length() < 2) {
 			return s.toUpperCase();
+		}
 		return s.substring(0, 1).toUpperCase() + s.substring(1);
 	}
 

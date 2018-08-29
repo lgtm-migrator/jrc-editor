@@ -17,11 +17,19 @@
 
 package org.zaval.tools.i18n.translator;
 
-import org.zaval.awt.*;
-import org.zaval.awt.dialog.*;
+import java.awt.Component;
+import java.awt.Event;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Panel;
 
-import java.awt.*;
-import java.util.*;
+import org.zaval.awt.BorderedPanel;
+import org.zaval.awt.EmulatedTextField;
+import org.zaval.awt.IECheckbox;
+import org.zaval.awt.IELabel;
+import org.zaval.awt.IERadioButton;
+import org.zaval.awt.dialog.EditDialog;
 
 public class ReplaceDialog extends EditDialog {
 	IERadioButton regex;
@@ -109,16 +117,22 @@ public class ReplaceDialog extends EditDialog {
 
 	private void applyTo(IERadioButton[] group, IERadioButton b) {
 		int j;
-		for (j = 0; j < group.length; ++j)
-			if (group[j] == b)
+		for (j = 0; j < group.length; ++j) {
+			if (group[j] == b) {
 				break;
-		if (j >= group.length)
+			}
+		}
+		if (j >= group.length) {
 			return;
-		for (j = 0; j < group.length; ++j)
-			if (group[j] != b)
+		}
+		for (j = 0; j < group.length; ++j) {
+			if (group[j] != b) {
 				group[j].setState(false);
+			}
+		}
 	}
 
+	@Override
 	public boolean action(Event evt, Object what) {
 		if (evt.target instanceof IERadioButton) {
 			applyTo(cg2, (IERadioButton) evt.target);

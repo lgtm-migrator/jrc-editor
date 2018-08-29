@@ -17,10 +17,21 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyEvent;
 //import org.zaval.awt.ScrollPanel;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 public class EmulatedTextArea extends EmulatedTextField implements ScrollObject {
 	boolean wordWrap = false;
@@ -71,11 +82,13 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 		rowsNumber = n;
 	}
 
+	@Override
 	public void setText(String s) {
 		super.setText(s);
 		recalcLines(0);
 	}
 
+	@Override
 	public void focusGained(FocusEvent e) {
 		int wasCP = cursorPos;
 		super.focusGained(e);
@@ -84,6 +97,7 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 		cursorPos = wasCP;
 	}
 
+	@Override
 	protected boolean controlKey(int key, boolean shift) {
 		switch (key) {
 			case KeyEvent.VK_DOWN:
@@ -98,77 +112,93 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 			case KeyEvent.VK_END:
 				int ln = lineFromPos(cursorPos);
 				int newPos = buffer.toString().length();
-				if (ln < lineText.size() - 1)
+				if (ln < (lineText.size() - 1)) {
 					newPos = adjustPos(lineStart[ln + 1] - 1, false);
+				}
 				seek(newPos - cursorPos, shift);
 				break;
 			case KeyEvent.VK_ENTER:
 				return false;
 			case KeyEvent.VK_PAGE_UP:
 				upRowNum -= lastVisLine;
-				if (upRowNum < 0)
+				if (upRowNum < 0) {
 					upRowNum = 0;
+				}
 				seek(vertPosShift(cursorPos, -lastVisLine) - cursorPos, shift);
 				break;
 			case KeyEvent.VK_PAGE_DOWN:
 				upRowNum += lastVisLine;
-				if (upRowNum + lastVisLine >= lineText.size())
+				if ((upRowNum + lastVisLine) >= lineText.size()) {
 					upRowNum = lineText.size() - lastVisLine - 1;
+				}
 				seek(vertPosShift(cursorPos, lastVisLine) - cursorPos, shift);
 				break;
 			default:
 				return super.controlKey(key, shift);
 		}
-		if (!shift)
+		if (!shift) {
 			clear();
+		}
 		return true;
 	}
 
+	@Override
 	protected boolean write(char key) {
 		super.write(key);
-		if (addLineFeed && key == '\n')
+		if (addLineFeed && (key == '\n')) {
 			super.write('\r');
+		}
 		recalcLines(cursorPos);
 		return true;
 	}
 
+	@Override
 	protected String filterSymbols(String s) {
 		return s;
 	}
 
+	@Override
 	protected void repaintPart() {
 		repaint();
 	}
 
+	@Override
 	protected void remove(int pos, int size) {
-		if (pos + size > buffer.length())
+		if ((pos + size) > buffer.length()) {
 			size = buffer.length() - pos;
-		if (pos > buffer.length() || size <= 0)
+		}
+		if ((pos > buffer.length()) || (size <= 0)) {
 			return;
-		if (pos > 0 && buffer.charAt(pos) == '\n' && buffer.charAt(pos - 1) == '\r') {
+		}
+		if ((pos > 0) && (buffer.charAt(pos) == '\n') && (buffer.charAt(pos - 1) == '\r')) {
 			pos--;
 			size++;
 		}
-		if (pos + size < buffer.length() && buffer.charAt(pos + size - 1) == '\r' && buffer.charAt(pos + size) == '\n')
+		if (((pos + size) < buffer.length()) && (buffer.charAt((pos + size) - 1) == '\r') && (buffer.charAt(pos + size) == '\n')) {
 			size++;
+		}
 		super.remove(pos, size);
 		recalcLines(pos);
 	}
 
+	@Override
 	public void insert(int pos, String str) {
 		super.insert(pos, str);
 		recalcLines(pos);
 	}
 
+	@Override
 	public void update(Graphics g) {
 		paint(g);
 	}
 
+	@Override
 	public void paint(Graphics g) {
 		Dimension d = size();
-		if ((d.width != viewWidth) || (d.height != viewHeight) || internImg == null) {
-			if (d.width * d.height <= 0)
+		if ((d.width != viewWidth) || (d.height != viewHeight) || (internImg == null)) {
+			if ((d.width * d.height) <= 0) {
 				return;
+			}
 			internImg = createImage(d.width, d.height);
 			viewWidth = d.width;
 			viewHeight = d.height;
@@ -177,7 +207,7 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 		recalc();
 		internGr.clearRect(0, 0, d.width, d.height);
 		drawBorder(internGr);
-		internGr.clipRect(insets.left, insets.top, d.width - insets.left - insets.right + 1, d.height - insets.top - insets.bottom);
+		internGr.clipRect(insets.left, insets.top, (d.width - insets.left - insets.right) + 1, d.height - insets.top - insets.bottom);
 		drawCursor(internGr);
 		drawText(internGr);
 		drawBlock(internGr);
@@ -185,9 +215,11 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 		internGr.dispose();
 	}
 
+	@Override
 	protected void drawBlock(Graphics g) {
-		if (!isSelected())
+		if (!isSelected()) {
 			return;
+		}
 		FontMetrics fm = getFontMetrics(getFont());
 		int l1 = lineFromPos(selPos);
 		int l2 = lineFromPos(selPos + selWidth);
@@ -202,44 +234,51 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 			int end = fm.stringWidth(s);
 			int endPos = s.length();
 			if (i == l2) {
-				endPos = selPos + selWidth - lineStart[i];
+				endPos = (selPos + selWidth) - lineStart[i];
 				end = fm.stringWidth(s.substring(0, endPos));
 			}
 			g.setColor(Color.blue);
-			g.fillRect(textLocation.x + shift.x + beg, insets.top + (i - upRowNum) * fm.getHeight(), end - beg, textSize.height);
+			g.fillRect(textLocation.x + shift.x + beg, insets.top + ((i - upRowNum) * fm.getHeight()), end - beg, textSize.height);
 			g.setColor(Color.white);
 			g.drawString(s.substring(begPos, endPos), insets.left + beg + shift.x,
-				insets.top + baseTextIndent + (i - upRowNum) * fm.getHeight());
+				insets.top + baseTextIndent + ((i - upRowNum) * fm.getHeight()));
 		}
 	}
 
+	@Override
 	protected void drawText(Graphics g) {
-		Dimension d = size();
+		size();
 		g.setColor(getForeground());
-		for (int i = upRowNum; i < lineText.size(); i++)
+		for (int i = upRowNum; i < lineText.size(); i++) {
 			g.drawString((String) lineText.elementAt(i), insets.left + shift.x,
-				insets.top + baseTextIndent + (i - upRowNum) * textSize.height);
+				insets.top + baseTextIndent + ((i - upRowNum) * textSize.height));
+		}
 	}
 
+	@Override
 	public Dimension preferredSize() {
 		int w = 0, h = 0;
 		int rows = 1;
 
 		Font f = getFont();
-		if (f == null)
+		if (f == null) {
 			return new Dimension(0, 0);
+		}
 		FontMetrics m = getFontMetrics(f);
 		if (m == null) {
 			Toolkit k = Toolkit.getDefaultToolkit();
 			m = k.getFontMetrics(f);
-			if (m == null)
+			if (m == null) {
 				return new Dimension(0, 0);
+			}
 		}
 
 		String text = getText();
-		for (int j = 0; j < text.length(); ++j)
-			if (text.charAt(j) == '\n')
+		for (int j = 0; j < text.length(); ++j) {
+			if (text.charAt(j) == '\n') {
 				++rows;
+			}
+		}
 		StringTokenizer st = new StringTokenizer(text, "\n");
 		h = m.getHeight() * (rows + 1);
 		while (st.hasMoreTokens()) {
@@ -251,28 +290,33 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 		return ask;
 	}
 
+	@Override
 	public Point getSOLocation() {
 		return new Point(-shift.x, upRowNum * textSize.height);
 	}
 
+	@Override
 	public void setSOLocation(int x, int y) {
 		shift.x = -x;
-		if (textSize.height > 0)
+		if (textSize.height > 0) {
 			upRowNum = y / textSize.height;
+		}
 		repaint();
 	}
 
+	@Override
 	public Dimension getSOSize() {
-		return new Dimension(maxTextWidth + insets.left + insets.right, lineText.size() * textSize.height + insets.top + insets.bottom);
+		return new Dimension(maxTextWidth + insets.left + insets.right, (lineText.size() * textSize.height) + insets.top + insets.bottom);
 	}
 
+	@Override
 	public Component getScrollComponent() {
 		return this;
 	}
 
 	protected void setLineStart(int pos, int value) {
 		if (pos >= lineStart.length) {
-			int[] nls = new int[(pos / LINE_INCR + 1) * LINE_INCR];
+			int[] nls = new int[((pos / LINE_INCR) + 1) * LINE_INCR];
 			System.arraycopy(lineStart, 0, nls, 0, lineStart.length);
 			lineStart = nls;
 		}
@@ -281,50 +325,58 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 
 	protected int indexOfBlank(String s, int i) {
 		int i1 = s.indexOf(' ', i);
-		if (i1 < 0)
+		if (i1 < 0) {
 			i1 = s.length() - 1;
+		}
 		int i2 = s.indexOf('\t', i);
-		if (i2 < 0)
+		if (i2 < 0) {
 			i2 = s.length() - 1;
+		}
 		return Math.min(i1, i2);
 	}
 
 	protected void recalcLines(int position) {
 		int rowNum = lineFromPos(position);
-		int oldLN = lineText.size();
-		int oldMW = maxTextWidth;
+		lineText.size();
 		Dimension d = size();
 		Insets i = insets();
 		textWidth = d.width - i.left - i.right;
 		textHeight = d.height - i.top - i.bottom;
-		if (textWidth <= 0 || textHeight <= 0)
+		if ((textWidth <= 0) || (textHeight <= 0)) {
 			return;
+		}
 		noFontMetric = true;
 		Font f = getFont();
-		if (f == null)
+		if (f == null) {
 			return;
+		}
 		FontMetrics m = getFontMetrics(f);
-		if (m == null)
+		if (m == null) {
 			return;
+		}
 		noFontMetric = false;
-		if (rowNum > lineText.size())
+		if (rowNum > lineText.size()) {
 			return;
+		}
 		String allText = buffer.toString();
 		int currLine = rowNum;
-		for (int j = lineText.size() - 1; j >= currLine; j--)
+		for (int j = lineText.size() - 1; j >= currLine; j--) {
 			lineText.removeElementAt(j);
+		}
 		setLineStart(0, 0);
 		int currPos = lineStart[currLine];
 		int ind;
 		do {
 			ind = allText.indexOf('\n', currPos);
 			int startNext = ind + 1;
-			if (ind < 0)
+			if (ind < 0) {
 				ind = allText.length();
-			if (ind > 0 && allText.charAt(ind - 1) == '\r')
+			}
+			if ((ind > 0) && (allText.charAt(ind - 1) == '\r')) {
 				ind--;
+			}
 			String sl = allText.substring(currPos, ind);
-			if (wordWrap && m.stringWidth(sl) > textWidth) {
+			if (wordWrap && (m.stringWidth(sl) > textWidth)) {
 				int blankInd = indexOfBlank(allText, currPos);
 				if (blankInd < ind) {
 					ind = blankInd + 1;
@@ -347,8 +399,9 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 		maxTextWidth = 0;
 		for (int j = 0; j < lineText.size(); j++) {
 			int len = m.stringWidth((String) lineText.elementAt(j));
-			if (maxTextWidth < len)
+			if (maxTextWidth < len) {
 				maxTextWidth = len;
+			}
 		}
 /*     if ( getParent() != null && ( oldLN != lineText.size() || maxTextWidth != oldMW ) )
      {
@@ -357,16 +410,19 @@ getParent().postEvent(e);
      }
 */ }
 
+	@Override
 	protected void setPos(int p) {
 		super.setPos(adjustPos(p, true));
 	}
 
+	@Override
 	public void select(int pos, int w) {
 		int ap = adjustPos(pos, true);
 		int aw = adjustPos(pos + w, true) - ap;
 		super.select(ap, aw);
 	}
 
+	@Override
 	protected boolean seek(int shift, boolean b) {
 		return super.seek(adjustPos(cursorPos + shift, shift > 0) - cursorPos, b);
 	}
@@ -374,18 +430,23 @@ getParent().postEvent(e);
 	protected int adjustPos(int pos, boolean incr) {
 		int l = lineFromPos(pos);
 		int sl = ((String) lineText.elementAt(l)).length();
-		if (l < lineText.size() - 1 && pos - lineStart[l] > sl)
-			if (incr)
+		if ((l < (lineText.size() - 1)) && ((pos - lineStart[l]) > sl)) {
+			if (incr) {
 				return lineStart[l + 1];
-			else
+			}
+			else {
 				return lineStart[l] + sl;
+			}
+		}
 		return pos;
 	}
 
+	@Override
 	protected boolean recalc() {
 		int wasShiftX = shift.x;
-		if (noFontMetric)
+		if (noFontMetric) {
 			recalcLines(0);
+		}
 		boolean res = super.recalc();
 		shift.x = wasShiftX;
 		int l = lineFromPos(cursorPos);
@@ -395,21 +456,26 @@ getParent().postEvent(e);
 		shift.y = 0;
 		baseTextIndent = m.getHeight() - m.getDescent();
 		int cursLine = lineFromPos(cursorPos);
-		if (cursLine < upRowNum)
+		if (cursLine < upRowNum) {
 			upRowNum = cursLine;
-		lastVisLine = textHeight / m.getHeight() - 1;
-		if (lastVisLine < 0)
+		}
+		lastVisLine = (textHeight / m.getHeight()) - 1;
+		if (lastVisLine < 0) {
 			lastVisLine = 0;
-		if (cursLine > lastVisLine + upRowNum)
+		}
+		if (cursLine > (lastVisLine + upRowNum)) {
 			upRowNum = cursLine - lastVisLine;
+		}
 		cursorLocation.x = insets.left + m.stringWidth(s);
-		cursorLocation.y = insets.top + (l - upRowNum) * textSize.height;
-		if ((cursorLocation.x + shift.x) < insets.left)
+		cursorLocation.y = insets.top + ((l - upRowNum) * textSize.height);
+		if ((cursorLocation.x + shift.x) < insets.left) {
 			shift.x = insets.left - cursorLocation.x;
+		}
 		else {
 			int w = size().width - insets.right;
-			if ((cursorLocation.x + shift.x) > w)
+			if ((cursorLocation.x + shift.x) > w) {
 				shift.x = w - cursorLocation.x;
+			}
 		}
 /*     if ( getParent() != null )
      {
@@ -420,23 +486,29 @@ getParent().postEvent(e);
 	}
 
 	protected int getLinePos(int ln, FontMetrics fm, int pix) {
-		if (ln < 0)
+		if (ln < 0) {
 			ln = 0;
-		if (ln >= lineText.size())
+		}
+		if (ln >= lineText.size()) {
 			ln = lineText.size() - 1;
+		}
 		String s = (String) lineText.elementAt(ln);
-		for (int i = 0; i < s.length(); i++)
-			if (fm.stringWidth(s.substring(0, i)) > pix)
-				return lineStart[ln] + i - 1;
+		for (int i = 0; i < s.length(); i++) {
+			if (fm.stringWidth(s.substring(0, i)) > pix) {
+				return (lineStart[ln] + i) - 1;
+			}
+		}
 		int res = lineStart[ln] + s.length();
-		if (pix > 0 && ln < lineText.size() - 1 && buffer.charAt(lineStart[ln + 1] - 1) != '\n')
+		if ((pix > 0) && (ln < (lineText.size() - 1)) && (buffer.charAt(lineStart[ln + 1] - 1) != '\n')) {
 			res--;
+		}
 		return res;
 	}
 
+	@Override
 	protected int calcTextPos(int x, int y) {
 		FontMetrics fm = getFontMetrics(getFont());
-		return getLinePos((y - insets.top) / fm.getHeight() + upRowNum, fm, x - insets.left - shift.x);
+		return getLinePos(((y - insets.top) / fm.getHeight()) + upRowNum, fm, x - insets.left - shift.x);
 	}
 
 	protected int vertPosShift(int currPos, int vertShift) {
@@ -447,22 +519,27 @@ getParent().postEvent(e);
 	}
 
 	protected int lineFromPos(int pos) {
-		for (int i = lineText.size() - 1; i >= 0; i--)
-			if (lineStart[i] <= pos)
+		for (int i = lineText.size() - 1; i >= 0; i--) {
+			if (lineStart[i] <= pos) {
 				return i;
+			}
+		}
 		return 0;
 	}
 
+	@Override
 	public void resize(int w, int h) {
 		super.resize(w, h);
 		recalcLines(0);
 	}
 
+	@Override
 	public void reshape(int x, int y, int w, int h) {
 		Dimension d = size();
 		super.reshape(x, y, w, h);
-		if (d.width != w)
+		if (d.width != w) {
 			recalcLines(0);
+		}
 	}
 
 }

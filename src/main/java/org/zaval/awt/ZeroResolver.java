@@ -17,12 +17,13 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
+import java.awt.Image;
 
 public class ZeroResolver implements ImageResolver {
 	public ZeroResolver() {
 	}
 
+	@Override
 	public Image getImage(String str) {
 		return null;
 	}

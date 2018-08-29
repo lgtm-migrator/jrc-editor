@@ -17,20 +17,22 @@
 
 package org.zaval.awt.event;
 
-import java.util.*;
+import java.util.Vector;
 
 public class ListenerSupport {
 	protected Vector v = new Vector();
 
 	public void addListener(Listener l) {
-		if (v.contains(l))
+		if (v.contains(l)) {
 			return;
+		}
 		v.addElement(l);
 	}
 
 	public void removeListener(Listener l) {
-		if (!v.contains(l))
+		if (!v.contains(l)) {
 			return;
+		}
 		v.removeElement(l);
 	}
 
@@ -43,11 +45,11 @@ public class ListenerSupport {
 	}
 
 	public boolean perform(Event e) {
-		boolean ret = false;
 		for (int i = 0; i < v.size(); i++) {
 			Listener l = (Listener) v.elementAt(i);
-			if (l.eventOccured(e))
+			if (l.eventOccured(e)) {
 				return true;
+			}
 		}
 		return false;
 	}

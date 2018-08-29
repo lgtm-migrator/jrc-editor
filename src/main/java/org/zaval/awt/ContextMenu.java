@@ -17,9 +17,18 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
-import java.applet.*;
-import java.util.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Menu;
+import java.awt.MenuComponent;
+import java.awt.MenuItem;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.util.Hashtable;
 
 public class ContextMenu extends Menu {
 	Rectangle size = null;
@@ -64,10 +73,12 @@ public class ContextMenu extends Menu {
 
 	public void addCheckit(MenuItem mi, boolean state) {
 		this.add(mi);
-		if (state)
+		if (state) {
 			types.put(mi.getLabel(), "1");
-		else
+		}
+		else {
 			types.put(mi.getLabel(), "0");
+		}
 	}
 
 	// ====================================================================
@@ -78,18 +89,21 @@ public class ContextMenu extends Menu {
 
 	// ====================================================================
 
+	@Override
 	public void add(String name) {
 		this.add(new MenuItem(name));
 	}
 
 	// ====================================================================
 
+	@Override
 	public void addSeparator() {
 		super.addSeparator();
 	}
 
 	// ====================================================================
 
+	@Override
 	public void remove(int index) {
 		size.height -= stap;
 		super.remove(index);
@@ -97,19 +111,22 @@ public class ContextMenu extends Menu {
 
 	// ====================================================================
 
+	@Override
 	public void remove(MenuComponent mc) {
 		super.remove(mc);
 	}
 
 	// ====================================================================
 
+	@Override
 	public MenuItem add(MenuItem mi) {
 		MenuItem ret_mi = super.add(mi);
 		FontMetrics fm = Toolkit.getDefaultToolkit().getFontMetrics(getFont());
-		int sx = fm.stringWidth(mi.getLabel()) + 2 * hdist;
+		int sx = fm.stringWidth(mi.getLabel()) + (2 * hdist);
 
-		if (size.width < sx)
+		if (size.width < sx) {
 			size.width = sx;
+		}
 		size.height += stap;
 		return ret_mi;
 	}
@@ -135,7 +152,7 @@ public class ContextMenu extends Menu {
 	// ====================================================================
 
 	public Dimension preferredSize() {
-		return new Dimension(size.width + 2 * hdist, size.height + 2 * vdist);
+		return new Dimension(size.width + (2 * hdist), size.height + (2 * vdist));
 	}
 
 	// ====================================================================
@@ -146,23 +163,27 @@ public class ContextMenu extends Menu {
 		htext = fm.getMaxAscent() + fm.getMaxDescent() + fm.getLeading();
 		vdist = htext / 4;
 		stap = vdist + htext;
-		msize = htext + htext / 4;
-		if (size == null)
+		msize = htext + (htext / 4);
+		if (size == null) {
 			size = new Rectangle(0, 0, 0, 2 * vdist);
-		else
+		}
+		else {
 			size.height = vdist + 5;
+		}
 		int count = countItems();
 		MenuItem mi[] = new MenuItem[count];
 		for (int i = 0; i < count; i++) {
 			mi[i] = getItem(i);
 			remove(i);
 		}
-		for (int i = 0; i < count; i++)
+		for (int i = 0; i < count; i++) {
 			add(mi[i]);
+		}
 	}
 
 	// ====================================================================
 
+	@Override
 	public void setFont(Font fnt) {
 		super.setFont(fnt);
 		recalc();
@@ -172,7 +193,7 @@ public class ContextMenu extends Menu {
 
 	private void drawSeparator(Graphics gr, int y) {
 		int x1 = size.x + 2;
-		int x2 = size.x + size.width - 3;
+		int x2 = (size.x + size.width) - 3;
 		y = y - vdist;
 		gr.setColor(Color.gray);
 		gr.drawLine(x1, y - 1, x2, y - 1);
@@ -184,39 +205,49 @@ public class ContextMenu extends Menu {
 
 	public Rectangle getRedrawArea() {
 		int dy = size.y + vdist + vdist;
-		if (prev_option > act_option)
-			return new Rectangle(size.x, dy + act_option * stap, size.width, 2 * msize);
-		else
-			return new Rectangle(size.x, dy + prev_option * stap, size.width, 2 * msize);
+		if (prev_option > act_option) {
+			return new Rectangle(size.x, dy + (act_option * stap), size.width, 2 * msize);
+		}
+		else {
+			return new Rectangle(size.x, dy + (prev_option * stap), size.width, 2 * msize);
+		}
 	}
 
 	// ====================================================================
 
 	private void correctPos() {
-		if (getParent() == null)
+		if (getParent() == null) {
 			return;
+		}
 		Dimension d = ((ContextMenuBar) (getParent())).getParentSize();
-		if (size.x < hdist)
+		if (size.x < hdist) {
 			size.x = hdist;
-		if (size.y < vdist)
+		}
+		if (size.y < vdist) {
 			size.y = vdist;
+		}
 		int dx = size.x + size.width + hdist;
 		int dy = size.y + size.height + vdist;
-		if (dx > d.width)
+		if (dx > d.width) {
 			size.x -= (dx - d.width);
-		if (dy > d.height)
+		}
+		if (dy > d.height) {
 			size.y -= (dy - d.height);
-		if (size.x < 0)
+		}
+		if (size.x < 0) {
 			size.x = 0;
-		if (size.y < 0)
+		}
+		if (size.y < 0) {
 			size.y = 0;
+		}
 	}
 
 	// ====================================================================
 
 	public boolean paint(Graphics gr) {
-		if (!isEnabled())
+		if (!isEnabled()) {
 			return false;
+		}
 		correctPos();
 
 		gr.setFont(getFont());
@@ -229,16 +260,15 @@ public class ContextMenu extends Menu {
 
 		gr.setColor(Color.white);
 		gr.drawLine(size.x, size.y, size.x + size.width, size.y);
-		gr.drawLine(size.x, size.y, size.x, size.y + size.height - 1);
+		gr.drawLine(size.x, size.y, size.x, (size.y + size.height) - 1);
 
 		gr.setColor(col_mark);
-		gr.fillRect(size.x + 3, size.y + vdist + act_option * stap, size.width - 6, msize);
+		gr.fillRect(size.x + 3, size.y + vdist + (act_option * stap), size.width - 6, msize);
 
-		int x = size.x + hdist;
-		int y = size.y + stap;
 		int count = countItems();
-		for (int i = 0; i < count; i++)
+		for (int i = 0; i < count; i++) {
 			drawOption(gr, i);
+		}
 		return true;
 	}
 
@@ -264,21 +294,23 @@ if (state!=null)
 	private void drawCheckit(Graphics gr, int index, String name, int x, int y) {
 		String state = (String) types.get(name);
 		if (state != null) {
-			ContextMenuBar cmb = (ContextMenuBar) (getParent());
-			if (state.equals("1"))
+			getParent();
+			if (state.equals("1")) {
 				for (int i = 0; i < 2; i++) {
-					gr.drawLine(x + hdist / 3 + i, y + stap - htext + vdist, x + hdist / 2 + i, y + stap);
-					gr.drawLine(x + hdist / 2 + i, y + stap, x + hdist - 3 + i, y + stap - htext + vdist);
+					gr.drawLine(x + (hdist / 3) + i, ((y + stap) - htext) + vdist, x + (hdist / 2) + i, y + stap);
+					gr.drawLine(x + (hdist / 2) + i, y + stap, ((x + hdist) - 3) + i, ((y + stap) - htext) + vdist);
 				}
-			// else                   gr.drawImage(off, size.x + hdist/4, size.y + vdist + add, cmb.parent);
+				// else                   gr.drawImage(off, size.x + hdist/4, size.y + vdist + add, cmb.parent);
+			}
 		}
 	}
 
 	// ====================================================================
 
 	private void drawOption(Graphics gr, int index) {
-		if (index >= countItems())
+		if (index >= countItems()) {
 			return;
+		}
 		MenuItem opt = getItem(index);
 		String name = opt.getLabel();
 		int y = size.y + stap;
@@ -289,10 +321,12 @@ if (state!=null)
 				drawSeparator(gr, y + add);
 				return;
 			}
-			if (index != act_option)
+			if (index != act_option) {
 				gr.setColor(Color.black);
-			else
+			}
+			else {
 				gr.setColor(Color.white);
+			}
 			drawCheckit(gr, index, name, size.x, size.y + add);
 			gr.drawString(name, x, y + add);
 		}
@@ -301,8 +335,9 @@ if (state!=null)
 			gr.drawString(name, x, y + add);
 			gr.setColor(Color.white);
 			gr.drawString(name, x + 1, y + 1 + add);
-			if (index != act_option)
+			if (index != act_option) {
 				gr.setColor(Color.darkGray);
+			}
 			drawCheckit(gr, index, name, size.x, size.y + add);
 		}
 
@@ -311,18 +346,19 @@ if (state!=null)
 	// ====================================================================
 
 	public boolean paintPart(Graphics gr) {
-		if (!isEnabled())
+		if (!isEnabled()) {
 			return false;
+		}
 		correctPos();
 
 		gr.setFont(getFont());
 
 		gr.setColor(Color.lightGray);
-		gr.fillRect(size.x + 1, size.y + vdist + prev_option * stap, size.width - 2, msize);
+		gr.fillRect(size.x + 1, size.y + vdist + (prev_option * stap), size.width - 2, msize);
 		drawOption(gr, prev_option);
 
 		gr.setColor(col_mark);
-		gr.fillRect(size.x + 3, size.y + vdist + act_option * stap, size.width - 6, msize);
+		gr.fillRect(size.x + 3, size.y + vdist + (act_option * stap), size.width - 6, msize);
 		drawOption(gr, act_option);
 		return true;
 	}
@@ -346,8 +382,9 @@ if (state!=null)
 	public void pressKey(Event evt) {
 		int num = countItems();
 		boolean flag = true;
-		if (num == 0)
+		if (num == 0) {
 			return;
+		}
 		switch (evt.key) {
 			case Event.UP:
 				flag = decOption();
@@ -356,31 +393,37 @@ if (state!=null)
 				flag = incOption();
 				break;
 		}
-		if (flag)
+		if (flag) {
 			sendEvent(ContextMenuBar.EV_MENU_REDRAW);
+		}
 	}
 
 	// ====================================================================
 
 	public boolean isCheckit(int act) {
 		MenuItem mi = getItem(act);
-		if (mi == null)
+		if (mi == null) {
 			return false;
-		if (types.get(mi.getLabel()) != null)
+		}
+		if (types.get(mi.getLabel()) != null) {
 			return true;
+		}
 		return false;
 	}
 
 	// ====================================================================
 
 	public void invCheckit(int act) {
-		if (!isCheckit(act))
+		if (!isCheckit(act)) {
 			return;
+		}
 		String state = (String) types.get(getItem(act).getLabel());
-		if (state.equals("1"))
+		if (state.equals("1")) {
 			types.put(getItem(act).getLabel(), "0");
-		else
+		}
+		else {
 			types.put(getItem(act).getLabel(), "1");
+		}
 	}
 
 	// ====================================================================
@@ -403,22 +446,26 @@ if (state!=null)
 
 	private boolean incOption() {
 		int num = countItems();
-		if (num <= 0)
+		if (num <= 0) {
 			return false;
+		}
 		prev_option = act_option;
-		for (int i = 0; i < num; i++)
+		for (int i = 0; i < num; i++) {
 			if (act_option < (num - 1)) {
 				act_option++;
-				if (getItem(act_option).getLabel().equals("-"))
+				if (getItem(act_option).getLabel().equals("-")) {
 					continue;
+				}
 				return true;
 			}
 			else {
 				act_option = 0;
-				if (getItem(act_option).getLabel().equals("-"))
+				if (getItem(act_option).getLabel().equals("-")) {
 					continue;
+				}
 				return true;
 			}
+		}
 		return false;
 	}
 
@@ -426,22 +473,26 @@ if (state!=null)
 
 	private boolean decOption() {
 		int num = countItems();
-		if (num <= 0)
+		if (num <= 0) {
 			return false;
+		}
 		prev_option = act_option;
-		for (int i = 0; i < num; i++)
+		for (int i = 0; i < num; i++) {
 			if (act_option > 0) {
 				act_option--;
-				if (getItem(act_option).getLabel().equals("-"))
+				if (getItem(act_option).getLabel().equals("-")) {
 					continue;
+				}
 				return true;
 			}
 			else {
 				act_option = (num - 1);
-				if (getItem(act_option).getLabel().equals("-"))
+				if (getItem(act_option).getLabel().equals("-")) {
 					continue;
+				}
 				return true;
 			}
+		}
 		return false;
 	}
 
@@ -451,8 +502,9 @@ if (state!=null)
 		int num = countItems();
 		boolean flag = true;
 		if ((num == 0) || (!this.inside(evt.x, evt.y))) {
-			if (evt.clickCount >= 1)
+			if (evt.clickCount >= 1) {
 				pressExit();
+			}
 			return;
 		}
 		int option = (evt.y - size.y) / stap;
@@ -460,19 +512,23 @@ if (state!=null)
 			prev_option = act_option;
 			act_option = option;
 		}
-		else
+		else {
 			flag = false;
-		if (flag)
+		}
+		if (flag) {
 			sendEvent(ContextMenuBar.EV_MENU_REDRAW);
-		if ((evt.id == Event.MOUSE_UP))
+		}
+		if ((evt.id == Event.MOUSE_UP)) {
 			pressEnter();
+		}
 	}
 
 	// ====================================================================
 
 	public boolean inside(int x, int y) {
-		if ((x > (size.x + size.width)) || (x < size.x) || (y > (size.y + size.height)) || (y < size.y))
+		if ((x > (size.x + size.width)) || (x < size.x) || (y > (size.y + size.height)) || (y < size.y)) {
 			return false;
+		}
 		return true;
 	}
 
@@ -485,10 +541,12 @@ if (state!=null)
 				pressExit();
 				break;
 			case Event.KEY_PRESS:
-				if (evt.key == 10)
+				if (evt.key == 10) {
 					pressEnter();
-				else
+				}
+				else {
 					pressExit();
+				}
 				break;
 			case Event.KEY_ACTION:
 				pressKey(evt);
@@ -517,8 +575,9 @@ if (state!=null)
 	// ====================================================================
 
 	private void sendEvent(int id) {
-		if (getParent() == null)
+		if (getParent() == null) {
 			return;
+		}
 		Event evt = null;
 		switch (id) {
 			case ContextMenuBar.EV_MENU_REDRAW:
@@ -536,8 +595,9 @@ if (state!=null)
 			}
 				break;
 		}
-		if (evt != null)
+		if (evt != null) {
 			((ContextMenuBar) (getParent())).sendEvent(evt);
+		}
 	}
 
 	// ====================================================================

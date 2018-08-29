@@ -17,10 +17,13 @@
 
 package org.zaval.tools.i18n.translator;
 
-import java.awt.*;
-import org.zaval.awt.*;
-import java.util.*;
-import java.awt.im.*;
+import java.awt.Component;
+import java.awt.Rectangle;
+import java.awt.TextArea;
+import java.awt.im.InputSubset;
+import java.util.Locale;
+
+import org.zaval.awt.EmulatedTextArea;
 
 public class TextAreaWrap {
 	private EmulatedTextArea tf1 = null;
@@ -84,8 +87,9 @@ public class TextAreaWrap {
 	public TextAreaWrap() {
 		flavor = PJAVA;
 		String kind = System.getProperty("inputControls");
-		if (kind != null && kind.equals("native"))
+		if ((kind != null) && kind.equals("native")) {
 			flavor = NATIVE;
+		}
 		initControls();
 	}
 
@@ -99,8 +103,9 @@ public class TextAreaWrap {
 			tf2 = new TextArea("", 3, 20, TextArea.SCROLLBARS_NONE);
 			tf2.enableInputMethods(true);
 		}
-		else
+		else {
 			tf1 = new EmulatedTextArea(true, false, 3, 20);
+		}
 	}
 
 	public String getText() {
@@ -111,22 +116,27 @@ public class TextAreaWrap {
 		if (flavor == NATIVE) {
 			tf2.setText(text);
 		}
-		else
+		else {
 			tf1.setText(text);
+		}
 	}
 
 	public void setVisible(boolean show) {
-		if (flavor == NATIVE)
+		if (flavor == NATIVE) {
 			tf2.setVisible(show);
-		else
+		}
+		else {
 			tf1.setVisible(show);
+		}
 	}
 
 	public void requestFocus() {
-		if (flavor == NATIVE)
+		if (flavor == NATIVE) {
 			requestFocus();
-		else
+		}
+		else {
 			tf1.requestFocus();
+		}
 	}
 
 	public Component getControl() {
@@ -137,21 +147,26 @@ public class TextAreaWrap {
 		if (flavor == NATIVE) {
 			tf2.setLocale(l);
 		}
-		if (getControl().getInputContext() != null)
+		if (getControl().getInputContext() != null) {
 			getControl().getInputContext().setCharacterSubsets(usedInputs);
+		}
 	}
 
 	public void selectAll() {
-		if (flavor == NATIVE)
+		if (flavor == NATIVE) {
 			tf2.selectAll();
-		else
+		}
+		else {
 			tf1.selectAll();
+		}
 	}
 
 	public Rectangle getCursorShape() {
-		if (flavor == NATIVE)
+		if (flavor == NATIVE) {
 			return null;
-		else
+		}
+		else {
 			return tf1.getCursorShape();
+		}
 	}
 }

@@ -17,7 +17,9 @@
 
 package org.zaval.util;
 
-import java.util.*;
+import java.util.Hashtable;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class SafeResourceBundle {
 	protected ResourceBundle rb = null;
@@ -34,8 +36,9 @@ public class SafeResourceBundle {
 				rb = ResourceBundle.getBundle(resName);
 				Locale.setDefault(saved);
 			}
-			else
+			else {
 				rb = ResourceBundle.getBundle(resName, loc);
+			}
 		}
 		catch (Exception e) {
 			System.err.println(resName + ": resource not found");
@@ -43,8 +46,9 @@ public class SafeResourceBundle {
 	}
 
 	public String getString(String k) {
-		if (rb == null)
+		if (rb == null) {
 			return FAILURE_STRING;
+		}
 		String res = null;
 		try {
 			res = rb.getString(k);
@@ -52,8 +56,9 @@ public class SafeResourceBundle {
 		catch (Exception e) {
 			System.err.println(k + ": resource not found");
 		}
-		if (res != null)
+		if (res != null) {
 			return res;
+		}
 		return FAILURE_STRING;
 	}
 
@@ -63,15 +68,17 @@ public class SafeResourceBundle {
 		int ind, ind2;
 		do {
 			ind = templ.indexOf(START_VAR);
-			if (ind < 0)
+			if (ind < 0) {
 				res += templ;
+			}
 			else {
 				res += templ.substring(0, ind);
 				ind2 = templ.indexOf(FINISH_VAR, ind);
 				if (ind2 >= 0) {
 					String repl = (String) ht.get(templ.substring(ind + 2, ind2));
-					if (repl == null)
+					if (repl == null) {
 						repl = "";
+					}
 					res += repl;
 					templ = templ.substring(ind2 + 2);
 				}
@@ -85,8 +92,9 @@ public class SafeResourceBundle {
 	}
 
 	public static Locale parseSuffix(String suffix) {
-		if (suffix == null || suffix.length() == 0)
+		if ((suffix == null) || (suffix.length() == 0)) {
 			return null;
+		}
 		int undInd = suffix.indexOf('_');
 		String sl = suffix;
 		String sc = "";

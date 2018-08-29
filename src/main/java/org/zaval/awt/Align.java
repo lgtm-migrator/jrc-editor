@@ -35,8 +35,9 @@ public class Align implements AlignConstants {
 	 * @param a new int value of the align property.
 	 */
 	public void setAlign(int a) {
-		if (align == a)
+		if (align == a) {
 			return;
+		}
 		code = align2insets(a);
 		alignStr = align2str(a);
 		align = a;
@@ -55,8 +56,9 @@ public class Align implements AlignConstants {
 	 * @param i new java.awt.Insets value of the align property.
 	 */
 	public void setAlignInsets(Insets i) {
-		if (i == code)
+		if (i == code) {
 			return;
+		}
 		align = insets2align(i);
 	}
 
@@ -79,66 +81,70 @@ public class Align implements AlignConstants {
 
 	public static Insets align2insets(int a) {
 		Insets i = new Insets(-1, -1, -1, -1);
-		i.top = ((a & Align.TOP) > 0) ? 1 : 0;
-		i.left = ((a & Align.LEFT) > 0) ? 1 : 0;
-		i.bottom = ((a & Align.BOTTOM) > 0) ? 1 : 0;
-		i.right = ((a & Align.RIGHT) > 0) ? 1 : 0;
-		if (!check(i))
+		i.top = ((a & AlignConstants.TOP) > 0) ? 1 : 0;
+		i.left = ((a & AlignConstants.LEFT) > 0) ? 1 : 0;
+		i.bottom = ((a & AlignConstants.BOTTOM) > 0) ? 1 : 0;
+		i.right = ((a & AlignConstants.RIGHT) > 0) ? 1 : 0;
+		if (!check(i)) {
 			return null;
+		}
 		return i;
 	}
 
 	public static String align2str(int a) {
 		String r = null;
 		switch (a) {
-			case Align.TOP:
-				r = Align.STR_TOP;
+			case AlignConstants.TOP:
+				r = AlignConstants.STR_TOP;
 				break;
-			case Align.BOTTOM:
-				r = Align.STR_BOTTOM;
+			case AlignConstants.BOTTOM:
+				r = AlignConstants.STR_BOTTOM;
 				break;
-			case Align.LEFT:
-				r = Align.STR_LEFT;
+			case AlignConstants.LEFT:
+				r = AlignConstants.STR_LEFT;
 				break;
-			case Align.RIGHT:
-				r = Align.STR_RIGHT;
+			case AlignConstants.RIGHT:
+				r = AlignConstants.STR_RIGHT;
 				break;
-			case Align.TLEFT:
-				r = Align.STR_TLEFT;
+			case AlignConstants.TLEFT:
+				r = AlignConstants.STR_TLEFT;
 				break;
-			case Align.TRIGHT:
-				r = Align.STR_TRIGHT;
+			case AlignConstants.TRIGHT:
+				r = AlignConstants.STR_TRIGHT;
 				break;
-			case Align.BRIGHT:
-				r = Align.STR_BRIGHT;
+			case AlignConstants.BRIGHT:
+				r = AlignConstants.STR_BRIGHT;
 				break;
-			case Align.BLEFT:
-				r = Align.STR_BLEFT;
+			case AlignConstants.BLEFT:
+				r = AlignConstants.STR_BLEFT;
 				break;
-			case Align.CENTER:
-				r = Align.STR_CENTER;
+			case AlignConstants.CENTER:
+				r = AlignConstants.STR_CENTER;
 				break;
 		}
 		return r;
 	}
 
 	public static int insets2align(Insets i) {
-		if (i == null || !check(i))
+		if ((i == null) || !check(i)) {
 			return -1;
+		}
 		int a = 0;
-		a |= ((i.top > 0) ? Align.TOP : 0);
-		a |= ((i.left > 0) ? Align.LEFT : 0);
-		a |= ((i.bottom > 0) ? Align.BOTTOM : 0);
-		a |= ((i.right > 0) ? Align.RIGHT : 0);
+		a |= ((i.top > 0) ? AlignConstants.TOP : 0);
+		a |= ((i.left > 0) ? AlignConstants.LEFT : 0);
+		a |= ((i.bottom > 0) ? AlignConstants.BOTTOM : 0);
+		a |= ((i.right > 0) ? AlignConstants.RIGHT : 0);
 		return a;
 	}
 
 	protected static boolean check(Insets i) {
-		if ((i.top > 0 && i.bottom > 0) || (i.left > 0 && i.right > 0))
+		if (((i.top > 0) && (i.bottom > 0)) || ((i.left > 0) && (i.right > 0))) {
 			return false;
+		}
 
-		if (i.top < 0 || i.bottom < 0 || i.left < 0 || i.right < 0)
+		if ((i.top < 0) || (i.bottom < 0) || (i.left < 0) || (i.right < 0)) {
 			return false;
+		}
 		return true;
 	}
 }

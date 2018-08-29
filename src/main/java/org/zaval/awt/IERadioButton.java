@@ -17,7 +17,8 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
 
 public class IERadioButton extends BaseCheckbox {
 	public IERadioButton() {
@@ -32,14 +33,17 @@ public class IERadioButton extends BaseCheckbox {
 		setLabel(label);
 	}
 
+	@Override
 	public void paint(Graphics g, int x, int y, int width, int height) {
 		int xx = x + width;
 		int yy = y + height;
 
 		g.setColor(Color.lightGray);
-		if (isEnabled())
-			if (!mouse_down)
+		if (isEnabled()) {
+			if (!mouse_down) {
 				g.setColor(Color.white);
+			}
+		}
 
 		g.fillOval(x, y, width, height);
 		g.setColor(Color.white);
@@ -67,18 +71,23 @@ public class IERadioButton extends BaseCheckbox {
 		g.drawLine(xx - 2, y + 4, xx - 2, yy - 5);
 		g.drawLine(xx - 3, y + 3, xx - 3, y + 3);
 
-		if (isEnabled())
+		if (isEnabled()) {
 			g.setColor(Color.black);
-		else
+		}
+		else {
 			g.setColor(Color.gray);
+		}
 
-		if (state)
+		if (state) {
 			g.fillOval(x + 4, y + 4, 4, 4);
+		}
 	}
 
+	@Override
 	protected boolean condition() {
-		if (getState())
+		if (getState()) {
 			return false;
+		}
 		return true;
 	}
 }

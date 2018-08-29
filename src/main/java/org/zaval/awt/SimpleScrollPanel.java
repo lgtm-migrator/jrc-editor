@@ -17,12 +17,18 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.LayoutManager;
+import java.awt.Panel;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Scrollbar;
 
 public class SimpleScrollPanel extends Panel implements LayoutManager {
-	private boolean isHor = true;
-	private boolean isVer = true;
 	private Scrollbar hor;
 	private Scrollbar ver;
 	private Component comp;
@@ -58,6 +64,7 @@ public class SimpleScrollPanel extends Panel implements LayoutManager {
 		panel.setBackground(getBackground());
 	}
 
+	@Override
 	public void setBackground(Color c) {
 		super.setBackground(c);
 		hor.setBackground(c);
@@ -73,17 +80,22 @@ public class SimpleScrollPanel extends Panel implements LayoutManager {
 		Event.SCROLL_PAGE_UP };
 
 	private boolean drop(Event e) {
-		if (!(e.target instanceof Scrollbar))
+		if (!(e.target instanceof Scrollbar)) {
 			return true;
-		for (int i = 0; i < table.length; ++i)
-			if (e.id == table[i])
+		}
+		for (int element : table) {
+			if (e.id == element) {
 				return false;
+			}
+		}
 		return true;
 	}
 
+	@Override
 	public boolean handleEvent(Event evt) {
-		if (drop(evt))
+		if (drop(evt)) {
 			return super.handleEvent(evt);
+		}
 		if (evt.target == ver) {
 			comp.move(comp.bounds().x, -ver.getValue());
 			checkValid();
@@ -118,35 +130,44 @@ public class SimpleScrollPanel extends Panel implements LayoutManager {
 		return new Point(0, 0);
 	}
 
+	@Override
 	public void addLayoutComponent(String name, Component comp) {
 	}
 
+	@Override
 	public void removeLayoutComponent(Component comp) {
 	}
 
+	@Override
 	public Dimension preferredLayoutSize(Container parent) {
 		Dimension zet = comp.preferredSize();
 //   return zet;
-		if (zet.width == 0 || zet.height == 0)
+		if ((zet.width == 0) || (zet.height == 0)) {
 			zet = comp.size();
+		}
 		zet.width += ver.preferredSize().width;
 		zet.height += hor.preferredSize().height;
-		if (auf == null)
+		if (auf == null) {
 			return zet;
-		else
+		}
+		else {
 			return auf;
 //   return oops(auf,zet);
+		}
 	}
 
+	@Override
 	public Dimension minimumLayoutSize(Container parent) {
 		Dimension zet = comp.minimumSize();
 //   return zet;
-		if (zet.width == 0 || zet.height == 0)
+		if ((zet.width == 0) || (zet.height == 0)) {
 			zet = comp.size();
+		}
 		zet.width += ver.preferredSize().width;
 		zet.height += hor.preferredSize().height;
-		if (auf == null)
+		if (auf == null) {
 			return zet;
+		}
 		return oops(auf, zet);
 	}
 
@@ -157,19 +178,18 @@ public class SimpleScrollPanel extends Panel implements LayoutManager {
 		return new Dimension(w, h);
 	}
 
+	@Override
 	public void layoutContainer(Container parent) {
 		Dimension x = comp.preferredSize();
-		if (x.width == 0 || x.height == 0)
+		if ((x.width == 0) || (x.height == 0)) {
 			x = comp.size();
+		}
 		comp.resize(x.width, x.height);
 		Rectangle r = comp.bounds();
-		if (r.x < 0 || r.y < 0)
+		if ((r.x < 0) || (r.y < 0)) {
 			comp.move(0, 0);
+		}
 		checkForSVH();
-	}
-
-	private Component get0(Container c) {
-		return c.getComponent(0);
 	}
 
 	public void setMaxSize(Dimension auf) {
@@ -178,8 +198,9 @@ public class SimpleScrollPanel extends Panel implements LayoutManager {
 
 	private void checkForSVH() {
 		Dimension x = comp.preferredSize();
-		if (x.width == 0 || x.height == 0)
+		if ((x.width == 0) || (x.height == 0)) {
 			x = comp.size();
+		}
 		Rectangle r = bounds();
 		int hor_h = hor.preferredSize().height;
 		int ver_w = ver.preferredSize().width;
@@ -189,12 +210,13 @@ public class SimpleScrollPanel extends Panel implements LayoutManager {
 		boolean seth = false;
 		boolean setv = false;
 
-		seth = (x.width > wx) || ((x.height > wy) && (x.width > wx - ver_w));
-		setv = (x.height > wy) || ((x.width > wx) && (x.height > wy - hor_h));
+		seth = (x.width > wx) || ((x.height > wy) && (x.width > (wx - ver_w)));
+		setv = (x.height > wy) || ((x.width > wx) && (x.height > (wy - hor_h)));
 
 		if (!seth) {
-			if (hor.isVisible())
+			if (hor.isVisible()) {
 				hor.hide();
+			}
 			comp.move(0, 0);
 		}
 		else {
@@ -202,14 +224,14 @@ public class SimpleScrollPanel extends Panel implements LayoutManager {
 			hor.resize(r.width - (setv ? ver_w : 0), hor_h);
 			hor.show();
 			wy -= hor_h;
-			int newh = x.width - wx + (x.height > wy ? ver_w : 0);
 			hor.setValues(0, wx - (setv ? ver_w : 0), 0, x.width);
 			hor.setPageIncrement(wx / 2);
 		}
 
 		if (!setv) {
-			if (ver.isVisible())
+			if (ver.isVisible()) {
 				ver.hide();
+			}
 			comp.move(0, 0);
 		}
 		else {
@@ -217,7 +239,6 @@ public class SimpleScrollPanel extends Panel implements LayoutManager {
 			ver.resize(ver_w, r.height - (seth ? hor_h : 0));
 			ver.show();
 			wx -= ver_w;
-			int newh = x.height - wy; // hor_h == ver_w
 			ver.setValues(0, wy, 0, x.height);
 			ver.setPageIncrement(wy / 2);
 		}

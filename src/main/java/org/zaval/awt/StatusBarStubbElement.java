@@ -17,8 +17,10 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
 
 public class StatusBarStubbElement extends StatusBarElement {
 	public StatusBarStubbElement(Component c, int p, Dimension pref) {
@@ -29,6 +31,7 @@ public class StatusBarStubbElement extends StatusBarElement {
 		this(c, p, null);
 	}
 
+	@Override
 	public void paint(Graphics gr) {
 		super.paint(gr);
 		Dimension d = size();
@@ -39,8 +42,9 @@ public class StatusBarStubbElement extends StatusBarElement {
 		int yy = d.height - 2;
 		int y = yy - 2;
 		int x = xx - 2;
-		if (c % 5 > 0)
+		if ((c % 5) > 0) {
 			c++;
+		}
 
 		for (int i = 0; i < c; i++) {
 			gr.setColor(Color.gray);

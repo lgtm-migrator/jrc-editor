@@ -17,9 +17,8 @@
 
 package org.zaval.awt.event;
 
-import java.util.*;
-
 public class ValidateListenerSupport extends ListenerSupport {
+	@Override
 	public boolean perform(Event e) {
 		for (int i = 0; i < v.size(); i++) {
 			ValidateListener vl = (ValidateListener) v.elementAt(i);

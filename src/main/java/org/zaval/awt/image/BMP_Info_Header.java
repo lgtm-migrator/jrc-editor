@@ -17,8 +17,7 @@
 
 package org.zaval.awt.image;
 
-import java.io.*;
-import java.awt.image.*;
+import java.io.IOException;
 
 // BMP Header, Win3.1 and on ( version 3 BMP )
 // BMP Information header
@@ -50,16 +49,19 @@ class BMP_Info_Header {
 		Width = in.readInt();
 		Height = in.readInt();
 		NumOfPlanes = in.readShort();
-		if (NumOfPlanes != 1)
+		if (NumOfPlanes != 1) {
 			throw new IllegalArgumentException("NumOfPlanes not 1" + NumOfPlanes);
+		}
 
 		BitsPerPixel = in.readShort();
-		if (BitsPerPixel != 24 && BitsPerPixel != 16 && BitsPerPixel != 8 && BitsPerPixel != 4 && BitsPerPixel != 1)
+		if ((BitsPerPixel != 24) && (BitsPerPixel != 16) && (BitsPerPixel != 8) && (BitsPerPixel != 4) && (BitsPerPixel != 1)) {
 			throw new IllegalArgumentException("Illegal BitsPerPixel " + BitsPerPixel);
+		}
 
 		CompressionMethod = in.readInt();
-		if (CompressionMethod < 0 || CompressionMethod > BMP_Header.COMPRESS_RLE4)
+		if ((CompressionMethod < 0) || (CompressionMethod > BMP_Header.COMPRESS_RLE4)) {
 			throw new IllegalArgumentException("Illegal CompressionMethod " + CompressionMethod);
+		}
 		BitmapSize = in.readInt();
 		HorizRes = in.readInt();
 		VertRes = in.readInt();

@@ -17,10 +17,23 @@
 
 package org.zaval.tools.i18n.translator;
 
-import org.zaval.awt.*;
+import java.awt.Button;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.LayoutManager;
+import java.awt.Panel;
+import java.awt.Toolkit;
 
-import java.awt.*;
-import java.util.*;
+import org.zaval.awt.ExGridLayout;
+import org.zaval.awt.IELabel;
 
 public class LangDialog extends Dialog {
 	private java.awt.List edit;
@@ -54,10 +67,11 @@ public class LangDialog extends Dialog {
 
 	public void setList(LangItem[] t) {
 		edit.clear();
-		if (t == null)
+		if (t == null) {
 			return;
-		for (int j = 0; j < t.length; ++j) {
-			String s = t[j].getLangId() + ": " + t[j].getLangDescription();
+		}
+		for (LangItem element : t) {
+			String s = element.getLangId() + ": " + element.getLangDescription();
 			edit.add(s);
 		}
 		edit.select(0); // english is always selected
@@ -77,15 +91,16 @@ public class LangDialog extends Dialog {
 		label.setText(l);
 	}
 
+	@Override
 	public boolean handleEvent(Event e) {
-		if (e.id == Event.WINDOW_DESTROY || (e.target == cancel && e.id == Event.ACTION_EVENT)) {
+		if ((e.id == Event.WINDOW_DESTROY) || ((e.target == cancel) && (e.id == Event.ACTION_EVENT))) {
 			isApply = false;
 			dispose();
 		}
 
-		if (e.target == ok && e.id == Event.ACTION_EVENT) {
+		if ((e.target == ok) && (e.id == Event.ACTION_EVENT)) {
 			isApply = true;
-			listener.postEvent(new Event(this, e.ACTION_EVENT, null));
+			listener.postEvent(new Event(this, Event.ACTION_EVENT, null));
 			dispose();
 		}
 		return super.handleEvent(e);
@@ -115,8 +130,9 @@ public class LangDialog extends Dialog {
 		cc.weightx = wx;
 		cc.weighty = wy;
 
-		if (t + b + l + r > 0)
+		if ((t + b + l + r) > 0) {
 			cc.insets = new Insets(t, l, b, r);
+		}
 		LayoutManager lm = c.getLayout();
 		if (lm instanceof GridBagLayout) {
 			GridBagLayout gbl = (GridBagLayout) lm;
@@ -137,14 +153,15 @@ public class LangDialog extends Dialog {
 		constrain(c, p, x, y, w, h, f, a, 1.0, 1.0, 0, 0, 5, 3);
 	}
 
+	@Override
 	public boolean keyDown(Event e, int key) {
-		if ((e.target == ok && key == Event.ENTER) || (e.target == edit && key == Event.ENTER)) {
+		if (((e.target == ok) && (key == Event.ENTER)) || ((e.target == edit) && (key == Event.ENTER))) {
 			isApply = true;
-			listener.postEvent(new Event(this, e.ACTION_EVENT, null));
+			listener.postEvent(new Event(this, Event.ACTION_EVENT, null));
 			dispose();
 			return true;
 		}
-		if (e.target == cancel && key == Event.ENTER) {
+		if ((e.target == cancel) && (key == Event.ENTER)) {
 			isApply = false;
 			dispose();
 			return true;
@@ -152,6 +169,7 @@ public class LangDialog extends Dialog {
 		return false;
 	}
 
+	@Override
 	public Dimension preferredSize() {
 		Dimension d = super.preferredSize();
 		d.width *= 2;

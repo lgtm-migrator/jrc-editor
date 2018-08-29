@@ -17,8 +17,15 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Event;
+import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.Rectangle;
+import java.util.Vector;
 
 public class Resizer extends Canvas {
 	private int startx;
@@ -34,17 +41,21 @@ public class Resizer extends Canvas {
 		_enable = isEnabled();
 	}
 
+	@Override
 	public void enable() {
 		enable(true);
 	}
 
+	@Override
 	public void disable() {
 		enable(false);
 	}
 
+	@Override
 	public void enable(boolean e) {
-		if (_enable == e)
+		if (_enable == e) {
 			return;
+		}
 		super.enable(_enable = e);
 		if (!_enable) {
 			drag = false;
@@ -53,11 +64,12 @@ public class Resizer extends Canvas {
 		repaint();
 	}
 
+	@Override
 	public void paint(Graphics gr) {
 		if (_enable) {
 			Rectangle r = bounds();
 			int x = 0, y = 0;
-			int w = r.width - 2 * x - 1, h = r.height - 2 * y - 1;
+			int w = r.width - (2 * x) - 1, h = r.height - (2 * y) - 1;
 			gr.setColor(Color.lightGray);
 			gr.fillRect(x, y, x + w, y + h);
 			gr.setColor(Color.white);
@@ -70,32 +82,38 @@ public class Resizer extends Canvas {
 	}
 
 	private void paintLine(Component c, int x) {
-		for (int i = 0; i < bounds().width; i++, x++)
+		for (int i = 0; i < bounds().width; i++, x++) {
 			drawVLineOnComponent(c, bounds().y, bounds().height + bounds().y, x, Color.darkGray);
+		}
 	}
 
 	private static void drawVLineOnComponent(Component c, int y1, int y2, int x, Color col) {
-		if (c == null)
+		if (c == null) {
 			return;
+		}
 		Rectangle d = c.bounds();
-		if (d.height <= y2)
+		if (d.height <= y2) {
 			y2 = d.height - 1;
+		}
 
 		Component lc = getNextBottomChild(c, y1 + 1, x);
 		int yy1, yy2;
-		while (lc != null && y1 < y2) {
+		while ((lc != null) && (y1 < y2)) {
 			Rectangle lr = lc.bounds();
 			yy1 = y1 - lr.y;
-			if (yy1 < 0)
+			if (yy1 < 0) {
 				yy1 = 0;
+			}
 
 			yy2 = y2 - lr.y;
-			if (yy2 >= lr.height)
+			if (yy2 >= lr.height) {
 				yy2 = lr.height - 1;
+			}
 
 			int xx = x - lr.x;
-			if (yy2 <= yy1)
+			if (yy2 <= yy1) {
 				break;
+			}
 
 			if (lr.y > y1) {
 				Graphics g = c.getGraphics();
@@ -126,24 +144,27 @@ public class Resizer extends Canvas {
 	}
 
 	private static Component getNextBottomChild(Component parent, int y, int x) {
-		if (!(parent instanceof Container))
+		if (!(parent instanceof Container)) {
 			return null;
+		}
 
 		Component c = getComponentAtFix((Container) parent, x, y); //parent.getComponentAt(x, y);
-		if (c != null && c != parent)
+		if ((c != null) && (c != parent)) {
 			return c;
+		}
 
 		Component[] comps = ((Container) parent).getComponents();
 		Component find = null;
 		int fy = Integer.MAX_VALUE;
-		for (int i = 0; i < comps.length; i++) {
-			Rectangle r = comps[i].bounds();
-			if (x < r.x || x > (r.x + r.width))
+		for (Component comp : comps) {
+			Rectangle r = comp.bounds();
+			if ((x < r.x) || (x > (r.x + r.width))) {
 				continue;
+			}
 
-			if (r.y < fy && r.y > y) {
+			if ((r.y < fy) && (r.y > y)) {
 				fy = r.y;
-				find = comps[i];
+				find = comp;
 			}
 		}
 		return find;
@@ -153,11 +174,13 @@ public class Resizer extends Canvas {
 		Component[] c = top.getComponents();
 		Vector v = new Vector();
 		for (int i = 0; i < c.length; i++) {
-			if (!c[i].isVisible())
+			if (!c[i].isVisible()) {
 				continue;
+			}
 			Rectangle b = c[i].bounds();
-			if (b.inside(x, y))
+			if (b.inside(x, y)) {
 				v.addElement(c[i]);
+			}
 		}
 
 		if (v.size() > 0) {
@@ -168,8 +191,9 @@ public class Resizer extends Canvas {
 
 	private void setCursor0(int c) {
 		Component f = this;
-		while ((f != null) && !(f instanceof Frame))
+		while ((f != null) && !(f instanceof Frame)) {
 			f = f.getParent();
+		}
 		if (f instanceof Frame) {
 			((Frame) f).setCursor(c);
 		}
@@ -180,20 +204,23 @@ public class Resizer extends Canvas {
 		ResizeLayout rl = (ResizeLayout) getParent().getLayout();
 		Rectangle rp = getParent().bounds();
 
-		int pos = r.x + x - startx - r.width;
+		int pos = (r.x + x) - startx - r.width;
 		int left = 0;
-		int right = rp.width - 2 * r.width + rp.x;
+		int right = (rp.width - (2 * r.width)) + rp.x;
 
-		if (pos > right)
+		if (pos > right) {
 			pos = right;
-		if (pos < left)
+		}
+		if (pos < left) {
 			pos = left;
+		}
 
 		rl.setSeparator(pos, getParent());
 
 		oldrg = startx = 0;
 	}
 
+	@Override
 	public boolean mouseEnter(Event ev, int x, int y) {
 		if (_enable) {
 			setCursor0(Frame.E_RESIZE_CURSOR);
@@ -202,10 +229,11 @@ public class Resizer extends Canvas {
 		return super.mouseEnter(ev, x, y);
 	}
 
+	@Override
 	public boolean mouseExit(Event ev, int x, int y) {
 		if (_enable) {
 			if (drag) {
-				paintLine(getParent(), oldrg + bounds().x - startx);
+				paintLine(getParent(), (oldrg + bounds().x) - startx);
 				drag = false;
 			}
 			setCursor0(Frame.DEFAULT_CURSOR);
@@ -214,24 +242,27 @@ public class Resizer extends Canvas {
 		return super.mouseExit(ev, x, y);
 	}
 
+	@Override
 	public boolean mouseDown(Event ev, int x, int y) {
-		if (_enable && inside(x, y) && ev.modifiers == 0) {
-			if (drag)
+		if (_enable && inside(x, y) && (ev.modifiers == 0)) {
+			if (drag) {
 				return super.mouseDown(ev, x, y);
+			}
 			startx = x;
 			oldrg = x;
 			state = drag = true;
-			paintLine(getParent(), oldrg + bounds().x - startx);
+			paintLine(getParent(), (oldrg + bounds().x) - startx);
 			setCursor0(Frame.E_RESIZE_CURSOR);
 			return true;
 		}
 		return super.mouseDown(ev, x, y);
 	}
 
+	@Override
 	public boolean mouseUp(Event ev, int x, int y) {
 		if (_enable) {
 			if (state) {
-				paintLine(getParent(), oldrg + bounds().x - startx);
+				paintLine(getParent(), (oldrg + bounds().x) - startx);
 				resizeme(x);
 				state = drag = false;
 			}
@@ -240,16 +271,20 @@ public class Resizer extends Canvas {
 		return super.mouseUp(ev, x, y);
 	}
 
+	@Override
 	public boolean mouseDrag(Event ev, int x, int y) {
 		if (_enable) {
 			if (state) {
-				if (oldrg == x)
+				if (oldrg == x) {
 					return super.mouseDrag(ev, x, y);
-				if (drag)
-					paintLine(getParent(), oldrg + bounds().x - startx);
-				else
+				}
+				if (drag) {
+					paintLine(getParent(), (oldrg + bounds().x) - startx);
+				}
+				else {
 					drag = true;
-				paintLine(getParent(), x + bounds().x - startx);
+				}
+				paintLine(getParent(), (x + bounds().x) - startx);
 				oldrg = x;
 			}
 			return true;

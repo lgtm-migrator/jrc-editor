@@ -17,19 +17,79 @@
 
 package org.zaval.tools.i18n.translator;
 
-import java.io.*;
-import java.awt.*;
+import java.awt.AWTEvent;
+import java.awt.BorderLayout;
+import java.awt.Button;
+import java.awt.CheckboxMenuItem;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.FileDialog;
+import java.awt.FlowLayout;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.LayoutManager;
+import java.awt.Menu;
+import java.awt.MenuBar;
+import java.awt.MenuItem;
+import java.awt.MenuShortcut;
+import java.awt.Panel;
+import java.awt.Rectangle;
+import java.awt.TextField;
+import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.event.KeyEvent;
-import java.util.*;
-import java.util.zip.*;
-
-import org.zaval.io.*;
-import org.zaval.awt.*;
-import org.zaval.awt.peer.TreeNode;
-import org.zaval.awt.dialog.*;
-import org.zaval.util.SafeResourceBundle;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.io.StringReader;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Locale;
+import java.util.StringTokenizer;
+import java.util.Vector;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.apache.regexp.RE;
+import org.zaval.awt.AlignConstants;
+import org.zaval.awt.BorderedPanel;
+import org.zaval.awt.ContextMenu;
+import org.zaval.awt.ContextMenuBar;
+import org.zaval.awt.EmulatedTextField;
+import org.zaval.awt.GraphTree;
+import org.zaval.awt.IELabel;
+import org.zaval.awt.LevelTree;
+import org.zaval.awt.ResizeLayout;
+import org.zaval.awt.Resizer;
+import org.zaval.awt.ResultField;
+import org.zaval.awt.SimpleScrollPanel;
+import org.zaval.awt.SpeedButton;
+import org.zaval.awt.StatusBar;
+import org.zaval.awt.StatusBarElement;
+import org.zaval.awt.StatusBarStubbElement;
+import org.zaval.awt.TextAlignArea;
+import org.zaval.awt.Toolbar;
+import org.zaval.awt.ToolkitResolver;
+import org.zaval.awt.dialog.EditDialog;
+import org.zaval.awt.dialog.MessageBox2;
+import org.zaval.awt.peer.TreeNode;
+import org.zaval.io.IniFile;
+import org.zaval.io.InputIniFile;
+import org.zaval.util.SafeResourceBundle;
 
 public class Translator extends Frame implements TranslatorConstants, java.awt.event.AWTEventListener {
 	private MessageBox2 closeDialog = null;
@@ -416,6 +476,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		tbar2menu = _tbar2menu;
 	}
 
+	@Override
 	public boolean handleEvent(Event e) {
 		if (e.id == Event.WINDOW_DESTROY) {
 			onClose();
@@ -423,9 +484,10 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		}
 
 		if (e.target == tree) {
-			if (e.id == REMOVE_REQUIRED)
+			if (e.id == REMOVE_REQUIRED) {
 				onDeleteKey();
-			if (e.target == tree && wasSelectedKey != tree.getSelectedText()) {
+			}
+			if ((e.target == tree) && (wasSelectedKey != tree.getSelectedText())) {
 				setTranslations();
 				invokeAutoFit();
 			}
@@ -435,23 +497,28 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		return super.handleEvent(e);
 	}
 
+	@Override
 	public void eventDispatched(AWTEvent event) {
-		if (event.getID() != java.awt.event.KeyEvent.KEY_TYPED)
+		if (event.getID() != java.awt.event.KeyEvent.KEY_TYPED) {
 			return;
-		if (!(event instanceof java.awt.event.KeyEvent))
+		}
+		if (!(event instanceof java.awt.event.KeyEvent)) {
 			return;
+		}
 		java.awt.event.KeyEvent ke = (java.awt.event.KeyEvent) event;
-		if (ke.getKeyChar() != '\t')
+		if (ke.getKeyChar() != '\t') {
 			return;
+		}
 		moveFocus();
 	}
 
+	@Override
 	public boolean keyDown(Event e, int key) {
-		if (e.target == keyName && key == Event.ENTER) {
+		if ((e.target == keyName) && (key == Event.ENTER)) {
 			onInsertKey();
 			return true;
 		}
-		else if (e.target instanceof Button && key == Event.ENTER) {
+		else if ((e.target instanceof Button) && (key == Event.ENTER)) {
 			action(e, null);
 			return true;
 		}
@@ -459,27 +526,35 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		return false;
 	}
 
+	@Override
 	public boolean action(Event e, Object arg) {
 		if (e.target instanceof Toolbar) {
 			int pos = Integer.parseInt((String) arg);
-			if (pos < 0 || pos >= tbar2menu.length)
+			if ((pos < 0) || (pos >= tbar2menu.length)) {
 				return false;
+			}
 			e.target = tbar2menu[pos];
 		}
 
-		if (e.target == statisticsMenu)
+		if (e.target == statisticsMenu) {
 			onStatistics();
-		if (e.target == searchMenu)
+		}
+		if (e.target == searchMenu) {
 			onSearch();
-		if (e.target == searchAgainMenu)
+		}
+		if (e.target == searchAgainMenu) {
 			onSearchAgain();
-		if (e.target == replaceToMenu)
+		}
+		if (e.target == replaceToMenu) {
 			onReplace();
+		}
 
-		if (e.target == expandNodeMenu || e.target == ctNodeExpandMenu)
+		if ((e.target == expandNodeMenu) || (e.target == ctNodeExpandMenu)) {
 			expand(tree.getSelectedNode());
-		if (e.target == collapseNodeMenu || e.target == ctNodeCollapseMenu)
+		}
+		if ((e.target == collapseNodeMenu) || (e.target == ctNodeCollapseMenu)) {
 			collapse(tree.getSelectedNode());
+		}
 		if (e.target == expandTreeMenu) {
 			tree.expandAll();
 			tree.repaint();
@@ -488,8 +563,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			tree.collapseAll();
 			tree.repaint();
 		}
-		if (e.target == hideTransMenu)
+		if (e.target == hideTransMenu) {
 			hideTranslated(hideTransMenu.getState());
+		}
 		if (e.target == dropComment) {
 			commField.setText("");
 			setTranslations();
@@ -520,8 +596,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 				java.awt.datatransfer.Clipboard c = java.awt.Toolkit.getDefaultToolkit().getSystemClipboard();
 				java.awt.datatransfer.StringSelection s2 = new java.awt.datatransfer.StringSelection(cur.getSelectedText());
 				c.setContents(s2, s2);
-				if (cur.getSelectedText().length() > 0)
+				if (cur.getSelectedText().length() > 0) {
 					cur.setText(cur.getText().substring(0, cur.getSelectionStart()) + cur.getText().substring(cur.getSelectionEnd()));
+				}
 			}
 		}
 		if (e.target == editPasteMenu) {
@@ -537,17 +614,20 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 				java.awt.datatransfer.Transferable t = c.getContents("e");
 
 				String nt = "";
-				if (t.isDataFlavorSupported(java.awt.datatransfer.DataFlavor.stringFlavor))
+				if (t.isDataFlavorSupported(java.awt.datatransfer.DataFlavor.stringFlavor)) {
 					try {
 						nt = (String) t.getTransferData(java.awt.datatransfer.DataFlavor.stringFlavor);
 					}
 					catch (Exception ex) {
 					}
+				}
 
-				if (cur.getSelectedText().length() > 0)
+				if (cur.getSelectedText().length() > 0) {
 					cur.setText(cur.getText().substring(0, cur.getSelectionStart()) + nt + cur.getText().substring(cur.getSelectionEnd()));
-				else
+				}
+				else {
 					cur.setText(cur.getText().substring(0, cur.getCaretPosition()) + nt + cur.getText().substring(cur.getCaretPosition()));
+				}
 			}
 		}
 		if (e.target == editDeleteMenu) {
@@ -558,72 +638,97 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			}
 			else if (ccur instanceof TextField) {
 				TextField cur = (TextField) ccur;
-				if (cur.getSelectedText().length() > 0)
+				if (cur.getSelectedText().length() > 0) {
 					cur.setText(cur.getText().substring(0, cur.getSelectionStart()) + cur.getText().substring(cur.getSelectionEnd()));
+				}
 			}
 		}
 
-		if (e.target == newLangMenu)
+		if (e.target == newLangMenu) {
 			onNewResource();
-		if (e.target == insMenu || e.target == ctNewMenu)
+		}
+		if ((e.target == insMenu) || (e.target == ctNewMenu)) {
 			onNewKey();
-		if (e.target == renMenu || e.target == ctNodeRenameMenu)
+		}
+		if ((e.target == renMenu) || (e.target == ctNodeRenameMenu)) {
 			onRenameKey();
-		if (e.target == newBundleMenu)
+		}
+		if (e.target == newBundleMenu) {
 			onNewBundle();
+		}
 		if (e.target == closeMenu) {
 			exitInitiated = false;
 			onClose();
 		}
-		if (e.target == openBundleMenu)
+		if (e.target == openBundleMenu) {
 			onOpen(false);
-		if (e.target == saveBundleMenu)
+		}
+		if (e.target == saveBundleMenu) {
 			onSave();
-		if (e.target == saveAsBundleMenu)
+		}
+		if (e.target == saveAsBundleMenu) {
 			onSaveAs();
-		if (e.target == exitMenu)
+		}
+		if (e.target == exitMenu) {
 			onClose();
-		if (e.target == keyInsertButton)
+		}
+		if (e.target == keyInsertButton) {
 			onInsertKey();
-		if (e.target == keyDeleteButton || e.target == delMenu || e.target == ctNodeDeleteMenu)
+		}
+		if ((e.target == keyDeleteButton) || (e.target == delMenu) || (e.target == ctNodeDeleteMenu)) {
 			onDeleteKey();
-		if (e.target == genMenu)
+		}
+		if (e.target == genMenu) {
 			onGenCode();
-		if (e.target == parseMenu)
+		}
+		if (e.target == parseMenu) {
 			onParseCode();
-		if (e.target == aboutMenu)
+		}
+		if (e.target == aboutMenu) {
 			onAbout();
-		if (e.target == optionsMenu)
+		}
+		if (e.target == optionsMenu) {
 			onOptions();
+		}
 
-		if (e.target == loadXmlBundleMenu)
+		if (e.target == loadXmlBundleMenu) {
 			onLoadXml(false);
-		if (e.target == saveXmlBundleMenu)
+		}
+		if (e.target == saveXmlBundleMenu) {
 			onSaveXml(false);
-		if (e.target == loadUtfBundleMenu)
+		}
+		if (e.target == loadUtfBundleMenu) {
 			onLoadUtf(false);
-		if (e.target == saveUtfBundleMenu)
+		}
+		if (e.target == saveUtfBundleMenu) {
 			onSaveUtf(false);
+		}
 
-		if (e.target == openBundleMenuP)
+		if (e.target == openBundleMenuP) {
 			onOpen(true);
-		if (e.target == loadXmlBundleMenuP)
+		}
+		if (e.target == loadXmlBundleMenuP) {
 			onLoadXml(true);
-		if (e.target == saveXmlBundleMenuP)
+		}
+		if (e.target == saveXmlBundleMenuP) {
 			onSaveXml(true);
-		if (e.target == loadUtfBundleMenuP)
+		}
+		if (e.target == loadUtfBundleMenuP) {
 			onLoadUtf(true);
-		if (e.target == saveUtfBundleMenuP)
+		}
+		if (e.target == saveUtfBundleMenuP) {
 			onSaveUtf(true);
+		}
 
-		if (e.target == loadJarMenu)
+		if (e.target == loadJarMenu) {
 			onLoadJar();
+		}
 
-		if (e.target instanceof CheckboxMenuItem && e.target == showNullsMenu) {
+		if ((e.target instanceof CheckboxMenuItem) && (e.target == showNullsMenu)) {
 			setIndicators(tree.getRootNode());
 			tree.repaint();
 		}
-		if (e.target instanceof CheckboxMenuItem)
+		if (e.target instanceof CheckboxMenuItem) {
 			for (int i = 0; i < langStates.size(); i++) {
 				LangState ls = getLangState(i);
 				if (e.target == ls.box) {
@@ -636,25 +741,30 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 				}
 				ls.box.setState(!ls.hidden);
 			}
-		if (e.target == closeDialog && e.arg instanceof Button) {
+		}
+		if ((e.target == closeDialog) && (e.arg instanceof Button)) {
 			if (!((Button) e.arg).getLabel().equals(CLOSE_BUTTONS[2])) {
-				if (((Button) e.arg).getLabel().equals(CLOSE_BUTTONS[0]))
+				if (((Button) e.arg).getLabel().equals(CLOSE_BUTTONS[0])) {
 					onSave();
-				if (exitInitiated)
+				}
+				if (exitInitiated) {
 					finish();
-				else
+				}
+				else {
 					clear();
+				}
 			}
 			exitInitiated = true;
 		}
-		if (e.target == delDialog && e.arg instanceof Button && ((Button) e.arg).getLabel().equals(DELETE_BUTTONS[0])) {
+		if ((e.target == delDialog) && (e.arg instanceof Button) && ((Button) e.arg).getLabel().equals(DELETE_BUTTONS[0])) {
 			String key = tree.getSelectedText();
 			// remove all subkeys
 			if (key != null) {
 				isDirty = true;
 				TreeNode tn = tree.getNode(key);
-				if (tn != null)
+				if (tn != null) {
 					tn = tn.parent;
+				}
 				bundle.getBundle().removeKeysBeginningWith(key);
 
 				tree.remove(key); // kill children
@@ -665,18 +775,19 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 				setTranslations();
 			}
 		}
-		if (e.target == delDialog && e.arg instanceof Button && ((Button) e.arg).getLabel().equals(DELETE_BUTTONS[1])) {
+		if ((e.target == delDialog) && (e.arg instanceof Button) && ((Button) e.arg).getLabel().equals(DELETE_BUTTONS[1])) {
 			// Only this
 			String key = tree.getSelectedText();
 			if (key != null) {
 				isDirty = true;
 				TreeNode tn = tree.getNode(key);
-				if (tn == null)
+				if (tn == null) {
 					return true;
+				}
 
 				// Not an leaf => don't touch tree but update model
 				bundle.getBundle().removeKey(key);
-				if (tree.enumChild(tn) == null || tree.enumChild(tn).length == 0) {
+				if ((tree.enumChild(tn) == null) || (tree.enumChild(tn).length == 0)) {
 					tree.remove(key);
 					removeLeafs(key);
 				}
@@ -693,22 +804,29 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		}
 
 		if (e.target == repDialog) {
-			if (e.arg instanceof Button && ((Button) e.arg).getLabel().equals(REPLACE_BUTTONS[0]))
+			if ((e.arg instanceof Button) && ((Button) e.arg).getLabel().equals(REPLACE_BUTTONS[0])) {
 				makeReplaceImpl();
-			else if (e.arg instanceof Button && ((Button) e.arg).getLabel().equals(REPLACE_BUTTONS[2]))
+			}
+			else if ((e.arg instanceof Button) && ((Button) e.arg).getLabel().equals(REPLACE_BUTTONS[2])) {
 				replaceTo = null;
+			}
 		}
 
-		if (e.target == keepLastDirMenu)
+		if (e.target == keepLastDirMenu) {
 			keepLastDir = keepLastDirMenu.getState();
-		if (e.target == omitSpacesMenu)
+		}
+		if (e.target == omitSpacesMenu) {
 			omitSpaces = omitSpacesMenu.getState();
-		if (e.target == autoExpandTFMenu)
+		}
+		if (e.target == autoExpandTFMenu) {
 			autoExpandTF = autoExpandTFMenu.getState();
-		if (e.target == allowDotMenu)
+		}
+		if (e.target == allowDotMenu) {
 			allowDot = allowDotMenu.getState();
-		if (e.target == allowUScoreMenu)
+		}
+		if (e.target == allowUScoreMenu) {
 			allowUScore = allowUScoreMenu.getState();
+		}
 
 		if (e.target instanceof MenuItem) {
 			String lbl = ((MenuItem) e.target).getLabel();
@@ -735,8 +853,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		if (wasSelectedKey != null) {
 			for (int i = 0; i < langStates.size(); i++) {
 				LangState ls = getLangState(i);
-				if (ls.hidden)
+				if (ls.hidden) {
 					continue;
+				}
 				String trans = ls.tf.getText();
 				BundleItem bi = bundle.getBundle().getItem(wasSelectedKey);
 				if (bi == null) {
@@ -747,32 +866,37 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 					commField.setEnabled(false);
 				}
 				else {
-					if (bi.getTranslation(ls.name) == null || !bi.getTranslation(ls.name).equals(trans))
+					if ((bi.getTranslation(ls.name) == null) || !bi.getTranslation(ls.name).equals(trans)) {
 						isDirty = true;
+					}
 					bundle.getBundle().updateValue(wasSelectedKey, ls.name, trans);
 				}
 			}
 			String comm = commField == null ? null : commField.getText();
-			if (comm != null && comm.trim().length() == 0)
+			if ((comm != null) && (comm.trim().length() == 0)) {
 				comm = null;
+			}
 			//if ( comm!=null ) {
 			BundleItem bi = bundle.getBundle().getItem(wasSelectedKey);
-			if (bi != null)
+			if (bi != null) {
 				bi.setComment(comm);
+			}
 			//}
 			adjustIndicator(tree.getNode(wasSelectedKey));
 			setIndicators(tree.getNode(wasSelectedKey));
 			tree.repaint();
 		}
-		if (newKey == null)
+		if (newKey == null) {
 			return;
+		}
 
 		BundleItem bi = bundle.getBundle().getItem(newKey);
 		for (int i = 0; i < langStates.size(); i++) {
 			LangState ls = getLangState(i);
 			String ss = bi == null ? null : bi.getTranslation(ls.name);
-			if (ss == null)
+			if (ss == null) {
 				ss = "";
+			}
 			if (bi == null) {
 				ls.tf.setVisible(false);
 				ls.label.setVisible(false);
@@ -786,8 +910,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			ls.tf.setText(ss);
 		}
 		String commText = bi == null ? " ** " + RC("tools.translator.message.noentry") + " **" : bi.getComment();
-		if (commField != null)
+		if (commField != null) {
 			commField.setText(commText == null ? "" : commText);
+		}
 		keynLab.setText("Key: " + newKey);
 		keynLab.repaint();
 		sbl2.setText(newKey);
@@ -795,8 +920,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 
 		String startValue = "";
 		wasSelectedKey = newKey;
-		if (wasSelectedKey != null)
+		if (wasSelectedKey != null) {
 			startValue = wasSelectedKey + ".";
+		}
 		keyName.setText(startValue);
 		tree.repaint();
 
@@ -814,19 +940,25 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 
 	public String getValidKey() {
 		String key = keyName.getText();
-		if (key == null)
+		if (key == null) {
 			return null;
-		while (key.endsWith("."))
+		}
+		while (key.endsWith(".")) {
 			key = key.substring(0, key.length() - 1);
-		if (key.length() <= 0)
+		}
+		if (key.length() <= 0) {
 			return null;
+		}
 		String illegalChar = "";
-		if (key.indexOf('=') >= 0)
+		if (key.indexOf('=') >= 0) {
 			illegalChar = "=";
-		if (key.indexOf('#') >= 0)
+		}
+		if (key.indexOf('#') >= 0) {
 			illegalChar = "#";
-		if (illegalChar.length() == 0)
+		}
+		if (illegalChar.length() == 0) {
 			return bundle.replace(key, "..", "");
+		}
 		MessageBox2 mess = new MessageBox2(this);
 		mess.setTitle(RC("dialog.title.warning"));
 		mess.setText(bundle.replace(RC("tools.translator.message.illchar"), "[%illchar%]", illegalChar));
@@ -837,8 +969,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 	}
 
 	public void onInsertKey() {
-		if (bundle.getBundle().getLangCount() == 0)
+		if (bundle.getBundle().getLangCount() == 0) {
 			return;
+		}
 		String key = getValidKey();
 		if (key != null) {
 			addToTree(key);
@@ -863,30 +996,37 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 
 	public void onDeleteKey() {
 		String key = tree.getSelectedText();
-		if (key == null)
+		if (key == null) {
 			return;
+		}
 		delDialog.setText(bundle.replace(RC("tools.translator.message.delkey"), "[%key%]", key));
 
 		TreeNode tn = tree.getNode(key);
-		if (tn == null)
+		if (tn == null) {
 			return;
-		boolean hasChilds = tree.enumChild(tn) != null && tree.enumChild(tn).length != 0;
+		}
+		boolean hasChilds = (tree.enumChild(tn) != null) && (tree.enumChild(tn).length != 0);
 		BundleItem bi = bundle.getBundle().getItem(key);
-		if (bi != null && hasChilds)
+		if ((bi != null) && hasChilds) {
 			delDialog.setButtons(DELETE_BUTTONS);
-		else if (bi != null && !hasChilds)
+		}
+		else if ((bi != null) && !hasChilds) {
 			delDialog.setButtons(DELETE_BUTTONS3);
-		else if (bi == null)
+		}
+		else if (bi == null) {
 			delDialog.setButtons(DELETE_BUTTONS2);
+		}
 		delDialog.show();
 	}
 
 	public void onClose() {
 		setTranslations();
-		if (isDirty)
+		if (isDirty) {
 			closeDialog.show();
-		else if (exitInitiated)
+		}
+		else if (exitInitiated) {
 			finish();
+		}
 		else {
 			clear();
 			exitInitiated = true;
@@ -900,8 +1040,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 	}
 
 	public void onSave() {
-		if (bundle.getBundle().getLangCount() == 0)
+		if (bundle.getBundle().getLangCount() == 0) {
 			return;
+		}
 		String fn = bundle.getBundle().getLanguage(0).getLangFile();
 		if (fn == null) {
 			onSaveAs();
@@ -919,15 +1060,18 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 
 	public void clear() {
 		setTitle(null);
-		if (keyName != null)
+		if (keyName != null) {
 			keyName.setText("");
-		if (keynLab != null)
+		}
+		if (keynLab != null) {
 			keynLab.setText("");
+		}
 		wasSelectedKey = null;
 		textPanel.removeAll();
 		langMenu.removeAll();
-		if (tree.getRootNode() != null)
+		if (tree.getRootNode() != null) {
 			tree.remove(tree.getRootNode());
+		}
 		tree.repaint();
 		textPanel.invalidate();
 		validate();
@@ -950,8 +1094,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		int c = 0;
 		for (int i = 0; i < langStates.size(); i++) {
 			LangState ls = getLangState(i);
-			if (!ls.hidden)
+			if (!ls.hidden) {
 				++c;
+			}
 		}
 		return c;
 	}
@@ -964,11 +1109,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		}
 		// Fire it async as it take large time
 		hideTransMenu.disable();
-		(new Thread(new Runnable() {
-			public void run() {
-				setIndicatorsInit();
-			}
-		})).start();
+		(new Thread(() -> setIndicatorsInit())).start();
 	}
 
 	private void setIndicatorsInit() {
@@ -981,15 +1122,17 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 	}
 
 	private boolean setIndicators(TreeNode tn) {
-		if (tn == null)
+		if (tn == null) {
 			return false;
+		}
 		boolean res = setIndicators(tn.sibling);
 		return setIndicator(tn, setIndicators(tn.child)) || res;
 	}
 
 	private boolean setIndicator(TreeNode tn, boolean childOn) {
-		if (tn == null)
+		if (tn == null) {
 			return false;
+		}
 		if (getVisLangCount() < 2) {
 			tn.setIndicator(null);
 			return false;
@@ -1008,11 +1151,13 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		}
 		for (int i = 0; i < langStates.size(); i++) {
 			LangState ls = getLangState(i);
-			if (ls.hidden)
+			if (ls.hidden) {
 				continue;
+			}
 			String ts = bi.getTranslation(ls.name);
-			if (ts != null && ts.trim().length() == 0)
+			if ((ts != null) && (ts.trim().length() == 0)) {
 				ts = null;
+			}
 			isAbs |= ts == null;
 			isPres |= ts != null;
 		}
@@ -1034,28 +1179,21 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 	}
 
 	private void adjustIndicator(TreeNode tn) {
-		if (tn == null)
+		if (tn == null) {
 			return;
+		}
 		setIndicator(tn, isSetInSiblings(tn.child));
 		adjustIndicator(tn.parent);
 	}
 
 	private boolean isSetInSiblings(TreeNode tn) {
-		if (tn == null)
+		if (tn == null) {
 			return false;
-		if (tn.getIndicator() != null)
+		}
+		if (tn.getIndicator() != null) {
 			return true;
+		}
 		return isSetInSiblings(tn.sibling);
-	}
-
-	private void createNewFile(String filename) {
-		try {
-			FileOutputStream f = new FileOutputStream(filename);
-			f.close();
-		}
-		catch (Exception e) {
-			infoException(e);
-		}
 	}
 
 	private void onSearch() {
@@ -1070,8 +1208,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 
 		ed.doModal();
 		String text = ed.getText();
-		if (text.length() <= 0 || !ed.isApply())
+		if ((text.length() <= 0) || !ed.isApply()) {
 			return;
+		}
 
 		searchCriteria = text;
 		searchRegex = ed.isRegexMatching();
@@ -1079,8 +1218,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		searchMask = ed.isMaskMatching();
 		searchCase = ed.isCaseSensitive();
 		replaceTo = null;
-		if (!searchRegex && !searchMask && !searchCase)
+		if (!searchRegex && !searchMask && !searchCase) {
 			searchCriteria = searchCriteria.toLowerCase();
+		}
 
 		lastKeyFound = null;
 		onSearchAgain();
@@ -1099,8 +1239,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 
 		ed.doModal();
 		String text = ed.getText();
-		if (text.length() <= 0 || !ed.isApply())
+		if ((text.length() <= 0) || !ed.isApply()) {
 			return;
+		}
 
 		searchCriteria = text;
 		searchRegex = ed.isRegexMatching();
@@ -1111,25 +1252,31 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		replaceAll = ed.isReplaceAll();
 		replaceTo = ed.getReplaceTo();
 
-		if (!searchRegex && !searchMask && !searchCase)
+		if (!searchRegex && !searchMask && !searchCase) {
 			searchCriteria = searchCriteria.toLowerCase();
+		}
 
 		lastKeyFound = null;
 		onSearchAgain();
 	}
 
 	private boolean isMatchedWith(String what) {
-		if (what == null)
+		if (what == null) {
 			return false;
-		if (searchRegex)
+		}
+		if (searchRegex) {
 			return match_regex(searchCriteria, what, !searchCase);
-		else if (searchMask)
+		}
+		else if (searchMask) {
 			return match_mask(searchCriteria, what, !searchCase);
+		}
 		else {
-			if (searchCase)
+			if (searchCase) {
 				return what.indexOf(searchCriteria) != -1;
-			else
+			}
+			else {
 				return what.toLowerCase().indexOf(searchCriteria) != -1;
+			}
 		}
 	}
 
@@ -1154,14 +1301,17 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			}
 		}
 		else {
-			if (replaceAll)
+			if (replaceAll) {
 				val = bundle.replace(val, searchCriteria, replaceTo);
+			}
 			else {
 				int j1 = val.indexOf(searchCriteria);
-				if (j1 > 0)
+				if (j1 > 0) {
 					val = val.substring(0, j1) + replaceTo + val.substring(j1 + searchCriteria.length());
-				else if (j1 == 0)
+				}
+				else if (j1 == 0) {
 					val = replaceTo + val.substring(searchCriteria.length());
+				}
 			}
 		}
 		// System.err.println("["+lang+"] '"+curItemForReplace.getTranslation(lang)+"' => '"+val+"'");
@@ -1198,8 +1348,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			repDialog.setText(mess);
 			repDialog.show();
 		}
-		else
+		else {
 			makeReplaceImpl();
+		}
 	}
 
 	private void onSearchAgain() {
@@ -1210,8 +1361,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		}
 		boolean first = lastKeyFound == null;
 
-		if (lastKeyFound != null)
+		if (lastKeyFound != null) {
 			j = bundle.getBundle().getItemIndex(lastKeyFound) + 1;
+		}
 		if (!searchData) { // Key names
 			for (i = j; i < bundle.getBundle().getItemCount(); ++i) {
 				BundleItem bi = bundle.getBundle().getItem(i);
@@ -1229,8 +1381,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 				}
 			}
 			lastKeyFound = null;
-			if (first)
+			if (first) {
 				searchCriteria = null;
+			}
 			errDialog.setText(first ? RC("tools.translator.label.search.nokeys") : RC("tools.translator.label.search.nomorekeys"));
 			errDialog.show();
 			return;
@@ -1245,14 +1398,15 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 				if (isMatchedWith(val)) {
 					lastKeyFound = bi.getId();
 
-					if (replaceTo == null || (replaceTo != null && !replaceAll)) {
+					if ((replaceTo == null) || ((replaceTo != null) && !replaceAll)) {
 						tree.selectNode(bi.getId());
 						tree.openToNode(bi.getId());
 						setTranslations(bi.getId());
 						tree.repaint();
 
-						if (replaceTo != null)
+						if (replaceTo != null) {
 							makeReplace(bi, li);
+						}
 
 						textPanel.invalidate();
 						validate();
@@ -1265,18 +1419,22 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 					}
 					makeReplace(bi, li);
 					++replacements;
-					if (replaceTo == null)
+					if (replaceTo == null) {
 						break;
+					}
 				}
 			}
 		}
 		lastKeyFound = null;
-		if (first)
+		if (first) {
 			searchCriteria = null;
-		if (replacements > 0)
+		}
+		if (replacements > 0) {
 			errDialog.setText(bundle.replace(RC("tools.translator.label.replaced.count"), "[%replaced%]", Integer.toString(replacements)));
-		else
+		}
+		else {
 			errDialog.setText(first ? RC("tools.translator.label.search.nokeys") : RC("tools.translator.label.search.nomorekeys"));
+		}
 		errDialog.show();
 	}
 
@@ -1286,8 +1444,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		ed.setButtonsCaption(RC("dialog.button.ok"), CLOSE_BUTTONS[2]);
 		ed.doModal();
 		String text = ed.getText();
-		if (text.length() <= 0 || !ed.isApply())
+		if ((text.length() <= 0) || !ed.isApply()) {
 			return;
+		}
 		bundle.getBundle().addLanguage(text);
 		syncLanguage(text);
 
@@ -1322,10 +1481,12 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		return rcTable.getString(key);
 	}
 
+	@Override
 	public void setTitle(String filename) {
 		String add = "";
-		if (filename != null)
+		if (filename != null) {
 			add = " [" + filename + "]";
+		}
 		super.setTitle("Zaval JRC Editor" + add);
 		sbl2.setText(filename == null ? "" : filename);
 	}
@@ -1346,8 +1507,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			}
 			set.resort();
 		}
-		else
+		else {
 			bundle = bundle2;
+		}
 	}
 
 	class Loader implements Runnable {
@@ -1359,6 +1521,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			this.part = part;
 		}
 
+		@Override
 		public void run() {
 			setCursor(Cursor.WAIT_CURSOR);
 			sbl2.setText(RC("tools.translator.progress.loadfiles"));
@@ -1379,12 +1542,14 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			sbl2.repaint();
 
 			// long t4 = System.currentTimeMillis();
-			if (!part)
+			if (!part) {
 				initControls();
-			else
+			}
+			else {
 				wasSelectedKey = null;
-			// long t5 = System.currentTimeMillis();
-			// System.err.println("    ...init controls = " + (t5 - t4 ) + "ms");
+				// long t5 = System.currentTimeMillis();
+				// System.err.println("    ...init controls = " + (t5 - t4 ) + "ms");
+			}
 
 			// long t6 = System.currentTimeMillis();
 			initData(part);
@@ -1436,8 +1601,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		ls.tf.getControl().setBackground(Color.white);
 		ls.tf.setLocale(new Locale(lang, ""));
 		ls.tf.getControl().addKeyListener(new java.awt.event.KeyAdapter() {
+			@Override
 			public void keyPressed(KeyEvent ke) {
-				if (!ke.isActionKey() && ke.getKeyChar() == '\n') {
+				if (!ke.isActionKey() && (ke.getKeyChar() == '\n')) {
 					invokeAutoFit();
 				}
 				checkForScrolling(ke.getComponent());
@@ -1454,12 +1620,14 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 
 	private void addToTree(String s) {
 		TreeNode tnew = tree.getNode(s);
-		if (tnew != null)
+		if (tnew != null) {
 			return;
+		}
 		int ind = allowDot ? s.lastIndexOf(KEY_SEPARATOR) : -1;
 		int ind2 = allowUScore ? s.lastIndexOf(KEY_SEPARATOR_2) : -1;
-		if (ind2 > ind)
+		if (ind2 > ind) {
 			ind = ind2;
+		}
 
 		tnew = new TreeNode(s, SYS_DIR + OPEN_IMAGE, SYS_DIR + CLOSE_IMAGE);
 		if (ind < 0) {
@@ -1488,8 +1656,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 
 		String filename = openFileDialog1.getFile();
 		if (filename != null) {
-			if (keepLastDir)
+			if (keepLastDir) {
 				lastDirectory = openFileDialog1.getDirectory();
+			}
 			return openFileDialog1.getDirectory() + filename;
 		}
 		return null;
@@ -1502,7 +1671,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		openFileDialog1.show();
 
 		String filename = openFileDialog1.getFile();
-		if (filename != null && keepLastDir) {
+		if ((filename != null) && keepLastDir) {
 			lastDirectory = openFileDialog1.getDirectory();
 			return openFileDialog1.getDirectory() + filename;
 		}
@@ -1512,12 +1681,13 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 	public void onSaveAs() {
 		String mask = "*" + RES_EXTENSION;
 		String fn = bundle.getBundle().getLanguage(0).getLangFile();
-		if (fn == null)
+		if (fn == null) {
 			fn = "autosaved";
+		}
 		fn += RES_EXTENSION;
 
 		String filename = lookupFileForStore(mask, fn);
-		if (filename != null)
+		if (filename != null) {
 			try {
 				bundle.store(filename);
 				addToPickList(filename);
@@ -1527,6 +1697,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			catch (Exception e) {
 				infoException(e);
 			}
+		}
 	}
 
 	private void infoException(Exception e) {
@@ -1574,14 +1745,14 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 
 		ResultField rf = sDialog.getTextContainer();
 		TextAlignArea area = rf.getAlignArea();
-		area.setAlign(Align.FIT | Align.TOP);
+		area.setAlign(AlignConstants.FIT | AlignConstants.TOP);
 		sDialog.show();
 	}
 
 	private void onGenCode() {
 		try {
 			String mask = "*.java";
-			String fn = bundle.getBundle().getLangCount() == 0 || bundle.getBundle().getLanguage(0).getLangFile() == null
+			String fn = (bundle.getBundle().getLangCount() == 0) || (bundle.getBundle().getLanguage(0).getLangFile() == null)
 				? "Sample"
 				: bundle.baseName(bundle.getBundle().getLanguage(0).getLangFile());
 			fn = fn.substring(0, 1).toUpperCase() + fn.substring(1);
@@ -1605,8 +1776,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 				filename = bundle.replace(filename, "\\", "/");
 				JavaParser parser = new JavaParser(new FileInputStream(filename));
 				Hashtable ask = parser.parse();
-				if (ask.size() == 0)
+				if (ask.size() == 0) {
 					ask.put("empty", "");
+				}
 
 				clear();
 				initControls();
@@ -1648,7 +1820,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		for (int i = 1; i < bundle.getBundle().getItemCount(); ++i) {
 			BundleItem bi2 = bundle.getBundle().getItem(i);
 			addToTree(bi2.getId());
-			if (i % 250 == 0) {
+			if ((i % 250) == 0) {
 				sbl2.setText("    " + i + " " + RC("tools.translator.progress.addkeys"));
 				sbl2.repaint();
 			}
@@ -1684,8 +1856,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		repaint();
 		//  isDirty = true;
 		syncToolbar();
-		if (!part)
+		if (!part) {
 			loadPickList();
+		}
 	}
 
 	private void invokeAutoFit() {
@@ -1698,9 +1871,11 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 	private void expand(TreeNode tn) {
 		if (tn != null) {
 			TreeNode[] children = tree.enumChild(tn);
-			if (children != null)
-				for (int i = 0; i < children.length; i++)
-					expand(children[i]);
+			if (children != null) {
+				for (TreeNode element : children) {
+					expand(element);
+				}
+			}
 			tree.openNode(tn.getText());
 		}
 	}
@@ -1708,9 +1883,11 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 	private void collapse(TreeNode tn) {
 		if (tn != null) {
 			TreeNode[] children = tree.enumChild(tn);
-			if (children != null)
-				for (int i = 0; i < children.length; i++)
-					collapse(children[i]);
+			if (children != null) {
+				for (TreeNode element : children) {
+					collapse(element);
+				}
+			}
 			tree.closeNode(tn.getText());
 		}
 	}
@@ -1727,32 +1904,38 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			MenuItem item = new MenuItem(patz);
 			fileMenu.add(item);
 		}
-		if (pickList.size() > 0)
+		if (pickList.size() > 0) {
 			fileMenu.addSeparator();
+		}
 		fileMenu.add(exitMenu);
 	}
 
 	private void removePickList() {
-		if (pickList.size() == 0)
+		if (pickList.size() == 0) {
 			return;
+		}
 
-		int j, q;
+		int j;
 		String s1 = stretchPath((String) pickList.elementAt(0));
 		for (j = 0; j < fileMenu.countItems(); ++j) {
 			String patz = fileMenu.getItem(j).getLabel();
-			if (patz.equals(s1))
+			if (patz.equals(s1)) {
 				break;
+			}
 		}
 		pickList = new Vector();
-		if (j >= fileMenu.countItems())
+		if (j >= fileMenu.countItems()) {
 			return;
-		for (; j < fileMenu.countItems();)
+		}
+		for (; j < fileMenu.countItems();) {
 			fileMenu.remove(j); //fileMenu.countItems()-1);
+		}
 	}
 
 	private String stretchPath(String name) {
-		if (name.length() < MAX_PICK_LENGTH)
+		if (name.length() < MAX_PICK_LENGTH) {
 			return name;
+		}
 		return name.substring(0, 4) + "..." + name.substring(name.length() - Math.min(name.length() - 7, MAX_PICK_LENGTH - 7));
 	}
 
@@ -1768,13 +1951,15 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			while (e.hasMoreElements()) {
 				String key = (String) e.nextElement();
 				String val = (String) tbl.get(key);
-				if (!key.startsWith("picklist."))
+				if (!key.startsWith("picklist.")) {
 					continue;
+				}
 				try {
 					key = key.substring(key.indexOf('.') + 1);
 					int pickLevel = Integer.parseInt(key);
-					while (pickList.size() <= pickLevel)
+					while (pickList.size() <= pickLevel) {
 						pickList.addElement(null);
+					}
 					pickList.setElementAt(val, pickLevel);
 				}
 				catch (Exception error) {
@@ -1783,11 +1968,11 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 				}
 			}
 
-			keepLastDir = tbl.get("keepLastDir") == null || tbl.get("keepLastDir").equals("Y");
-			omitSpaces = tbl.get("omitSpaces") == null || tbl.get("omitSpaces").equals("Y");
-			autoExpandTF = tbl.get("autoExpandTF") == null || tbl.get("autoExpandTF").equals("Y");
-			allowDot = tbl.get("allowDot") == null || tbl.get("allowDot").equals("Y");
-			allowUScore = tbl.get("allowUScore") == null || tbl.get("allowUScore").equals("Y");
+			keepLastDir = (tbl.get("keepLastDir") == null) || tbl.get("keepLastDir").equals("Y");
+			omitSpaces = (tbl.get("omitSpaces") == null) || tbl.get("omitSpaces").equals("Y");
+			autoExpandTF = (tbl.get("autoExpandTF") == null) || tbl.get("autoExpandTF").equals("Y");
+			allowDot = (tbl.get("allowDot") == null) || tbl.get("allowDot").equals("Y");
+			allowUScore = (tbl.get("allowUScore") == null) || tbl.get("allowUScore").equals("Y");
 
 			keepLastDirMenu.setState(keepLastDir);
 			omitSpacesMenu.setState(omitSpaces);
@@ -1810,8 +1995,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 
 	private void addToPickList(String name) {
 		int j = 0;
-		if (name == null)
+		if (name == null) {
 			return;
+		}
 		for (; j < pickList.size(); ++j) {
 			String v1 = (String) pickList.elementAt(j);
 			if (v1.equals(name)) {
@@ -1821,8 +2007,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		}
 
 		pickList.insertElementAt(name, 0);
-		while (pickList.size() >= 8)
+		while (pickList.size() >= 8) {
 			pickList.removeElementAt(7);
+		}
 		saveIni();
 	}
 
@@ -1830,8 +2017,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		try {
 			String path = System.getProperty("user.home") + "/.jrc-editor.conf";
 			IniFile ini = new IniFile(path);
-			for (int j = 0; j < pickList.size(); ++j)
+			for (int j = 0; j < pickList.size(); ++j) {
 				ini.putString("picklist." + j, (String) pickList.elementAt(j));
+			}
 
 			ini.putString("keepLastDir", keepLastDir ? "Y" : "N");
 			ini.putString("omitSpaces", omitSpaces ? "Y" : "N");
@@ -1850,17 +2038,21 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		ed.setButtonsCaption(RC("dialog.button.ok"), CLOSE_BUTTONS[2]);
 
 		LangItem[] lset = new LangItem[bundle.getBundle().getLangCount()];
-		for (int i = 0; i < lset.length; ++i)
+		for (int i = 0; i < lset.length; ++i) {
 			lset[i] = bundle.getBundle().getLanguage(i);
+		}
 		ed.setList(lset);
 
 		ed.doModal();
 		String[] ask = ed.getList();
-		if (ask == null || ask.length <= 0 || !ed.isApply())
+		if ((ask == null) || (ask.length <= 0) || !ed.isApply()) {
 			return null;
-		for (int i = 0; i < ask.length; ++i)
-			if (ask[i].indexOf(':') > 0)
+		}
+		for (int i = 0; i < ask.length; ++i) {
+			if (ask[i].indexOf(':') > 0) {
 				ask[i] = ask[i].substring(0, ask[i].indexOf(':')).trim();
+			}
+		}
 		return ask;
 	}
 
@@ -1868,23 +2060,26 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		String mask = "*" + RES_EXTENSION + ";" + "*" + INI_EXTENSION;
 		String filename = lookupFileForLoad(mask);
 		if (filename != null) {
-			if (!part)
+			if (!part) {
 				clear();
+			}
 			readResources(filename, part);
 		}
 	}
 
 	public void onSaveXml(boolean part) {
 		String[] parts = part ? getLangSet() : null;
-		if (part && (parts == null || parts.length < 2))
+		if (part && ((parts == null) || (parts.length < 2))) {
 			return;
+		}
 		String mask = "*.xml";
 		String fn = bundle.getBundle().getLanguage(0).getLangFile();
-		if (fn == null)
+		if (fn == null) {
 			fn = "autosaved";
+		}
 
 		String filename = lookupFileForStore(mask, bundle.baseName(fn) + ".xml");
-		if (filename != null)
+		if (filename != null) {
 			try {
 				DataOutputStream out = new DataOutputStream(new FileOutputStream(filename));
 				BundleSet set = bundle.getBundle();
@@ -1897,8 +2092,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 					out.writeChars("\t<key name=\"" + bi.getId() + "\">\n");
 					while (en.hasMoreElements()) {
 						String lang = (String) en.nextElement();
-						if (part && !inArray(parts, lang))
+						if (part && !inArray(parts, lang)) {
 							continue;
+						}
 						out.writeChars("\t\t<value lang=\"" + lang + "\">" + bi.getTranslation(lang) + "</value>\n");
 					}
 					out.writeChars("\t</key>\n");
@@ -1909,20 +2105,23 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			catch (Exception e) {
 				infoException(e);
 			}
+		}
 	}
 
 	public void onSaveUtf(boolean part) {
 		String[] parts = part ? getLangSet() : null;
-		if (part && (parts == null || parts.length < 2))
+		if (part && ((parts == null) || (parts.length < 2))) {
 			return;
+		}
 
 		String mask = "*.txt";
 		String fn = bundle.getBundle().getLanguage(0).getLangFile();
-		if (fn == null)
+		if (fn == null) {
 			fn = "autosaved";
+		}
 
 		String filename = lookupFileForStore(mask, bundle.baseName(fn) + ".txt");
-		if (filename != null)
+		if (filename != null) {
 			try {
 				DataOutputStream out = new DataOutputStream(new FileOutputStream(filename));
 				BundleSet set = bundle.getBundle();
@@ -1935,8 +2134,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 					out.writeChars("KEY=\"" + bi.getId() + "\":\r\n");
 					while (en.hasMoreElements()) {
 						String lang = (String) en.nextElement();
-						if (part && !inArray(parts, lang))
+						if (part && !inArray(parts, lang)) {
 							continue;
+						}
 						out.writeChars("\t\"" + lang + "\"=\"" + bi.getTranslation(lang) + "\"\r\n");
 					}
 					out.writeChars("\r\n");
@@ -1946,12 +2146,15 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			catch (Exception e) {
 				infoException(e);
 			}
+		}
 	}
 
 	private boolean inArray(String[] array, String lang) {
-		for (int j = 0; j < array.length; ++j)
-			if (array[j].equalsIgnoreCase(lang))
+		for (String element : array) {
+			if (element.equalsIgnoreCase(lang)) {
 				return true;
+			}
+		}
 		return false;
 	}
 
@@ -1981,12 +2184,14 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			String k = (String) en.nextElement();
 			StringTokenizer st = new StringTokenizer(k, "!");
 			String key = st.nextToken();
-			if (!st.hasMoreTokens())
+			if (!st.hasMoreTokens()) {
 				continue;
+			}
 			String lang = st.nextToken();
 
-			if (bundle.getBundle().getLanguage(lang) == null)
+			if (bundle.getBundle().getLanguage(lang) == null) {
 				bundle.getBundle().addLanguage(lang);
+			}
 
 			bundle.getBundle().addKey(key);
 			bundle.getBundle().updateValue(key, lang, (String) tbl.get(k));
@@ -1998,10 +2203,12 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		String mask = "*.xml";
 		String filename = lookupFileForLoad(mask);
 		if (filename != null) {
-			if (!part)
+			if (!part) {
 				clear();
-			if (!part)
+			}
+			if (!part) {
 				initControls();
+			}
 			bundle.getBundle().addLanguage("en");
 
 			try {
@@ -2021,10 +2228,12 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		String mask = "*.txt";
 		String filename = lookupFileForLoad(mask);
 		if (filename != null) {
-			if (!part)
+			if (!part) {
 				clear();
-			if (!part)
+			}
+			if (!part) {
 				initControls();
+			}
 			bundle.getBundle().addLanguage("en");
 			try {
 				UtfParser parser = new UtfParser(new StringReader(getBody(filename)));
@@ -2045,30 +2254,28 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		ed.setButtonsCaption(RC("dialog.button.ok"), CLOSE_BUTTONS[2]);
 		ed.doModal();
 		String text = ed.getText();
-		if (text.length() <= 0 || !ed.isApply())
+		if ((text.length() <= 0) || !ed.isApply()) {
 			return;
+		}
 		keyName.setText(text);
 		onInsertKey();
-	}
-
-	private void infoError(String error) {
-		errDialog.setText(error);
-		errDialog.show();
 	}
 
 	private void moveFocus() {
 		Window wnd = null;
 		Component p = this;
-		while (p != null && !(p instanceof Window))
+		while ((p != null) && !(p instanceof Window)) {
 			p = p.getParent();
-		if (p == null)
+		}
+		if (p == null) {
 			return;
+		}
 		wnd = (Window) p;
 
 		Component focused = wnd.getFocusOwner();
 		int idx = tabOrder.indexOf(focused);
 		if (idx >= 0) {
-			if (idx + 1 < tabOrder.size()) {
+			if ((idx + 1) < tabOrder.size()) {
 				Component c = (Component) tabOrder.elementAt(idx + 1);
 				c.requestFocus();
 				return;
@@ -2077,17 +2284,20 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		int i;
 		for (i = 0; i < langStates.size(); i++) {
 			LangState ls = getLangState(i);
-			if (ls.hidden)
+			if (ls.hidden) {
 				continue;
-			if (ls.tf.getControl() == focused)
+			}
+			if (ls.tf.getControl() == focused) {
 				break;
+			}
 		}
 
 		if (i < langStates.size()) {
 			for (++i; i < langStates.size(); ++i) {
 				LangState ls = getLangState(i);
-				if (ls.hidden)
+				if (ls.hidden) {
 					continue;
+				}
 				ls.tf.requestFocus();
 				return;
 			}
@@ -2096,8 +2306,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		}
 		for (i = 0; i < langStates.size(); ++i) {
 			LangState ls = getLangState(i);
-			if (ls.hidden)
+			if (ls.hidden) {
 				continue;
+			}
 			ls.tf.requestFocus();
 			return;
 		}
@@ -2106,27 +2317,31 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 
 	private void removeLeafs(String key) {
 		// Don't touch hier if key/childs are exists
-		if (bundle.getBundle().getItem(key) != null)
+		if (bundle.getBundle().getItem(key) != null) {
 			return;
+		}
 		TreeNode tn = tree.getNode(key);
 		if (tn != null) {
-			if (tree.enumChild(tn) != null && tree.enumChild(tn).length > 0)
+			if ((tree.enumChild(tn) != null) && (tree.enumChild(tn).length > 0)) {
 				return;
+			}
 			tree.remove(key);
 		}
 
 		int j1 = allowDot ? key.lastIndexOf(KEY_SEPARATOR) : -1;
 		int j2 = allowUScore ? key.lastIndexOf(KEY_SEPARATOR_2) : -1;
 		j1 = Math.max(j1, j2);
-		if (j1 <= 0)
+		if (j1 <= 0) {
 			return;
+		}
 		removeLeafs(key.substring(0, j1));
 	}
 
 	void onRenameKey() {
 		String oldKeyName = keyName.getText();
-		if (oldKeyName.endsWith("."))
+		if (oldKeyName.endsWith(".")) {
 			oldKeyName = oldKeyName.substring(0, oldKeyName.length() - 1);
+		}
 
 		EditDialog ed = new EditDialog(this, RC("tools.translator.label.rename.caption"), true, this);
 		ed.setLabelCaption(RC("tools.translator.label.rename.label"));
@@ -2135,10 +2350,12 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		ed.doModal();
 
 		String newKeyName = ed.getText();
-		if (newKeyName.trim().length() <= 0 || !ed.isApply())
+		if ((newKeyName.trim().length() <= 0) || !ed.isApply()) {
 			return;
-		if (oldKeyName.equals(newKeyName))
+		}
+		if (oldKeyName.equals(newKeyName)) {
 			return;
+		}
 
 		BundleItem biOldAlone = bundle.getBundle().getItem(oldKeyName);
 		Enumeration en = bundle.getBundle().getKeysBeginningWith(oldKeyName);
@@ -2146,8 +2363,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			BundleItem biOld = (BundleItem) en.nextElement();
 
 			String newKey = newKeyName;
-			if (biOldAlone == null) // Mass rename
+			if (biOldAlone == null) {
 				newKey = newKeyName + biOld.getId().substring(oldKeyName.length());
+			}
 
 			Hashtable oldValues = new Hashtable();
 			int k = bundle.getBundle().getLangCount();
@@ -2162,8 +2380,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			for (int j = 0; j < k; ++j) {
 				String lang = bundle.getBundle().getLanguage(j).getLangId();
 				String value = biOld.getTranslation(lang);
-				if (value != null)
+				if (value != null) {
 					oldValues.put(lang, value);
+				}
 			}
 			bundle.getBundle().removeKey(biOld.getId());
 
@@ -2174,8 +2393,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			for (int j = 0; j < k; ++j) {
 				String lang = bundle.getBundle().getLanguage(j).getLangId();
 				String value = (String) oldValues.get(lang);
-				if (value != null)
+				if (value != null) {
 					biNew.setTranslation(lang, value);
+				}
 			}
 		}
 		isDirty = true;
@@ -2229,8 +2449,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 
 	private void hideTranslated(TreeNode tn, boolean hide) {
 		while (tn != null) {
-			if (tn.getIndicator() == null)
+			if (tn.getIndicator() == null) {
 				tn.setHide(hide);
+			}
 			hideTranslated(tn.child, hide);
 			tn = tn.sibling;
 		}
@@ -2253,8 +2474,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		cc.weightx = weightx;
 		cc.weighty = weighty;
 
-		if (insetTop + insetBottom + insetLeft + insetRight > 0)
+		if ((insetTop + insetBottom + insetLeft + insetRight) > 0) {
 			cc.insets = new Insets(insetTop, insetLeft, insetBottom, insetRight);
+		}
 		LayoutManager lm = c.getLayout();
 		GridBagLayout gbl = (GridBagLayout) lm;
 		gbl.setConstraints(p, cc);
@@ -2279,33 +2501,45 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 	private boolean match_mask(char[] s, int sp, char[] t, int tp, boolean matchCase) {
 		int vp;
 
-		if (sp == s.length && tp == t.length)
+		if ((sp == s.length) && (tp == t.length)) {
 			return true;
-		if (tp == t.length && s[sp] == '*')
-			return match_mask(s, sp + 1, t, tp, matchCase);
-		if (tp == t.length && sp != s.length)
-			return false;
-		if (sp == s.length && tp != t.length)
-			return false;
-
-		if (s[sp] == '?')
-			return match_mask(s, sp + 1, t, tp + 1, matchCase);
-		if (!matchCase && (Character.toLowerCase(s[sp]) == Character.toLowerCase(t[tp])))
-			return match_mask(s, sp + 1, t, tp + 1, matchCase);
-		if (matchCase && s[sp] == t[tp])
-			return match_mask(s, sp + 1, t, tp + 1, matchCase);
-
-		if (s[sp] != '?' && s[sp] != '*') {
-			if (!matchCase && Character.toLowerCase(s[sp]) != Character.toLowerCase(t[tp]))
-				return false;
-			if (matchCase && s[sp] != t[tp])
-				return false;
 		}
-		if (s[sp] == '*' && s.length == sp + 1)
+		if ((tp == t.length) && (s[sp] == '*')) {
+			return match_mask(s, sp + 1, t, tp, matchCase);
+		}
+		if ((tp == t.length) && (sp != s.length)) {
+			return false;
+		}
+		if ((sp == s.length) && (tp != t.length)) {
+			return false;
+		}
+
+		if (s[sp] == '?') {
+			return match_mask(s, sp + 1, t, tp + 1, matchCase);
+		}
+		if (!matchCase && (Character.toLowerCase(s[sp]) == Character.toLowerCase(t[tp]))) {
+			return match_mask(s, sp + 1, t, tp + 1, matchCase);
+		}
+		if (matchCase && (s[sp] == t[tp])) {
+			return match_mask(s, sp + 1, t, tp + 1, matchCase);
+		}
+
+		if ((s[sp] != '?') && (s[sp] != '*')) {
+			if (!matchCase && (Character.toLowerCase(s[sp]) != Character.toLowerCase(t[tp]))) {
+				return false;
+			}
+			if (matchCase && (s[sp] != t[tp])) {
+				return false;
+			}
+		}
+		if ((s[sp] == '*') && (s.length == (sp + 1))) {
 			return true;
-		for (vp = tp; vp < t.length; ++vp)
-			if (match_mask(s, sp + 1, t, vp, matchCase))
+		}
+		for (vp = tp; vp < t.length; ++vp) {
+			if (match_mask(s, sp + 1, t, vp, matchCase)) {
 				return true;
+			}
+		}
 		return match_mask(s, sp + 1, t, tp, matchCase);
 	}
 
@@ -2313,8 +2547,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		if (what instanceof EmulatedTextField) {
 			Rectangle r1 = what.getBounds();
 			Rectangle r2 = ((EmulatedTextField) what).getCursorShape();
-			if (r1 == null || r2 == null)
+			if ((r1 == null) || (r2 == null)) {
 				return;
+			}
 			r1.x += r2.x;
 			r1.y += r2.y;
 			r1.width = r2.width + 25;
@@ -2334,19 +2569,26 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			//       "viewport=("+s1.width+"x"+s1.height+"); " +
 			//       "curS=(h="+curHS+",v="+curVS+") " );
 
-			if (r1.x + r1.width >= s1.width + curHS || r1.y + r1.height >= s1.height + curVS || r1.x < curHS || r1.y < curVS) {
+			if (((r1.x + r1.width) >= (s1.width + curHS))
+				|| ((r1.y + r1.height) >= (s1.height + curVS))
+				|| (r1.x < curHS)
+				|| (r1.y < curVS)) {
 
 				int newX = curHS;
 				int newY = curVS;
 				Dimension s2 = scrPanel.getScrollableObject().preferredSize();
-				if (r1.x + r1.width >= s1.width)
-					newX = Math.min(r1.x + r1.width - s1.width, s2.width - s1.width);
-				if (r1.y + r1.height >= s1.height)
-					newY = Math.min(r1.y + r1.height - s1.height, s2.height - s1.height);
-				if (r1.x < curHS)
+				if ((r1.x + r1.width) >= s1.width) {
+					newX = Math.min((r1.x + r1.width) - s1.width, s2.width - s1.width);
+				}
+				if ((r1.y + r1.height) >= s1.height) {
+					newY = Math.min((r1.y + r1.height) - s1.height, s2.height - s1.height);
+				}
+				if (r1.x < curHS) {
 					newX = r1.x;
-				if (r1.y < curVS)
+				}
+				if (r1.y < curVS) {
 					newX = r1.y;
+				}
 
 				//        System.out.println("\tnewX="+newX+", newY="+newY + " of ["+s2.width+"x"+s2.height+"]");
 				scrPanel.scroll(newX, newY);

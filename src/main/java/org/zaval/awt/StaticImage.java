@@ -17,8 +17,10 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
-import java.awt.image.*;
+import java.awt.Canvas;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Image;
 
 public class StaticImage extends Canvas {
 	protected Image image;
@@ -46,17 +48,21 @@ public class StaticImage extends Canvas {
 		setImage(img, width, height);
 	}
 
+	@Override
 	public void paint(Graphics gr) {
-		if (image == null)
+		if (image == null) {
 			return;
+		}
 		Dimension sz = size();
 		gr.drawImage(image, 0, 0, sz.width, sz.height, this);
 	}
 
+	@Override
 	public Dimension preferredSize() {
 		return new Dimension(width, height);
 	}
 
+	@Override
 	public Dimension minimumSize() {
 		return preferredSize();
 	}

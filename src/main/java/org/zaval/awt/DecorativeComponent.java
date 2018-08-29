@@ -17,9 +17,16 @@
 
 package org.zaval.awt;
 
-import org.zaval.awt.event.*;
-import java.awt.*;
-import java.util.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Insets;
+
+import org.zaval.awt.event.ValidateEvent;
+import org.zaval.awt.event.ValidateListener;
+import org.zaval.awt.event.ValidateListenerSupport;
 
 public abstract class DecorativeComponent {
 	public static final int CENTER = 1;
@@ -62,14 +69,18 @@ public abstract class DecorativeComponent {
 	}
 
 	public void setFromComponent(Component c) {
-		if (c == null)
+		if (c == null) {
 			return;
-		if (c.getFont() != null)
+		}
+		if (c.getFont() != null) {
 			setFont(c.getFont());
-		if (c.getBackground() != null)
+		}
+		if (c.getBackground() != null) {
 			setBackgroundColor(c.getBackground());
-		if (c.getForeground() != null)
+		}
+		if (c.getForeground() != null) {
 			setForegroundColor(c.getForeground());
+		}
 	}
 
 	public Component getParent() {
@@ -94,8 +105,9 @@ public abstract class DecorativeComponent {
 	}
 
 	public void setAlign(int a) {
-		if (a == align)
+		if (a == align) {
 			return;
+		}
 		align = a;
 	}
 
@@ -116,8 +128,9 @@ public abstract class DecorativeComponent {
 	}
 
 	public void setSize(Dimension d) {
-		if (d == size)
+		if (d == size) {
 			return;
+		}
 		size.width = d.width;
 		size.height = d.height;
 		invalidate();
@@ -162,20 +175,24 @@ public abstract class DecorativeComponent {
 
 	public void doPaint(int x, int y, int width, int height, Graphics g) {
 		validate();
-		if (!isValid())
+		if (!isValid()) {
 			return;
-		if (width <= 0 || height <= 0)
+		}
+		if ((width <= 0) || (height <= 0)) {
 			return;
+		}
 		draw(x, y, width, height, g);
 	}
 
 	public void doPaint(int x, int y, Graphics g) {
 		validate();
-		if (!isValid())
+		if (!isValid()) {
 			return;
+		}
 		Dimension d = getSize();
-		if (d.width <= 0 || d.height <= 0)
+		if ((d.width <= 0) || (d.height <= 0)) {
 			return;
+		}
 		draw(x, y, d.width, d.height, g);
 
 	}

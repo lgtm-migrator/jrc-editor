@@ -17,8 +17,13 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Canvas;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Toolkit;
+import java.util.StringTokenizer;
 
 public class IELabel extends Canvas {
 	public static final int LEFT = 0;
@@ -66,26 +71,32 @@ public class IELabel extends Canvas {
 		measure();
 	}
 
+	@Override
 	public String toString() {
 		return "IELabel[text=" + name + ",align=" + (align == LEFT ? "LEFT" : align == CENTER ? "CENTER" : "RIGHT") + "]";
 	}
 
+	@Override
 	public void setFont(Font s) {
 		super.setFont(s);
 		measure();
 	}
 
+	@Override
 	public void paint(Graphics gr) {
 		try {
 			measure();
 			Dimension b = size();
-			int xs, ys = ascent + (b.height - hsize) / 2;
-			if (RIGHT == align)
+			int xs, ys = ascent + ((b.height - hsize) / 2);
+			if (RIGHT == align) {
 				xs = b.width - wsize;
-			else if (CENTER == align)
+			}
+			else if (CENTER == align) {
 				xs = (b.width - wsize) / 2;
-			else
+			}
+			else {
 				xs = 1;
+			}
 
 			gr.setColor(getBackground());
 
@@ -94,10 +105,12 @@ public class IELabel extends Canvas {
 			gr.fillRect(0, 0, b.width - 1, b.height - 1);
 
 			gr.setColor(getForeground());
-			if (align != FIT || b.width <= wsize)
+			if ((align != FIT) || (b.width <= wsize)) {
 				gr.drawString(name, xs, ys);
-			else
+			}
+			else {
 				drawText(gr, name, xs, ys, b.width);
+			}
 		}
 		catch (Exception eee) {
 			eee.printStackTrace();
@@ -107,8 +120,9 @@ public class IELabel extends Canvas {
 	private void drawText(Graphics gr, String text, int xs, int ys, int max) {
 		int comml = 0, j = 0;
 		StringTokenizer st = new StringTokenizer(text, " \t");
-		if (st.countTokens() == 0)
+		if (st.countTokens() == 0) {
 			return;
+		}
 		String[] words = new String[st.countTokens()];
 
 		FontMetrics fm = getFontMetrics(getFont());
@@ -124,34 +138,40 @@ public class IELabel extends Canvas {
 		for (j = 0; j < words.length; ++j) {
 			gr.drawString(words[j], xs, ys);
 			v = k / words.length;
-			if (v > 0)
+			if (v > 0) {
 				k = k % words.length;
+			}
 			k += spcd;
 			xs += fm.stringWidth(words[j]) + spc + v;
 		}
 	}
 
+	@Override
 	public Dimension preferredSize() {
 		measure();
 		return new Dimension(wsize, hsize);
 	}
 
+	@Override
 	public Dimension minimumSize() {
 		return preferredSize();
 	}
 
 	private void measure() {
-		if (name == null)
+		if (name == null) {
 			return;
+		}
 		Font x = getFont();
-		if (x == null)
+		if (x == null) {
 			return;
+		}
 		FontMetrics fm = getFontMetrics(x);
 		if (fm == null) {
 			Toolkit k = Toolkit.getDefaultToolkit();
 			fm = k.getFontMetrics(x);
-			if (fm == null)
+			if (fm == null) {
 				return;
+			}
 		}
 		hsize = fm.getHeight();
 		ascent = fm.getAscent();

@@ -17,9 +17,13 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
-import java.util.*;
-import java.io.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.LayoutManager;
+import java.awt.Rectangle;
 
 public class ScrollLayout implements LayoutManager {
 	protected Component hs, vs, stubb, center;
@@ -28,14 +32,18 @@ public class ScrollLayout implements LayoutManager {
 		super();
 	}
 
+	@Override
 	public void addLayoutComponent(String s, Component c) {
 		if (s != null) {
-			if (s.equals("East"))
+			if (s.equals("East")) {
 				vs = c;
-			else if (s.equals("South"))
+			}
+			else if (s.equals("South")) {
 				hs = c;
-			else if (s.equals("Center"))
+			}
+			else if (s.equals("Center")) {
 				center = c;
+			}
 			else if (s.equals("Stubb")) {
 				stubb = c;
 				stubb.resize(0, 0);
@@ -49,26 +57,33 @@ public class ScrollLayout implements LayoutManager {
 		return c.insets();
 	}
 
+	@Override
 	public void removeLayoutComponent(Component c) {
-		if (c == vs)
+		if (c == vs) {
 			vs = null;
-		if (c == hs)
+		}
+		if (c == hs) {
 			hs = null;
-		if (center == c)
+		}
+		if (center == c) {
 			center = null;
-		if (stubb == c)
+		}
+		if (stubb == c) {
 			stubb = null;
+		}
 	}
 
+	@Override
 	public Dimension minimumLayoutSize(Container target) {
 		return preferredLayoutSize(target);
 	}
 
+	@Override
 	public Dimension preferredLayoutSize(Container target) {
 		Dimension dim = new Dimension(0, 0);
 
-		boolean hb = (hs != null && hs.isVisible());
-		boolean vb = (vs != null && vs.isVisible());
+		boolean hb = ((hs != null) && hs.isVisible());
+		boolean vb = ((vs != null) && vs.isVisible());
 
 		if (vb) {
 			Dimension d = vs.preferredSize();
@@ -94,6 +109,7 @@ public class ScrollLayout implements LayoutManager {
 		return dim;
 	}
 
+	@Override
 	public void layoutContainer(Container parent) {
 		Insets insets = getInsets(parent);
 		Rectangle target = parent.bounds();
@@ -104,30 +120,37 @@ public class ScrollLayout implements LayoutManager {
 		int right = target.width - insets.right;
 		int s = ScrollController.SCROLL_SIZE;
 
-		boolean hb = (hs != null && hs.isVisible());
-		boolean vb = (vs != null && vs.isVisible());
+		boolean hb = ((hs != null) && hs.isVisible());
+		boolean vb = ((vs != null) && vs.isVisible());
 
-		if (hb)
+		if (hb) {
 			bottom -= s;
-		if (vb)
+		}
+		if (vb) {
 			right -= s;
+		}
 
-		if (hb)
+		if (hb) {
 			hs.reshape(left, bottom, right, s);
+		}
 
-		if (vb)
+		if (vb) {
 			vs.reshape(right, top, s, bottom);
+		}
 
-		if ((center != null) && center.isVisible())
+		if ((center != null) && center.isVisible()) {
 			layoutCenter(parent, left, top, right - left, bottom - top);
+		}
 
 		if (hb && vb) {
-			if (stubb != null)
+			if (stubb != null) {
 				stubb.reshape(right, bottom, s, s);
+			}
 		}
 		else {
-			if (stubb != null)
+			if (stubb != null) {
 				stubb.resize(0, 0);
+			}
 		}
 	}
 
@@ -137,14 +160,16 @@ public class ScrollLayout implements LayoutManager {
 
 		if (hs.isVisible()) {
 			Rectangle r = hs.bounds();
-			if ((b.y + b.height) < r.y)
+			if ((b.y + b.height) < r.y) {
 				d.height += r.height;
+			}
 		}
 
 		if (vs.isVisible()) {
 			Rectangle r = vs.bounds();
-			if ((b.x + b.width) < r.x)
+			if ((b.x + b.width) < r.x) {
 				d.width += r.width;
+			}
 		}
 
 		return d;

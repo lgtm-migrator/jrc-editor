@@ -17,8 +17,13 @@
 
 package org.zaval.awt;
 
-import java.util.*;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Scrollbar;
 
 public class ScrollController extends org.zaval.awt.util.Metrics {
 	public static final int SCROLL_SIZE = 16;
@@ -41,33 +46,40 @@ public class ScrollController extends org.zaval.awt.util.Metrics {
 	protected int normilize(Scrollbar sb, int prev, int dt) {
 		int v = prev + dt;
 
-		if (v < 0)
+		if (v < 0) {
 			dt -= v;
-		else if (v >= sb.getMaximum())
+		}
+		else if (v >= sb.getMaximum()) {
 			dt -= (v - sb.getMaximum());
+		}
 
 		return dt;
 	}
 
 	protected int next(Scrollbar sb, int prev, int id, int times) {
-		if (sb == null || !sb.isVisible())
+		if ((sb == null) || !sb.isVisible()) {
 			return 0;
+		}
 
 		int dt = 0;
 		int or = sb.getOrientation();
 		switch (id) {
 			case Event.SCROLL_PAGE_DOWN: {
-				if (or == Scrollbar.HORIZONTAL)
+				if (or == Scrollbar.HORIZONTAL) {
 					dt = getHPageSize(id);
-				else
+				}
+				else {
 					dt = getVPageSize(id);
+				}
 			}
 				break;
 			case Event.SCROLL_LINE_UP: {
-				if (or == Scrollbar.HORIZONTAL)
+				if (or == Scrollbar.HORIZONTAL) {
 					dt = -getHLineSize(id);
-				else
+				}
+				else {
 					dt = -getVLineSize(id);
+				}
 			}
 				break;
 			case Event.SCROLL_ABSOLUTE: {
@@ -75,17 +87,21 @@ public class ScrollController extends org.zaval.awt.util.Metrics {
 			}
 				break;
 			case Event.SCROLL_LINE_DOWN: {
-				if (or == Scrollbar.HORIZONTAL)
+				if (or == Scrollbar.HORIZONTAL) {
 					dt = getHLineSize(id);
-				else
+				}
+				else {
 					dt = getVLineSize(id);
+				}
 			}
 				break;
 			case Event.SCROLL_PAGE_UP: {
-				if (or == Scrollbar.HORIZONTAL)
+				if (or == Scrollbar.HORIZONTAL) {
 					dt = -getHPageSize(id);
-				else
+				}
+				else {
 					dt = -getVPageSize(id);
+				}
 			}
 				break;
 		}
@@ -100,24 +116,27 @@ public class ScrollController extends org.zaval.awt.util.Metrics {
 		Scrollbar hBar = area.getHBar();
 		Scrollbar vBar = area.getVBar();
 
-		if (e.target != hBar && e.target != vBar)
+		if ((e.target != hBar) && (e.target != vBar)) {
 			return false;
+		}
 
-		boolean b = (e.id == Event.SCROLL_PAGE_UP
-			|| e.id == Event.SCROLL_PAGE_DOWN
-			|| e.id == Event.SCROLL_ABSOLUTE
-			|| e.id == Event.SCROLL_LINE_UP
-			|| e.id == Event.SCROLL_LINE_DOWN);
+		boolean b = ((e.id == Event.SCROLL_PAGE_UP)
+			|| (e.id == Event.SCROLL_PAGE_DOWN)
+			|| (e.id == Event.SCROLL_ABSOLUTE)
+			|| (e.id == Event.SCROLL_LINE_UP)
+			|| (e.id == Event.SCROLL_LINE_DOWN));
 
-		if (!b)
+		if (!b) {
 			return false;
+		}
 
 		return handle((Scrollbar) e.target, e.id, times);
 	}
 
 	protected boolean handle(Scrollbar bar, int id, int times) {
-		if (bar == null || !bar.isVisible())
+		if ((bar == null) || !bar.isVisible()) {
 			return false;
+		}
 		Scrollbar hBar = area.getHBar();
 		Scrollbar vBar = area.getVBar();
 
@@ -125,17 +144,19 @@ public class ScrollController extends org.zaval.awt.util.Metrics {
 		if (bar == hBar) {
 			dx = next(hBar, hValue, id, times);
 			hValue += dx;
-			if (dx != 0)
+			if (dx != 0) {
 				hBar.setValue(hValue);
+			}
 		}
 		else if (bar == vBar) {
 			dy = next(vBar, vValue, id, times);
 			vValue += dy;
-			if (dy != 0)
+			if (dy != 0) {
 				vBar.setValue(vValue);
+			}
 		}
 
-		if (dx != 0 || dy != 0) {
+		if ((dx != 0) || (dy != 0)) {
 			ScrollObject sobj = getScrollObject();
 			Point pos = sobj.getSOLocation();
 			sobj.setSOLocation(pos.x - dx, pos.y - dy);
@@ -152,8 +173,9 @@ public class ScrollController extends org.zaval.awt.util.Metrics {
 	public int getMaxHorScroll() {
 		Scrollbar hBar = area.getHBar();
 		Scrollbar vBar = area.getVBar();
-		if (hBar == null)
+		if (hBar == null) {
 			return -1;
+		}
 		Dimension r = sobj.getSOSize();
 		Dimension d = area.getSASize();
 		int wx = d.width;
@@ -161,13 +183,14 @@ public class ScrollController extends org.zaval.awt.util.Metrics {
 		boolean needVBar = false;
 		boolean b1 = (r.width > wx);
 
-		if (vBar != null)
-			if (r.height > wy || (b1 && r.height > (wy - SCROLL_SIZE))) {
+		if (vBar != null) {
+			if ((r.height > wy) || (b1 && (r.height > (wy - SCROLL_SIZE)))) {
 				needVBar = true;
 				wx -= SCROLL_SIZE;
 			}
+		}
 
-		boolean b2 = (needVBar && r.width > wx);
+		boolean b2 = (needVBar && (r.width > wx));
 		if (b1 || b2) {
 			hValue = 0;
 			int max = (r.width - wx);
@@ -180,8 +203,9 @@ public class ScrollController extends org.zaval.awt.util.Metrics {
 	public int getMaxVerScroll() {
 		Scrollbar hBar = area.getHBar();
 		Scrollbar vBar = area.getVBar();
-		if (vBar == null)
+		if (vBar == null) {
 			return -1;
+		}
 		Dimension r = sobj.getSOSize();
 		Dimension d = area.getSASize();
 		int wx = d.width;
@@ -189,13 +213,14 @@ public class ScrollController extends org.zaval.awt.util.Metrics {
 		boolean needHBar = false;
 
 		boolean b1 = (r.height > wy);
-		if (hBar != null)
-			if (r.width > wx || (b1 && r.width > (wx - SCROLL_SIZE))) {
+		if (hBar != null) {
+			if ((r.width > wx) || (b1 && (r.width > (wx - SCROLL_SIZE)))) {
 				wy -= SCROLL_SIZE;
 				needHBar = true;
 			}
+		}
 
-		boolean b2 = (needHBar && r.height > wy);
+		boolean b2 = (needHBar && (r.height > wy));
 		if (b1 || b2) {
 			vValue = 0;
 			int max = (r.height - wy);
@@ -223,6 +248,7 @@ public class ScrollController extends org.zaval.awt.util.Metrics {
 		invalidate();
 	}
 
+	@Override
 	public void recalc() {
 		clear();
 		Scrollbar hBar = area.getHBar();
@@ -231,11 +257,11 @@ public class ScrollController extends org.zaval.awt.util.Metrics {
 		Dimension d = area.getSASize();
 		pages.width = d.width;
 		pages.height = d.height;
-		if (hBar != null && hBar.isVisible()) {
+		if ((hBar != null) && hBar.isVisible()) {
 			pages.width -= SCROLL_SIZE;
 			lines.width = pages.width / 4;
 		}
-		if (vBar != null && vBar.isVisible()) {
+		if ((vBar != null) && vBar.isVisible()) {
 			pages.height -= SCROLL_SIZE;
 			lines.height = pages.height / 4;
 		}
@@ -273,15 +299,18 @@ public class ScrollController extends org.zaval.awt.util.Metrics {
 		int maxy = 0;
 
 		for (int i = 0; i < c.length; i++) {
-			if (!c[i].isVisible())
+			if (!c[i].isVisible()) {
 				continue;
+			}
 			Rectangle r = c[i].bounds();
 			int mx = r.x + r.width;
 			int my = r.y + r.height;
-			if (maxx < mx)
+			if (maxx < mx) {
 				maxx = mx;
-			if (maxy < my)
+			}
+			if (maxy < my) {
 				maxy = my;
+			}
 		}
 		return new Dimension(maxx + 5, maxy + 5);
 	}

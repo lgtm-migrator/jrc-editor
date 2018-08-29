@@ -17,10 +17,10 @@
 
 package org.zaval.awt.peer;
 
-import org.zaval.awt.*;
+import java.awt.Image;
+import java.util.Hashtable;
 
-import java.awt.*;
-import java.util.*;
+import org.zaval.awt.ImageResolver;
 
 public class TreeNode {
 	public ImageResolver imgres = null;
@@ -60,11 +60,13 @@ public class TreeNode {
 		this.nameCollImage = nameCollImage;
 		this.nameExpImage = nameExpImage;
 
-		if (nameCollImage != null && imgres != null)
+		if ((nameCollImage != null) && (imgres != null)) {
 			this.collapsedImage = imgres.getImage(nameCollImage);
+		}
 
-		if (nameExpImage != null && imgres != null)
+		if ((nameExpImage != null) && (imgres != null)) {
 			this.expandedImage = imgres.getImage(nameCollImage);
+		}
 
 		numberOfChildren = 0;
 		caption = null;
@@ -87,8 +89,9 @@ public class TreeNode {
 	}
 
 	public void expand() {
-		if (isExpandable())
+		if (isExpandable()) {
 			isExpanded = true;
+		}
 	}
 
 	public void collapse() {
@@ -119,30 +122,36 @@ public class TreeNode {
 	}
 
 	public String getNameImage() {
-		if (getImage() != null)
+		if (getImage() != null) {
 			return ((isExpanded && (expandedImage != null)) ? nameExpImage : nameCollImage);
+		}
 		return null;
 	}
 
 	private void loadImages() {
-		if (imgres == null)
+		if (imgres == null) {
 			return;
-		if (nameCollImage != null && collapsedImage == null)
+		}
+		if ((nameCollImage != null) && (collapsedImage == null)) {
 			collapsedImage = imgres.getImage(nameCollImage);
-		if (nameExpImage != null && expandedImage == null)
+		}
+		if ((nameExpImage != null) && (expandedImage == null)) {
 			expandedImage = imgres.getImage(nameExpImage);
+		}
 	}
 
 	public void setExpandedImage(String image) {
 		this.nameCollImage = image;
-		if (image != null && imgres != null)
+		if ((image != null) && (imgres != null)) {
 			this.collapsedImage = imgres.getImage(nameCollImage);
+		}
 	}
 
 	public void setCollapsedImage(String image) {
 		this.nameExpImage = image;
-		if (image != null && imgres != null)
+		if ((image != null) && (imgres != null)) {
 			this.expandedImage = imgres.getImage(nameExpImage);
+		}
 	}
 
 	public String getText() {
@@ -214,10 +223,12 @@ public class TreeNode {
 	}
 
 	public void setIndicator(String name) {
-		if (name == null || imgres == null)
+		if ((name == null) || (imgres == null)) {
 			indicator = null;
-		else
+		}
+		else {
 			indicator = imgres.getImage(name);
+		}
 	}
 
 	public Image getIndicator() {

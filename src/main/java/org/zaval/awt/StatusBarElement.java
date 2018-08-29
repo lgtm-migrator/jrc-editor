@@ -17,8 +17,13 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Insets;
+import java.awt.Panel;
 
 public class StatusBarElement extends Panel {
 	private int percent = -1;
@@ -28,8 +33,9 @@ public class StatusBarElement extends Panel {
 
 	public StatusBarElement(Component c, int p, Dimension pref) {
 		setLayout(new BorderLayout(1, 0));
-		if (c != null)
+		if (c != null) {
 			add("Center", c);
+		}
 		percent = p;
 		this.pref = pref;
 	}
@@ -39,8 +45,9 @@ public class StatusBarElement extends Panel {
 	}
 
 	public void setType(int t) {
-		if (t == type)
+		if (t == type) {
 			return;
+		}
 		type = t;
 		repaint();
 	}
@@ -49,10 +56,12 @@ public class StatusBarElement extends Panel {
 		return percent;
 	}
 
+	@Override
 	public Insets insets() {
 		return ins;
 	}
 
+	@Override
 	public void paint(Graphics gr) {
 		super.paint(gr);
 		Dimension d = size();
@@ -77,9 +86,11 @@ public class StatusBarElement extends Panel {
 		}
 	}
 
+	@Override
 	public Dimension preferredSize() {
-		if (pref != null)
+		if (pref != null) {
 			return new Dimension(pref.width, pref.height);
+		}
 		return super.preferredSize();
 	}
 }

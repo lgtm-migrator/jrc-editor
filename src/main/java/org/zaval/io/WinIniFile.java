@@ -17,8 +17,15 @@
 
 package org.zaval.io;
 
-import java.util.*;
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.StringTokenizer;
 
 //========================================================================
 
@@ -34,13 +41,11 @@ public class WinIniFile {
 	private char buf[] = new char[WinIniFile.MAX_LEN_LINE];
 	private String begSecSymb = "[";
 	private String endSecSymb = "]";
-	private int openFlag = OPEN_EXISTS;
 
 	//========================================================================
 
 	public WinIniFile(String name, int flag) throws IOException {
 		this.name = name;
-		openFlag = flag;
 		switch (flag) {
 			case CREATE: {
 				// if this file allready exist => clear it
@@ -50,7 +55,7 @@ public class WinIniFile {
 			}
 				break;
 			case OPEN_EXISTS:
-				init((InputStream) new FileInputStream(name));
+				init(new FileInputStream(name));
 				break;
 		}
 	}
@@ -59,7 +64,7 @@ public class WinIniFile {
 
 	public WinIniFile(String name) throws IOException {
 		this.name = name;
-		init((InputStream) new FileInputStream(name));
+		init(new FileInputStream(name));
 	}
 
 	//========================================================================
@@ -78,35 +83,43 @@ public class WinIniFile {
 		DataInputStream dis = new DataInputStream(isdata);
 		for (;;) {
 			data = readLine(is);
-			if (data == null)
+			if (data == null) {
 				break;
-			if ((isEmpty(data)) || (data.indexOf(";") == 0))
+			}
+			if ((isEmpty(data)) || (data.indexOf(";") == 0)) {
 				continue;
-			if (data.equals("EOF"))
+			}
+			if (data.equals("EOF")) {
 				break;
+			}
 			int beg = data.indexOf(begSecSymb);
 			if (beg == 0) {
 				int end = data.indexOf(endSecSymb);
-				if (end != (data.length() - 1))
+				if (end != (data.length() - 1)) {
 					continue;
+				}
 				sect = new Hashtable();
 				sections.put(data.substring(beg + 1, end).toLowerCase(), sect);
 				continue;
 			}
-			if (sect == null)
+			if (sect == null) {
 				continue;
+			}
 			StringTokenizer st = new StringTokenizer(data, "=");
-			if (!st.hasMoreTokens())
+			if (!st.hasMoreTokens()) {
 				continue;
+			}
 			String vname = st.nextToken().toLowerCase();
 
 			String value = null;
-			if (!st.hasMoreTokens())
+			if (!st.hasMoreTokens()) {
 				value = NO_VALUE;
+			}
 			value = st.nextToken();
 
-			if (isEmpty(vname) || isEmpty(value))
+			if (isEmpty(vname) || isEmpty(value)) {
 				continue;
+			}
 			sect.put(vname, value);
 		}
 		dis.close();
@@ -117,11 +130,13 @@ public class WinIniFile {
 
 	private String readLine(InputStream is) throws IOException {
 		int res = -1, i = 0;
-		while ((res = is.read()) > 0 && res != '\n' && i < buf.length)
+		while (((res = is.read()) > 0) && (res != '\n') && (i < buf.length)) {
 			buf[i++] = (char) res;
+		}
 
-		if (i == 0)
+		if (i == 0) {
 			return null;
+		}
 		return new String(buf, 0, i).trim();
 	}
 
@@ -139,8 +154,9 @@ public class WinIniFile {
 
 	public String getValue(String section, String name) {
 		Hashtable tab = (Hashtable) sections.get(section.toLowerCase());
-		if (tab == null)
+		if (tab == null) {
 			return null;
+		}
 		return (String) tab.get(name.toLowerCase());
 	}
 
@@ -148,8 +164,9 @@ public class WinIniFile {
 
 	public String getValue(String name) {
 		Hashtable tab = foundSection(name.toLowerCase());
-		if (tab == null)
+		if (tab == null) {
 			return null;
+		}
 		return (String) tab.get(name.toLowerCase());
 	}
 
@@ -164,24 +181,27 @@ public class WinIniFile {
 		while (el.hasMoreElements()) {
 			Hashtable tab = (Hashtable) el.nextElement();
 			String res = (String) tab.get(namevalue.toLowerCase());
-			if (res != null)
+			if (res != null) {
 				return tab;
+			}
 		}
 		return null;
 	}
 
 	public int size(String section) {
 		Hashtable tab = getSection(section);
-		if (tab == null)
+		if (tab == null) {
 			return -1;
+		}
 		return tab.size();
 	}
 
 	public int size() {
 		Enumeration el = sections.elements();
 		int count = 0;
-		if ((el == null) || (!el.hasMoreElements()))
+		if ((el == null) || (!el.hasMoreElements())) {
 			return -1;
+		}
 		while (el.hasMoreElements()) {
 			Hashtable tab = (Hashtable) el.nextElement();
 			count += tab.size();
@@ -192,18 +212,21 @@ public class WinIniFile {
 	public int sizeNumber(String section) {
 		int count = 0;
 		Hashtable tab = (Hashtable) sections.get(section.toLowerCase());
-		if (tab == null)
+		if (tab == null) {
 			return -1;
+		}
 		String data = "";
-		for (count = 0; data != null; count++)
+		for (count = 0; data != null; count++) {
 			data = (String) tab.get("" + count);
+		}
 		return count - 1;
 	}
 
 	public int putValue(String section, String name, String value) {
 		Hashtable tab = getSection(section.toLowerCase());
-		if (tab == null)
+		if (tab == null) {
 			return -1;
+		}
 		tab.put(name.toLowerCase(), value);
 		return 0;
 	}
@@ -212,8 +235,9 @@ public class WinIniFile {
 
 	public int putValue(String name, String value) {
 		Hashtable tab = foundSection(name.toLowerCase());
-		if (tab == null)
+		if (tab == null) {
 			return -1;
+		}
 		tab.put(name.toLowerCase(), value);
 		return 0;
 	}
@@ -221,8 +245,9 @@ public class WinIniFile {
 	//========================================================================
 
 	public int delSection(String name) {
-		if (sections == null)
+		if (sections == null) {
 			return -1;
+		}
 		sections.remove(name.toLowerCase());
 		return 0;
 	}
@@ -231,8 +256,9 @@ public class WinIniFile {
 
 	public int delValue(String section, String name) {
 		Hashtable tab = getSection(section.toLowerCase());
-		if (tab == null)
+		if (tab == null) {
 			return -1;
+		}
 		tab.remove(name.toLowerCase());
 		return 0;
 	}
@@ -240,8 +266,9 @@ public class WinIniFile {
 	//========================================================================
 
 	public int putSection(String name) {
-		if ((sections == null) || (sections.get(name.toLowerCase()) != null))
+		if ((sections == null) || (sections.get(name.toLowerCase()) != null)) {
 			return -1;
+		}
 		sections.put(name.toLowerCase(), new Hashtable());
 		return 0;
 	}
@@ -249,25 +276,29 @@ public class WinIniFile {
 	//========================================================================
 
 	public int flush(String name) throws IOException {
-		if (sections == null)
+		if (sections == null) {
 			return -1;
+		}
 		RandomAccessFile file = new RandomAccessFile(name, "rw");
 		Enumeration el = sections.elements();
 		Enumeration sk = sections.keys();
 		while (el.hasMoreElements()) {
 			Hashtable tab = (Hashtable) el.nextElement();
-			if (tab == null)
+			if (tab == null) {
 				break;
+			}
 			Enumeration keys = tab.keys();
 			Enumeration values = tab.elements();
 			writeLine(file, begSecSymb + (String) sk.nextElement() + endSecSymb);
 			while (keys.hasMoreElements()) {
 				String key = (String) keys.nextElement();
 				String value = (String) values.nextElement();
-				if (value.equals(NO_VALUE))
+				if (value.equals(NO_VALUE)) {
 					writeLine(file, key);
-				else
+				}
+				else {
 					writeLine(file, key + "=" + value);
+				}
 			}
 		}
 		file.close();
@@ -277,8 +308,9 @@ public class WinIniFile {
 	//========================================================================
 
 	public int flush() throws IOException {
-		if (this.name == null)
+		if (this.name == null) {
 			return -1;
+		}
 		return flush(name);
 	}
 
@@ -296,6 +328,6 @@ public class WinIniFile {
 	}
 
 	private boolean isEmpty(String s) {
-		return s == null || s.length() == 0 || s.trim().length() == 0;
+		return (s == null) || (s.length() == 0) || (s.trim().length() == 0);
 	}
 }

@@ -17,7 +17,8 @@
 
 package org.zaval.tools.i18n.translator;
 
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 class BundleItem {
 	private String identifier;

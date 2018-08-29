@@ -17,8 +17,15 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.Insets;
+import java.awt.LayoutManager;
+import java.awt.Panel;
+import java.awt.Point;
+import java.util.Vector;
 
 public class Toolbar extends Panel implements LayoutManager {
 	private Vector v = new Vector();
@@ -30,15 +37,17 @@ public class Toolbar extends Panel implements LayoutManager {
 
 	public void add(int id, Component button) {
 		add(button);
-		while (v.size() <= id)
+		while (v.size() <= id) {
 			v.addElement("");
+		}
 		v.setElementAt(button, id);
 	}
 
+	@Override
 	public boolean action(Event e, Object o) {
 		if (e.target instanceof SpeedButton) {
 			int id = v.indexOf(e.target);
-			getParent().postEvent(new Event(this, e.ACTION_EVENT, Integer.toString(id)));
+			getParent().postEvent(new Event(this, Event.ACTION_EVENT, Integer.toString(id)));
 			return true;
 		}
 		return false;
@@ -48,16 +57,20 @@ public class Toolbar extends Panel implements LayoutManager {
 		return new Point(0, 0);
 	}
 
+	@Override
 	public void addLayoutComponent(String name, Component comp) {
 	}
 
+	@Override
 	public void removeLayoutComponent(Component comp) {
 	}
 
+	@Override
 	public Dimension minimumLayoutSize(Container parent) {
 		return preferredLayoutSize(parent);
 	}
 
+	@Override
 	public Dimension preferredLayoutSize(Container parent) {
 		int maxx = 0, maxy = 0, j;
 		Component[] v = getComponents();
@@ -70,15 +83,17 @@ public class Toolbar extends Panel implements LayoutManager {
 		return new Dimension(maxx/*-1*/, maxy);
 	}
 
+	@Override
 	public void layoutContainer(Container parent) {
 		int x, y, w, h, j;
 		Dimension real = parent.size();
-		Dimension want = preferredLayoutSize(parent);
+		preferredLayoutSize(parent);
 		Insets p_i = parent.insets();
 
-		if (real.width == 0 || real.height == 0)
+		if ((real.width == 0) || (real.height == 0)) {
 			return;
-		// double cfx  = (double)real.width/(double)want.width;
+			// double cfx  = (double)real.width/(double)want.width;
+		}
 
 		x = p_i.left;
 		y = p_i.top;
@@ -113,9 +128,11 @@ public class Toolbar extends Panel implements LayoutManager {
 
 	public void setEnabled(int j, boolean state) {
 		Component c = (Component) v.elementAt(j);
-		if (state)
+		if (state) {
 			c.enable();
-		else
+		}
+		else {
 			c.disable();
+		}
 	}
 }

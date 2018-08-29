@@ -17,7 +17,10 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Image;
+import java.awt.Polygon;
 
 class NotebookPage {
 	String label;
@@ -33,10 +36,12 @@ class NotebookPage {
 	}
 
 	public void setImage(String name) {
-		if (name == null || imgres == null)
+		if ((name == null) || (imgres == null)) {
 			img = null;
-		else
+		}
+		else {
 			img = imgres.getImage(name);
+		}
 	}
 
 	public Image getImage() {

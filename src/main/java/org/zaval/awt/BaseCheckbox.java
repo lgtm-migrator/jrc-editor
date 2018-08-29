@@ -17,8 +17,14 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Insets;
+import java.awt.Rectangle;
 
 public abstract class BaseCheckbox extends Canvas {
 	public final static int LEFT = 1;
@@ -42,11 +48,13 @@ public abstract class BaseCheckbox extends Canvas {
 		return alignArea.getText();
 	}
 
+	@Override
 	public void disable() {
 		super.disable();
 		repaint();
 	}
 
+	@Override
 	public void enable() {
 		super.enable();
 		repaint();
@@ -54,18 +62,21 @@ public abstract class BaseCheckbox extends Canvas {
 
 	public void setLabel(String label) {
 		alignArea.setText(label);
-		if (alignArea.isValid())
+		if (alignArea.isValid()) {
 			return;
+		}
 		invalidate();
 		repaint();
 	}
 
 	public void setAlign(int a) {
-		if (a == align)
+		if (a == align) {
 			return;
+		}
 		align = a;
-		if (alignArea.isValid())
+		if (alignArea.isValid()) {
 			return;
+		}
 		invalidate();
 		repaint();
 	}
@@ -83,12 +94,14 @@ public abstract class BaseCheckbox extends Canvas {
 		repaint();
 	}
 
+	@Override
 	public boolean gotFocus(Event e, Object o) {
 		hasFocus = true;
 		repaint();
 		return super.gotFocus(e, o);
 	}
 
+	@Override
 	public boolean lostFocus(Event e, Object o) {
 		hasFocus = false;
 		repaint();
@@ -97,15 +110,17 @@ public abstract class BaseCheckbox extends Canvas {
 
 	private void calc() {
 		FontMetrics fm = getFontMetrics(getFont());
-		if (fm == null)
+		if (fm == null) {
 			return;
+		}
 
 		Dimension d = size();
-		posY = d.height / 2 - sqSize.height / 2;
+		posY = (d.height / 2) - (sqSize.height / 2);
 		posX = 0;
 
-		if (align == RIGHT)
+		if (align == RIGHT) {
 			posX = d.width - sqSize.width - 1;
+		}
 
 		eventBox.x = 0;
 		eventBox.y = 0;
@@ -113,54 +128,65 @@ public abstract class BaseCheckbox extends Canvas {
 		eventBox.height = d.height;
 
 		alignArea.setSize(d);
-		if (align == LEFT)
+		if (align == LEFT) {
 			alignArea.setInsets(new Insets(0, textInset + sqSize.width + 1, 0, 0));
-		else
+		}
+		else {
 			alignArea.setInsets(new Insets(0, 1, 0, 0));
+		}
 
 		alignArea.setFontMetrics(fm);
 
 		textArea = alignArea.getAlignRectangle();
-		if ((textArea.x + textArea.width) >= d.width)
+		if ((textArea.x + textArea.width) >= d.width) {
 			textArea.width = (d.width - textArea.x - 1);
+		}
 
-		if ((textArea.y + textArea.height) >= d.height)
+		if ((textArea.y + textArea.height) >= d.height) {
 			textArea.height = (d.height - textArea.y - 1);
+		}
 
-		if (align == RIGHT && (textArea.x + textArea.width) > posX)
+		if ((align == RIGHT) && ((textArea.x + textArea.width) > posX)) {
 			textArea.width = (posX - textArea.x - 1);
+		}
 
 		isCalc = true;
 	}
 
+	@Override
 	public void invalidate() {
 		isCalc = false;
 		super.invalidate();
 	}
 
+	@Override
 	public void paint(Graphics g) {
 		super.paint(g);
-		if (!isCalc)
+		if (!isCalc) {
 			calc();
+		}
 		String lab = getLabel();
 
-		if (isEnabled())
+		if (isEnabled()) {
 			g.setColor(Color.black);
-		else
+		}
+		else {
 			g.setColor(Color.gray);
+		}
 
-		int yy = posY + sqSize.height;
-		if (lab != null && lab.length() > 0) {
-			if (!isEnabled())
+		if ((lab != null) && (lab.length() > 0)) {
+			if (!isEnabled()) {
 				alignArea.draw(g, 0, 1, Color.white);
+			}
 
 			alignArea.draw(g, getForeground());
 		}
 
 		if (hasFocus) {
 			g.setColor(Color.black);
-			if (lab != null && lab.length() > 0)
+			if ((lab != null) && (lab.length() > 0)) {
 				drawRect(g, textArea.x - 1, textArea.y, textArea.width, textArea.height);
+			}
 		}
 
 		paint(g, posX, posY, sqSize.width, sqSize.height);
@@ -170,39 +196,47 @@ public abstract class BaseCheckbox extends Canvas {
 		return eventBox.inside(x, y);
 	}
 
+	@Override
 	public synchronized boolean mouseDown(Event ev, int x, int y) {
 		if (isEnabled()) {
 			if (insideBox(x, y)) {
 				mouse_down = true;
 				requestFocus();
-				if (condition())
+				if (condition()) {
 					stateChanged();
+				}
 			}
 		}
 		return super.mouseDown(ev, x, y);
 	}
 
+	@Override
 	public synchronized boolean mouseUp(Event ev, int x, int y) {
-		if (isEnabled())
+		if (isEnabled()) {
 			if (condition() && insideBox(x, y)) {
 				mouse_down = false;
 
-				if (state)
+				if (state) {
 					state = false;
-				else
+				}
+				else {
 					state = true;
+				}
 				repaint();
 
 				Event e = new Event(this, Event.ACTION_EVENT, "1");
 				getParent().postEvent(e);
 				return true;
 			}
+		}
 		return super.mouseDown(ev, x, y);
 	}
 
+	@Override
 	public boolean keyDown(Event ev, int key) {
-		if (!hasFocus || key != ' ' || (!condition()))
+		if (!hasFocus || (key != ' ') || (!condition())) {
 			return super.keyDown(ev, key);
+		}
 
 		setState(!getState());
 		Event e = new Event(this, Event.ACTION_EVENT, "1");
@@ -210,6 +244,7 @@ public abstract class BaseCheckbox extends Canvas {
 		return true;
 	}
 
+	@Override
 	public synchronized boolean mouseDrag(Event ev, int x, int y) {
 		if (isEnabled()) {
 			if (insideBox(x, y)) {
@@ -220,10 +255,12 @@ public abstract class BaseCheckbox extends Canvas {
 		return super.mouseDrag(ev, x, y);
 	}
 
+	@Override
 	public Dimension preferredSize() {
 		FontMetrics fm = getFontMetrics(getFont());
-		if (fm == null)
+		if (fm == null) {
 			return super.preferredSize();
+		}
 
 		int w = textInset + sqSize.width + fm.stringWidth(alignArea.getText()) + 1;
 		int h = Math.max(fm.getHeight(), sqSize.height);
@@ -241,14 +278,17 @@ public abstract class BaseCheckbox extends Canvas {
 		return alignArea;
 	}
 
+	@Override
 	public boolean mouseMove(Event e, int x, int y) {
 		return true;
 	}
 
+	@Override
 	public boolean mouseExit(Event e, int x, int y) {
 		return true;
 	}
 
+	@Override
 	public boolean mouseEnter(Event e, int x, int y) {
 		return true;
 	}
@@ -264,7 +304,7 @@ public abstract class BaseCheckbox extends Canvas {
 
 	public void drawHLine(Graphics gr, int x1, int x2, int y1) {
 		int dx = x2 - x1;
-		int count = dx / 2 + dx % 2;
+		int count = (dx / 2) + (dx % 2);
 		for (int i = 0; i < count; i++) {
 			gr.drawLine(x1, y1, x1, y1);
 			x1 += 2;
@@ -274,7 +314,7 @@ public abstract class BaseCheckbox extends Canvas {
 
 	public void drawVLine(Graphics gr, int y1, int y2, int x1) {
 		int dy = y2 - y1;
-		int count = dy / 2 + dy % 2;
+		int count = (dy / 2) + (dy % 2);
 		;
 		for (int i = 0; i < count; i++) {
 			gr.drawLine(x1, y1, x1, y1);

@@ -17,9 +17,15 @@
 
 package org.zaval.tools.i18n.translator;
 
-import java.io.*;
-import java.util.*;
-import org.zaval.xml.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.util.Enumeration;
+import java.util.Hashtable;
+
+import org.zaval.xml.XmlElement;
+import org.zaval.xml.XmlParseException;
 
 class XmlReader {
 	private XmlElement xml;
@@ -50,12 +56,15 @@ class XmlReader {
 
 	private void getTable(Hashtable place, XmlElement root, String prefix) {
 		String xmap = (String) root.getAttribute("lang");
-		if (xmap != null)
+		if (xmap != null) {
 			xmap = xmap;
-		if (xmap == null)
+		}
+		if (xmap == null) {
 			xmap = (String) root.getAttribute("name");
-		if (xmap == null)
+		}
+		if (xmap == null) {
 			xmap = root.getName();
+		}
 		String name = prefix + xmap + "!";
 
 		Enumeration en;
@@ -67,8 +76,9 @@ class XmlReader {
 		    place.put(name + key, val);
 		}
 		*/
-		if (root.getContent() != null)
+		if (root.getContent() != null) {
 			place.put(prefix + xmap, root.getContent());
+		}
 
 		en = root.enumerateChildren();
 		while (en.hasMoreElements()) {

@@ -17,8 +17,22 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Button;
+import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.LayoutManager;
+import java.awt.Panel;
+import java.awt.Point;
+import java.awt.Polygon;
+import java.awt.Rectangle;
+import java.util.Vector;
 
 public class Notebook extends Panel implements LayoutManager {
 	public static final int TOP = 0;
@@ -71,8 +85,9 @@ public class Notebook extends Panel implements LayoutManager {
 
 	public void setFont(Font norm, Font sel, Color c) {
 		fReg = norm;
-		if (sel == null)
+		if (sel == null) {
 			sel = new Font(norm.getName(), norm.getStyle() | Font.BOLD, norm.getSize());
+		}
 		fSel = sel;
 		caption = c;
 	}
@@ -103,15 +118,19 @@ public class Notebook extends Panel implements LayoutManager {
 
 	public void setTabsInfo(int tabsPosition, int tabsStyle) {
 		iTabsPosition = tabsPosition;
-		if (iTabsPosition == TOP)
+		if (iTabsPosition == TOP) {
 			iTabsStyle = ROUNDED;
-		else
+		}
+		else {
 			iTabsStyle = tabsStyle;
+		}
 
-		if (iTabsStyle == ROUNDED)
+		if (iTabsStyle == ROUNDED) {
 			TF_BTN_HEIGHT = 20;
-		else
+		}
+		else {
 			TF_BTN_HEIGHT = 17;
+		}
 	}
 
 	public int getTabIndex() {
@@ -130,8 +149,9 @@ public class Notebook extends Panel implements LayoutManager {
 		np.color = Color.gray;
 		np.name = Integer.toString(pos);
 
-		if (curIndex < 0)
+		if (curIndex < 0) {
 			curIndex = pos;
+		}
 		pages.addElement(np);
 
 		oobj.add(np.name, np.comp);
@@ -168,23 +188,28 @@ public class Notebook extends Panel implements LayoutManager {
 		repaint();
 	}
 
+	@Override
 	public void layoutContainer(Container obj) {
 		Rectangle r = obj.bounds();
-		int width = r.width - TF_LEFT + TF_RIGHT;
-		if (width < 0)
+		int width = (r.width - TF_LEFT) + TF_RIGHT;
+		if (width < 0) {
 			return;
+		}
 
-		int height = r.height - TF_TOP + TF_BOTTOM;
-		if (height < 0)
+		int height = (r.height - TF_TOP) + TF_BOTTOM;
+		if (height < 0) {
 			return;
+		}
 
 		int col = TF_LEFT;
 		int row = 0;
 
-		if (iTabsPosition == TOP)
+		if (iTabsPosition == TOP) {
 			row = TF_TOP;
-		else
+		}
+		else {
 			row = TF_TOP - TF_BTN_HEIGHT;
+		}
 
 		oobj.move(col + 1, row + 1);
 
@@ -193,14 +218,14 @@ public class Notebook extends Panel implements LayoutManager {
 
 		if (iTabsPosition == TOP) {
 
-			dbLeft.move(r.width - 33 + TF_RIGHT, TF_TOP - 16);
-			dbRight.move(r.width - 16 + TF_RIGHT, TF_TOP - 16);
+			dbLeft.move((r.width - 33) + TF_RIGHT, TF_TOP - 16);
+			dbRight.move((r.width - 16) + TF_RIGHT, TF_TOP - 16);
 			dbLeft.resize(16, 15);
 			dbRight.resize(16, 15);
 		}
 		else {
-			dbLeft.move(r.width - 33 + TF_RIGHT, r.height + TF_BOTTOM - TF_BTN_HEIGHT);
-			dbRight.move(r.width - 16 + TF_RIGHT, r.height + TF_BOTTOM - TF_BTN_HEIGHT);
+			dbLeft.move((r.width - 33) + TF_RIGHT, (r.height + TF_BOTTOM) - TF_BTN_HEIGHT);
+			dbRight.move((r.width - 16) + TF_RIGHT, (r.height + TF_BOTTOM) - TF_BTN_HEIGHT);
 			dbLeft.resize(16, 15);
 			dbRight.resize(16, 15);
 		}
@@ -211,16 +236,20 @@ public class Notebook extends Panel implements LayoutManager {
 		return new Point(0, 0);
 	}
 
+	@Override
 	public void addLayoutComponent(String name, Component comp) {
 	}
 
+	@Override
 	public void removeLayoutComponent(Component comp) {
 	}
 
+	@Override
 	public Dimension preferredLayoutSize(Container parent) {
 		return getSize(parent, true);
 	}
 
+	@Override
 	public Dimension minimumLayoutSize(Container parent) {
 		return getSize(parent, false);
 	}
@@ -228,13 +257,10 @@ public class Notebook extends Panel implements LayoutManager {
 	private Dimension getSize(Container obj, boolean max) {
 		int width = TF_LEFT - TF_RIGHT;
 		int height = TF_TOP - TF_BOTTOM;
-		int col = TF_LEFT;
-		int row = 0;
-
-		if (iTabsPosition == TOP)
-			row = TF_TOP;
-		else
-			row = TF_TOP - TF_BTN_HEIGHT;
+		if (iTabsPosition == TOP) {
+		}
+		else {
+		}
 
 		Dimension d = max ? oobj.preferredSize() : oobj.minimumSize();
 		return new Dimension(d.width + width, d.height + height);
@@ -247,19 +273,23 @@ public class Notebook extends Panel implements LayoutManager {
 		repaint();
 	}
 
+	@Override
 	public void paint(Graphics g) {
 		Rectangle r = bounds();
 
 		// paint the box
-		int width = r.width - TF_LEFT + TF_RIGHT;
-		if (width < 0)
+		int width = (r.width - TF_LEFT) + TF_RIGHT;
+		if (width < 0) {
 			width = 0;
-		int height = r.height - TF_TOP + TF_BOTTOM;
-		if (height < 0)
+		}
+		int height = (r.height - TF_TOP) + TF_BOTTOM;
+		if (height < 0) {
 			height = 0;
+		}
 
-		if (r.width > lastWidth)
+		if (r.width > lastWidth) {
 			firstVisibleTab = 0;
+		}
 		lastWidth = r.width;
 
 		int col = TF_LEFT;
@@ -269,23 +299,25 @@ public class Notebook extends Panel implements LayoutManager {
 		g.setColor(getBackground());
 		g.fillRect(0, 0, r.width, r.height);
 
-		if (iTabsPosition == TOP)
+		if (iTabsPosition == TOP) {
 			row = TF_TOP;
-		else
+		}
+		else {
 			row = TF_TOP - TF_BTN_HEIGHT;
+		}
 
 		// draw border
 		g.setColor(Color.white);
-		g.drawLine(col, row, (col + width - 1), row);
-		g.drawLine(col, row, col, (row + height - 1));
+		g.drawLine(col, row, ((col + width) - 1), row);
+		g.drawLine(col, row, col, ((row + height) - 1));
 
 		g.setColor(Color.gray);
-		g.drawLine((col + 2), (row + height - 2), (col + width - 2), (row + height - 2));
-		g.drawLine((col + width - 2), (row + 2), (col + width - 2), (row + height - 2));
+		g.drawLine((col + 2), ((row + height) - 2), ((col + width) - 2), ((row + height) - 2));
+		g.drawLine(((col + width) - 2), (row + 2), ((col + width) - 2), ((row + height) - 2));
 
 		g.setColor(Color.black);
-		g.drawLine((col + 1), (row + height - 1), (col + width - 1), (row + height - 1));
-		g.drawLine((col + width - 1), (row + 1), (col + width - 1), (row + height - 1));
+		g.drawLine((col + 1), ((row + height) - 1), ((col + width) - 1), ((row + height) - 1));
+		g.drawLine(((col + width) - 1), (row + 1), ((col + width) - 1), ((row + height) - 1));
 
 		// paint the tabs, and record areas
 		int x1;
@@ -312,14 +344,16 @@ public class Notebook extends Panel implements LayoutManager {
 		}
 
 		// make sure there is a polygon for each tab
-		if (firstVisibleTab > 0)
+		if (firstVisibleTab > 0) {
 			x4 += 2;
+		}
 		int xStep = 1;
 
 		for (w = firstVisibleTab; w < sze; w++) {
 			int fheight = fm.getHeight() - fms.getDescent();
-			if (w == curIndex)
+			if (w == curIndex) {
 				fheight = fms.getHeight() - fms.getDescent();
+			}
 
 			p = new Polygon();
 			if (npages[w].hidden) {
@@ -339,13 +373,16 @@ public class Notebook extends Panel implements LayoutManager {
 			}
 			try {
 				sLabel = npages[w].label;
-				if (w == curIndex)
+				if (w == curIndex) {
 					labelWidth = fms.stringWidth(sLabel);
-				else
+				}
+				else {
 					labelWidth = fm.stringWidth(sLabel);
+				}
 
-				if (npages[w].img != null)
+				if (npages[w].img != null) {
 					labelWidth += IMAGE_SIZE;
+				}
 
 				if (iTabsPosition == TOP) {
 					y1 = TF_TOP - TF_BTN_HEIGHT;
@@ -353,7 +390,7 @@ public class Notebook extends Panel implements LayoutManager {
 				}
 				else {
 					y1 = r.height + TF_BOTTOM + 1;
-					y2 = r.height + TF_BOTTOM - TF_BTN_HEIGHT;
+					y2 = (r.height + TF_BOTTOM) - TF_BTN_HEIGHT;
 				}
 
 				if (iTabsStyle == ROUNDED) {
@@ -366,8 +403,9 @@ public class Notebook extends Panel implements LayoutManager {
 				}
 
 				// check to see if this tab would draw too far
-				if ((x2 + 36 - TF_RIGHT) > r.width)
+				if (((x2 + 36) - TF_RIGHT) > r.width) {
 					break;
+				}
 
 				// draw the outside edge of the tab
 				if (iTabsPosition == TOP) {
@@ -398,7 +436,7 @@ public class Notebook extends Panel implements LayoutManager {
 
 						g.setColor(Color.black);
 						// left \ slanted line
-						if (w == 0 || w == curIndex) {
+						if ((w == 0) || (w == curIndex)) {
 							g.drawLine(x1, y2, x1 + 9, y1);
 							p.addPoint(x1, y2);
 						}
@@ -420,10 +458,12 @@ public class Notebook extends Panel implements LayoutManager {
 							p.addPoint(x2, y2);
 						}
 
-						if (w == 1 || w == curIndex)
+						if ((w == 1) || (w == curIndex)) {
 							p.addPoint(x1, y2);
-						else
+						}
+						else {
 							p.addPoint(x1 + 9, y2);
+						}
 					}
 					else {
 						// if current tab, it extends further
@@ -432,18 +472,21 @@ public class Notebook extends Panel implements LayoutManager {
 							x1 -= 2;
 						}
 						g.setColor(Color.white);
-						if (curIndex == (w + xStep))
+						if (curIndex == (w + xStep)) {
 							g.drawLine(x1 + 2, y1, x2 - 2, y1);
-						else
+						}
+						else {
 							g.drawLine(x1 + 2, y1, x2, y1);
+						}
 
 						// draw the border between tabs if not covered by the current one
 						if (curIndex != (w - xStep)) {
 							g.drawLine(x1, y1 - 2, x1, y2);
 							x3 = x1;
 						}
-						else
+						else {
 							x3 = x1 + 1;
+						}
 
 						g.drawLine(x1 + 1, y1 - 1, x1 + 1, y1 - 1);
 
@@ -454,26 +497,31 @@ public class Notebook extends Panel implements LayoutManager {
 							g.drawLine(x2 + 1, y1 - 2, x2 + 1, y2);
 							x4 = x2;
 						}
-						else
+						else {
 							x4 = x2 - 1;
+						}
 					}
 				}
 
 				// draw the inside edge of the tab
 				if (w == curIndex) {
-					if (iTabsPosition == TOP)
+					if (iTabsPosition == TOP) {
 						++y2;
-					else
+					}
+					else {
 						--y2;
+					}
 					g.setColor(getBackground());
 					g.drawLine(x1 + 1, y2, x2, y2);
-					if (iTabsPosition == BOTTOM)
+					if (iTabsPosition == BOTTOM) {
 						g.drawLine(x1 + 1, y2 - 1, x2, y2 - 1);
+					}
 
 					g.setFont(fSel);
 				}
-				else
+				else {
 					g.setFont(fReg);
+				}
 
 				// if (iTabsPosition == TOP)
 				if (iTabsStyle == ROUNDED) {
@@ -511,12 +559,12 @@ public class Notebook extends Panel implements LayoutManager {
 					yy = y1 - 4;
 				}
 
-				int imgy = yy - fheight / 2;
+				int imgy = yy - (fheight / 2);
 
 				if (npages[w].img != null) {
 					int imgH = npages[w].img.getHeight(this);
 					int imgW = npages[w].img.getWidth(this);
-					imgy = imgy - imgH / 2 + 1;
+					imgy = (imgy - (imgH / 2)) + 1;
 					g.drawImage(npages[w].img, xx - IMAGE_SIZE - 2, imgy, imgW, imgH, this);
 				}
 
@@ -531,15 +579,19 @@ public class Notebook extends Panel implements LayoutManager {
 		if ((firstVisibleTab > 0) || (w < sze)) {
 			dbLeft.show();
 			dbRight.show();
-			if (firstVisibleTab > 0)
+			if (firstVisibleTab > 0) {
 				dbLeft.enable();
-			else
+			}
+			else {
 				dbLeft.disable();
+			}
 
-			if (w < sze)
+			if (w < sze) {
 				dbRight.enable();
-			else
+			}
+			else {
 				dbRight.disable();
+			}
 		}
 		else {
 			dbLeft.hide();
@@ -548,8 +600,9 @@ public class Notebook extends Panel implements LayoutManager {
 		g.setFont(f);
 		g.setColor(c);
 
-		if (mark && curIndex >= 0)
+		if (mark && (curIndex >= 0)) {
 			drawMark(g, npages[curIndex].poly);
+		}
 
 		npages = null;
 	}
@@ -571,59 +624,72 @@ public class Notebook extends Panel implements LayoutManager {
 		int x, y, i;
 		for (i = 0; i < p.npoints; ++i) {
 			x = p.xpoints[i];
-			if (p.xpoints[i] >= r.x + r.width - 1)
+			if (p.xpoints[i] >= ((r.x + r.width) - 1)) {
 				x = p.xpoints[i] - 1;
-			if (p.xpoints[i] == r.x)
+			}
+			if (p.xpoints[i] == r.x) {
 				x = p.xpoints[i] + 2;
+			}
 
 			y = p.ypoints[i];
-			if (!isTop && p.ypoints[i] >= r.y + r.height - 1)
+			if (!isTop && (p.ypoints[i] >= ((r.y + r.height) - 1))) {
 				y = p.ypoints[i] - 1;
-			if (isTop && p.ypoints[i] == r.y)
+			}
+			if (isTop && (p.ypoints[i] == r.y)) {
 				y = p.ypoints[i] + 2;
+			}
 			p2.addPoint(x, y);
 		}
 		return p2;
 	}
 
+	@Override
 	public boolean keyDown(Event e, int key) {
 		switch (key) {
 			case Event.LEFT: {
 				int x = curIndex;
-				if (x > 0 && mark)
+				if ((x > 0) && mark) {
 					x--;
-				else
+				}
+				else {
 					return false;
-				for (; x >= 0; x--)
+				}
+				for (; x >= 0; x--) {
 					try {
-						NotebookPage np = (NotebookPage) pages.elementAt(x);
-						if (isHidden(x))
+						pages.elementAt(x);
+						if (isHidden(x)) {
 							continue;
+						}
 						sendActionEvent(x, 0);
 						requestFocus();
 						break;
 					}
 					catch (ArrayIndexOutOfBoundsException ex) {
 					}
+				}
 			}
 				break;
 			case Event.RIGHT: {
 				int size = pages.size(), x = curIndex;
-				if (x < (size - 1) && mark)
+				if ((x < (size - 1)) && mark) {
 					x++;
-				else
+				}
+				else {
 					return false;
-				for (; x < size; x++)
+				}
+				for (; x < size; x++) {
 					try {
-						NotebookPage np = (NotebookPage) pages.elementAt(x);
-						if (isHidden(x))
+						pages.elementAt(x);
+						if (isHidden(x)) {
 							continue;
+						}
 						sendActionEvent(x, 0);
 						requestFocus();
 						break;
 					}
 					catch (ArrayIndexOutOfBoundsException ex) {
 					}
+				}
 			}
 				break;
 		}
@@ -636,6 +702,7 @@ public class Notebook extends Panel implements LayoutManager {
 		isHandle = b;
 	}
 
+	@Override
 	public boolean handleEvent(Event evt) {
 		switch (evt.id) {
 			case Event.MOUSE_MOVE:
@@ -645,16 +712,18 @@ public class Notebook extends Panel implements LayoutManager {
 			case Event.MOUSE_DRAG:
 				return true;
 			case Event.MOUSE_UP:
-				if (!isHandle)
+				if (!isHandle) {
 					return true;
+				}
 				int sizeR = pages.size();
 				NotebookPage np = null;
-				for (int x = 0; x < sizeR; x++)
+				for (int x = 0; x < sizeR; x++) {
 					try {
 						np = (NotebookPage) pages.elementAt(x);
 						if ((np.poly != nullPoly) && np.poly.inside(evt.x, evt.y)) {
-							if (isHidden(x))
+							if (isHidden(x)) {
 								continue;
+							}
 							if (x == curIndex) {
 								requestFocus();
 								return true;
@@ -665,22 +734,27 @@ public class Notebook extends Panel implements LayoutManager {
 					}
 					catch (ArrayIndexOutOfBoundsException e) {
 					}
+				}
 				break;
 
 			case Event.ACTION_EVENT:
 				if (evt.target == dbLeft) {
-					if (--firstVisibleTab < 0)
+					if (--firstVisibleTab < 0) {
 						firstVisibleTab = 0;
-					else
+					}
+					else {
 						repaint();
+					}
 					return true;
 				}
 				else if (evt.target == dbRight) {
 					int sze = pages.size();
-					if (++firstVisibleTab == sze)
+					if (++firstVisibleTab == sze) {
 						firstVisibleTab--;
-					else
+					}
+					else {
 						repaint();
+					}
 					return true;
 				}
 				break;
@@ -689,9 +763,11 @@ public class Notebook extends Panel implements LayoutManager {
 		return super.handleEvent(evt);
 	}
 
+	@Override
 	public boolean lostFocus(Event e, Object o) {
-		if (!(e.target instanceof Notebook))
+		if (!(e.target instanceof Notebook)) {
 			return super.lostFocus(e, o);
+		}
 		mark = false;
 		repaint();
 		return super.lostFocus(e, o);
@@ -710,20 +786,24 @@ public class Notebook extends Panel implements LayoutManager {
 		repaint();
 	}
 
+	@Override
 	public void requestFocus() {
 		super.requestFocus();
 		mark = true;
 		repaint();
 	}
 
+	@Override
 	public boolean mouseMove(Event e, int x, int y) {
 		return true;
 	}
 
+	@Override
 	public boolean mouseExit(Event e, int x, int y) {
 		return true;
 	}
 
+	@Override
 	public boolean mouseEnter(Event e, int x, int y) {
 		return true;
 	}
@@ -741,7 +821,7 @@ public class Notebook extends Panel implements LayoutManager {
 
 	public static void drawHLine(Graphics gr, int x1, int x2, int y1) {
 		int dx = x2 - x1;
-		int count = dx / 2 + dx % 2;
+		int count = (dx / 2) + (dx % 2);
 		for (int i = 0; i < count; i++) {
 			gr.drawLine(x1, y1, x1, y1);
 			x1 += 2;
@@ -751,7 +831,7 @@ public class Notebook extends Panel implements LayoutManager {
 
 	public static void drawVLine(Graphics gr, int y1, int y2, int x1) {
 		int dy = y2 - y1;
-		int count = dy / 2 + dy % 2;
+		int count = (dy / 2) + (dy % 2);
 		;
 		for (int i = 0; i < count; i++) {
 			gr.drawLine(x1, y1, x1, y1);

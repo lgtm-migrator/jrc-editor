@@ -17,7 +17,12 @@
 
 package org.zaval.tools.i18n.translator;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Locale;
+import java.util.Vector;
 
 class BundleSet implements TranslatorConstants {
 	private Vector items;
@@ -31,8 +36,9 @@ class BundleSet implements TranslatorConstants {
 	}
 
 	void addLanguage(String slng, String desc) {
-		if (getLanguage(slng) != null)
+		if (getLanguage(slng) != null) {
 			return;
+		}
 		LangItem newl = new LangItem(slng, desc);
 		lng.addElement(newl);
 		correctFileName(newl);
@@ -55,8 +61,9 @@ class BundleSet implements TranslatorConstants {
 		int j, k = getLangCount();
 		for (j = 0; j < k; ++j) {
 			LangItem lx = getLanguage(j);
-			if (lx.getLangId().equals(lng))
+			if (lx.getLangId().equals(lng)) {
 				return j;
+			}
 		}
 		return -1;
 	}
@@ -66,14 +73,17 @@ class BundleSet implements TranslatorConstants {
 		Vector ask = new Vector();
 		for (j = 0; j < k; ++j) {
 			LangItem lx = getLanguage(j);
-			if (lx.getLangDescription().equals(lng))
+			if (lx.getLangDescription().equals(lng)) {
 				ask.addElement(lx);
+			}
 		}
-		if (ask.size() == 0)
+		if (ask.size() == 0) {
 			return null;
+		}
 		LangItem[] li = new LangItem[k = ask.size()];
-		for (j = 0; j < k; ++j)
+		for (j = 0; j < k; ++j) {
 			li[j] = (LangItem) ask.elementAt(j);
+		}
 		return li;
 	}
 
@@ -96,15 +106,15 @@ class BundleSet implements TranslatorConstants {
 		int j, k = getItemCount();
 		for (j = k - 1; j >= 0; --j) {
 			BundleItem bi = getItem(j);
-			if (bi.getId().equals(key))
+			if (bi.getId().equals(key)) {
 				return j;
+			}
 		}
 		return -1;
 	}
 
 	BundleItem addKey(String key) {
-		int j, k = getItemCount(), q;
-		BundleItem ask = (BundleItem) getItem(key);
+		BundleItem ask = getItem(key);
 		/*  for(j=0;j<k;++j){
 		    BundleItem bi = getItem(j);
 		    q = bi.getId().compareTo(key);
@@ -123,8 +133,9 @@ class BundleSet implements TranslatorConstants {
 
 	void removeKey(String key) {
 		int j = getItemIndex(key);
-		if (j >= 0)
+		if (j >= 0) {
 			items.removeElementAt(j);
+		}
 		nameCache.remove(key);
 	}
 
@@ -132,8 +143,9 @@ class BundleSet implements TranslatorConstants {
 		Vector v = new Vector();
 		for (int j = 0; j < getItemCount(); ++j) {
 			BundleItem bi = getItem(j);
-			if (bi.getId().startsWith(key))
+			if (bi.getId().startsWith(key)) {
 				v.addElement(bi);
+			}
 		}
 		return v.elements();
 	}
@@ -150,13 +162,15 @@ class BundleSet implements TranslatorConstants {
 
 	void updateValue(String key, String lang, String value) {
 		BundleItem bi = getItem(key);
-		if (bi != null)
+		if (bi != null) {
 			bi.setTranslation(lang, value);
+		}
 	}
 
 	private Locale parseLanguage(String suffix) {
-		if (suffix == null || suffix.length() == 0)
+		if ((suffix == null) || (suffix.length() == 0)) {
 			return null;
+		}
 		int undInd = suffix.indexOf('_');
 		String sl = suffix;
 		String sc = "";
@@ -172,15 +186,17 @@ class BundleSet implements TranslatorConstants {
 		if (loc != null) {
 			String desc = loc.getDisplayLanguage();
 			String sCountry = loc.getDisplayCountry();
-			if (sCountry != null && sCountry.length() > 0)
+			if ((sCountry != null) && (sCountry.length() > 0)) {
 				desc += " (" + sCountry + ")";
+			}
 			addLanguage(lng, desc);
 		}
 	}
 
 	private String makeLine(String key, String val) {
-		if (val == null)
+		if (val == null) {
 			return null;
+		}
 		int capacity = key.length() + val.length() + 2;
 		StringBuffer sb = new StringBuffer(capacity);
 		sb.append(key);
@@ -190,7 +206,7 @@ class BundleSet implements TranslatorConstants {
 	}
 
 	Vector store(String lng) {
-		LangItem lang = getLanguage(lng);
+		getLanguage(lng);
 		Vector lines = new Vector();
 		lines.addElement("# Java Resource Bundle");
 		lines.addElement("# Modified by Zaval JRC Editor (C) Zaval CE Group");
@@ -201,39 +217,48 @@ class BundleSet implements TranslatorConstants {
 
 		for (int j = 0; j < getItemCount(); ++j) {
 			BundleItem bi = getItem(j);
-			if (bi.getComment() != null)
+			if (bi.getComment() != null) {
 				lines.addElement("#" + bi.getComment());
-			if (bi.getTranslation(lng) == null)
+			}
+			if (bi.getTranslation(lng) == null) {
 				continue;
+			}
 			lines.addElement(makeLine(bi.getId(), bi.getTranslation(lng)));
 		}
 		return lines;
 	}
 
 	private void correctFileName(LangItem lang) {
-		if (getLangCount() < 1)
+		if (getLangCount() < 1) {
 			return;
+		}
 		LangItem lan0 = getLanguage(0);
-		if (lan0 == lang)
+		if (lan0 == lang) {
 			return;
-		if (lang.getLangFile() != null)
+		}
+		if (lang.getLangFile() != null) {
 			return;
-		if (lan0.getLangFile() == null)
+		}
+		if (lan0.getLangFile() == null) {
 			return;
+		}
 		String base = lan0.getLangFile();
 		int j = base.lastIndexOf('.');
-		if (j < 0)
+		if (j < 0) {
 			return;
+		}
 		base = base.substring(0, j) + "_" + lang.getLangId() + base.substring(j);
 		lang.setLangFile(base);
 	}
 
 	public void resort() {
 		Collections.sort(items, new Comparator() {
+			@Override
 			public int compare(Object o1, Object o2) {
 				return ((BundleItem) o1).getId().compareTo(((BundleItem) o2).getId());
 			}
 
+			@Override
 			public boolean equals(Object obj) {
 				return this == obj;
 			}

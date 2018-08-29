@@ -17,8 +17,7 @@
 
 package org.zaval.awt.image;
 
-import java.io.*;
-import java.awt.image.*;
+import java.io.IOException;
 
 // BMP Header, Win3.1 and on ( version 3 BMP )
 
@@ -38,12 +37,14 @@ class BMP_Header {
 
 	public BMP_Header(BMP_InputStream in) throws IOException {
 		FileType = in.readShort();
-		if (FileType != BMP_ID)
+		if (FileType != BMP_ID) {
 			throw new IllegalArgumentException("FileType not BMP: " + FileType);
+		}
 
 		FileSize = in.readInt();
-		if (FileSize < 0)
+		if (FileSize < 0) {
 			throw new IllegalArgumentException("FileSize < 0 " + FileSize);
+		}
 
 		res1 = in.readShort();
 		res2 = in.readShort();
@@ -51,6 +52,7 @@ class BMP_Header {
 		readBytes = 14;
 	}
 
+	@Override
 	public String toString() {
 		String res = new String("type " + FileType + " size " + FileSize + " offset " + dataOffset + "reses: " + res1 + " " + res2);
 		return res;

@@ -17,8 +17,8 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Dimension;
+import java.awt.Scrollbar;
 
 public interface ScrollArea {
 	public Dimension getSASize();

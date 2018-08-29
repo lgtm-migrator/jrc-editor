@@ -17,9 +17,28 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Insets;
+import java.awt.MenuItem;
+import java.awt.Point;
+import java.awt.PopupMenu;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 public class EmulatedTextField extends Canvas implements KeyListener, MouseListener, FocusListener, ActionListener {
 	protected static EmulatedTextField cursorOwner = null;
@@ -51,20 +70,24 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 		minSize = size;
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getActionCommand().equals("Cut")) {
 			blCopy();
 			removeBlock();
 		}
-		else if (e.getActionCommand().equals("Copy"))
+		else if (e.getActionCommand().equals("Copy")) {
 			blCopy();
-		else if (e.getActionCommand().equals("Paste"))
+		}
+		else if (e.getActionCommand().equals("Paste")) {
 			blPaste();
+		}
 	}
 
 	public EmulatedTextField(String s) {
-		if (s != null)
+		if (s != null) {
 			setText(s);
+		}
 		enableInputMethods(true);
 		addKeyListener(this);
 		addMouseListener(this);
@@ -105,14 +128,16 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 
 	public void setCursorColor(Color c) {
 		cursorColor = c;
-		if (hasFocus())
+		if (hasFocus()) {
 			repaint();
+		}
 	}
 
 	public int getCursorPos() {
 		return cursorPos;
 	}
 
+	@Override
 	public boolean hasFocus() {
 		return (this == cursorOwner);
 	}
@@ -126,8 +151,9 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 	}
 
 	public void set3D(boolean b) {
-		if (b == is3D)
+		if (b == is3D) {
 			return;
+		}
 		is3D = b;
 		repaint();
 	}
@@ -136,82 +162,106 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 		return is3D;
 	}
 
+	@Override
 	public void keyTyped(KeyEvent ke) {
 		int key = ke.getKeyCode();
-		boolean isCtrl = (ke.getModifiers() & ke.CTRL_MASK) != 0;
-		boolean isShift = (ke.getModifiers() & ke.SHIFT_MASK) != 0;
-		if (controlKey(key, isShift))
+		ke.getModifiers();
+		boolean isShift = (ke.getModifiers() & InputEvent.SHIFT_MASK) != 0;
+		if (controlKey(key, isShift)) {
 			return;
+		}
 
-		if (ke.isActionKey())
+		if (ke.isActionKey()) {
 			return;
+		}
 		char c = ke.getKeyChar();
-		if (c == ke.CHAR_UNDEFINED)
+		if (c == KeyEvent.CHAR_UNDEFINED) {
 			return;
+		}
 
-		if (c == 0x7F || c == 0x1B)
+		if ((c == 0x7F) || (c == 0x1B)) {
 			return;
-		if (ke.isControlDown())
+		}
+		if (ke.isControlDown()) {
 			return;
-		if (c != '\b' && c != '\t') {
+		}
+		if ((c != '\b') && (c != '\t')) {
 			removeBlock();
-			if (write(c))
+			if (write(c)) {
 				seek(1, false);
+			}
 		}
 	}
 
+	@Override
 	public void keyPressed(KeyEvent ke) {
 		int key = ke.getKeyCode();
-		boolean isCtrl = (ke.getModifiers() & ke.CTRL_MASK) != 0;
-		boolean isShift = (ke.getModifiers() & ke.SHIFT_MASK) != 0;
-		if (blockKey(key, isCtrl, isShift))
+		boolean isCtrl = (ke.getModifiers() & InputEvent.CTRL_MASK) != 0;
+		boolean isShift = (ke.getModifiers() & InputEvent.SHIFT_MASK) != 0;
+		if (blockKey(key, isCtrl, isShift)) {
 			return;
-		if (controlKey(key, isShift))
+		}
+		if (controlKey(key, isShift)) {
 			return;
-		if (key == ke.VK_F12)
+		}
+		if (key == KeyEvent.VK_F12) {
 			menu.show(this, 0, 0);
+		}
 	}
 
+	@Override
 	public void keyReleased(KeyEvent ke) {
 	}
 
 	protected boolean blockKey(int key, boolean isCtrlDown, boolean isShiftDown) {
 		boolean shift = isShiftDown;
-		if (isCtrlDown && (key == KeyEvent.VK_INSERT || key == KeyEvent.VK_C))
+		if (isCtrlDown && ((key == KeyEvent.VK_INSERT) || (key == KeyEvent.VK_C))) {
 			blCopy();
-		else if ((isShiftDown && key == KeyEvent.VK_INSERT) || (isCtrlDown && key == KeyEvent.VK_V))
+		}
+		else if ((isShiftDown && (key == KeyEvent.VK_INSERT)) || (isCtrlDown && (key == KeyEvent.VK_V))) {
 			blPaste();
-		else if ((isShiftDown && key == KeyEvent.VK_DELETE) || (isCtrlDown && key == KeyEvent.VK_X))
+		}
+		else if ((isShiftDown && (key == KeyEvent.VK_DELETE)) || (isCtrlDown && (key == KeyEvent.VK_X))) {
 			blDelete();
-		else if (isCtrlDown && key == KeyEvent.VK_RIGHT)
+		}
+		else if (isCtrlDown && (key == KeyEvent.VK_RIGHT)) {
 			seek(nextSpace() - cursorPos, shift);
-		else if (isCtrlDown && key == KeyEvent.VK_LEFT)
+		}
+		else if (isCtrlDown && (key == KeyEvent.VK_LEFT)) {
 			seek(prevSpace() - cursorPos, shift);
-		else if (!isCtrlDown)
+		}
+		else if (!isCtrlDown) {
 			return false;
+		}
 		return true;
 	}
 
 	protected int prevSpace() {
 		int j = cursorPos;
-		if (j >= buffer.length())
+		if (j >= buffer.length()) {
 			j = buffer.length() - 1;
-		for (; j > 0 && Character.isSpaceChar(buffer.charAt(j)); --j)
+		}
+		for (; (j > 0) && Character.isSpaceChar(buffer.charAt(j)); --j) {
 			;
-		for (; j > 0 && !Character.isSpaceChar(buffer.charAt(j)); --j)
+		}
+		for (; (j > 0) && !Character.isSpaceChar(buffer.charAt(j)); --j) {
 			;
+		}
 		return j;
 	}
 
 	protected int nextSpace() {
 		int j = cursorPos;
 		int k = buffer.length();
-		if (j >= k)
+		if (j >= k) {
 			return cursorPos;
-		for (; j < k && Character.isSpaceChar(buffer.charAt(j)); ++j)
+		}
+		for (; (j < k) && Character.isSpaceChar(buffer.charAt(j)); ++j) {
 			;
-		for (; j < k && !Character.isSpaceChar(buffer.charAt(j)); ++j)
+		}
+		for (; (j < k) && !Character.isSpaceChar(buffer.charAt(j)); ++j) {
 			;
+		}
 		return j;
 	}
 
@@ -233,10 +283,12 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 				seek2beg(shift);
 				break;
 			case KeyEvent.VK_DELETE:
-				if (!isSelected())
+				if (!isSelected()) {
 					remove(cursorPos, 1);
-				else
+				}
+				else {
 					removeBlock();
+				}
 				break;
 			case KeyEvent.VK_BACK_SPACE:
 				if (!isSelected()) {
@@ -245,8 +297,9 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 						remove(cursorPos, 1);
 					}
 				}
-				else
+				else {
 					removeBlock();
+				}
 				break;
 			case KeyEvent.VK_ENTER:
 			case KeyEvent.VK_PAGE_UP:
@@ -259,8 +312,9 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 			default:
 				return false;
 		}
-		if (!shift)
+		if (!shift) {
 			clear();
+		}
 		return b;
 	}
 
@@ -283,23 +337,25 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 	}
 
 	public void blCopy() {
-		if (!isSelected())
+		if (!isSelected()) {
 			return;
+		}
 		writeToClipboard(buffer.toString().substring(selPos, selPos + selWidth));
 	}
 
 	public void blDelete() {
-		if (!isSelected())
+		if (!isSelected()) {
 			return;
+		}
 		writeToClipboard(buffer.toString().substring(selPos, selPos + selWidth));
 		removeBlock();
 	}
 
 	protected boolean inputKey(int key) {
 		removeBlock();
-		char ch = (char) key;
-		if (write(key))
+		if (write(key)) {
 			seek(1, false);
+		}
 		return true;
 	}
 
@@ -311,6 +367,7 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 		}
 	}
 
+	@Override
 	public void paint(Graphics g) {
 		recalc();
 		drawBorder(g);
@@ -324,9 +381,10 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 	}
 
 	protected void drawBlock(Graphics g) {
-		int len = buffer.length();
-		if (!isSelected())
+		buffer.length();
+		if (!isSelected()) {
 			return;
+		}
 		String s = buffer.toString();
 		FontMetrics fm = getFontMetrics(getFont());
 		int beg = fm.stringWidth(s.substring(0, selPos));
@@ -345,8 +403,9 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 	}
 
 	protected void drawCursor(Graphics g) {
-		if (cursorOwner != this)
+		if (cursorOwner != this) {
 			return;
+		}
 		g.setColor(cursorColor);
 		g.fillRect(cursorLocation.x + shift.x, cursorLocation.y + shift.y, cursorSize.width, cursorSize.height);
 	}
@@ -378,19 +437,23 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 		int len = buffer.length();
 		int npos = getValidPos(shift);
 
-		if (npos > len || npos < 0)
+		if ((npos > len) || (npos < 0)) {
 			return false;
+		}
 
-		if (!isSelected() && b)
+		if (!isSelected() && b) {
 			startSel = cursorPos;
+		}
 
 		setPos(npos);
 
 		if (b) {
-			if (cursorPos < startSel)
+			if (cursorPos < startSel) {
 				select(cursorPos, startSel - cursorPos);
-			else
+			}
+			else {
 				select(startSel, cursorPos - startSel);
+			}
 		}
 
 		return true;
@@ -421,10 +484,12 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 	}
 
 	protected void remove(int pos, int size) {
-		if (pos > buffer.length() || pos < 0)
+		if ((pos > buffer.length()) || (pos < 0)) {
 			return;
-		if (pos + size > buffer.length())
+		}
+		if ((pos + size) > buffer.length()) {
 			size = buffer.length() - pos;
+		}
 		String s = buffer.toString();
 		s = s.substring(0, pos) + s.substring(pos + size);
 		buffer = new StringBuffer(s);
@@ -432,19 +497,22 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 	}
 
 	protected int getShift(int x, Dimension d, Insets i) {
-		if (x < i.left)
+		if (x < i.left) {
 			return (i.left - x);
+		}
 
 		int w = d.width - i.right;
-		if (x > w)
+		if (x > w) {
 			return (w - x);
+		}
 
 		return 0;
 	}
 
 	public void insert(int pos, String str) {
-		if (pos > buffer.length() || pos < 0)
+		if ((pos > buffer.length()) || (pos < 0)) {
 			return;
+		}
 		String s = buffer.toString();
 		s = s.substring(0, pos) + str + s.substring(pos);
 		buffer = new StringBuffer(s);
@@ -453,9 +521,11 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 
 	private long clickTime = 0;
 
+	@Override
 	public void mouseClicked(MouseEvent e) {
 	}
 
+	@Override
 	public void mousePressed(MouseEvent e) {
 	}
 
@@ -463,44 +533,54 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 		select(0, buffer.length());
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent e) {
 		int x = e.getX();
 		int y = e.getY();
 
-		if (cursorOwner != this)
+		if (cursorOwner != this) {
 			requestFocus();
+		}
 		int pos = calcTextPos(x, y);
-		if (pos >= 0 && pos != cursorPos)
+		if ((pos >= 0) && (pos != cursorPos)) {
 			setPos(pos);
+		}
 
 		if (e.isPopupTrigger() || e.isShiftDown()) {
 			menu.show(this, x, y);
 			return;
 		}
-		else if (isSelected() && !e.isShiftDown())
+		else if (isSelected() && !e.isShiftDown()) {
 			clear();
+		}
 
 		long t = System.currentTimeMillis();
-		if ((t - clickTime) < 300)
+		if ((t - clickTime) < 300) {
 			select(0, buffer.length());
+		}
 		clickTime = t;
 	}
 
+	@Override
 	public void mouseEntered(MouseEvent e) {
 	}
 
+	@Override
 	public void mouseExited(MouseEvent e) {
 	}
 
 	protected int calcTextPos(int x, int y) {
-		if (buffer.length() == 0)
+		if (buffer.length() == 0) {
 			return 0;
+		}
 
-		if (x > (shift.x + textSize.width + textLocation.x))
+		if (x > (shift.x + textSize.width + textLocation.x)) {
 			return buffer.length();
+		}
 
-		if ((shift.x + textLocation.x) > x)
+		if ((shift.x + textLocation.x) > x) {
 			return 0;
+		}
 
 		int w = x - shift.x;
 		int p = (w * 100) / textSize.width;
@@ -509,18 +589,20 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 
 		FontMetrics fm = getFontMetrics(getFont());
 		String ss = buffer.toString();
-		for (int i = s, j = s + 1, k = i; i >= 0 || j < l;) {
-			if (k >= 0 && k < l) {
+		for (int i = s, j = s + 1, k = i; (i >= 0) || (j < l);) {
+			if ((k >= 0) && (k < l)) {
 				char ch = buffer.charAt(k);
 				String sx = ss.substring(0, k);
 				int sl = fm.stringWidth(sx) + shift.x + textLocation.x;
 				int cl = fm.charWidth(ch);
-				if (x >= sl && x < sl + cl) {
-					if (x > (sl + cl / 2))
+				if ((x >= sl) && (x < (sl + cl))) {
+					if (x > (sl + (cl / 2))) {
 						return k + 1;
-					else
+					}
+					else {
 						return k;
-					//return 1;
+						//return 1;
+					}
 				}
 			}
 
@@ -529,8 +611,9 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 				j++;
 				k = i;
 			}
-			else
+			else {
 				k = j;
+			}
 		}
 
 		return -1;
@@ -543,14 +626,16 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 
 	protected Dimension calcSize() {
 		Font f = getFont();
-		if (f == null)
+		if (f == null) {
 			return new Dimension(0, 25);
+		}
 		FontMetrics m = getFontMetrics(f);
 		if (m == null) {
 			Toolkit k = Toolkit.getDefaultToolkit();
 			m = k.getFontMetrics(f);
-			if (m == null)
+			if (m == null) {
 				return new Dimension(0, 25);
+			}
 		}
 		Insets i = insets();
 		String t = buffer.toString();
@@ -560,13 +645,15 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 
 	protected boolean recalc() {
 		Dimension d = size();
-		if (d.width == 0 || d.height == 0)
+		if ((d.width == 0) || (d.height == 0)) {
 			return false;
+		}
 
 		Insets i = insets();
 		FontMetrics m = getFontMetrics(getFont());
-		if (m == null)
+		if (m == null) {
 			return false;
+		}
 
 		String s = buffer.toString();
 		String sub = s.substring(0, cursorPos);
@@ -575,18 +662,20 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 
 		textSize.height = m.getHeight();
 		textSize.width = m.stringWidth(s);
-		textLocation.y = i.top + (rh + textSize.height) / 2 - m.getDescent();
+		textLocation.y = (i.top + ((rh + textSize.height) / 2)) - m.getDescent();
 
 		cursorLocation.x = sl + i.left;
-		cursorLocation.y = textLocation.y - textSize.height + m.getDescent();
-		if (cursorLocation.y < i.top)
+		cursorLocation.y = (textLocation.y - textSize.height) + m.getDescent();
+		if (cursorLocation.y < i.top) {
 			cursorLocation.y = i.top;
+		}
 
 		cursorSize.width = 1;
 		cursorSize.height = textSize.height;
 
-		if ((cursorLocation.y + cursorSize.height) >= d.height - i.bottom)
+		if ((cursorLocation.y + cursorSize.height) >= (d.height - i.bottom)) {
 			cursorSize.height = d.height - cursorLocation.y - i.bottom;
+		}
 
 		switch (align) {
 			case LEFT: {
@@ -601,17 +690,20 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 				break;
 		}
 
-		if ((cursorLocation.x + shift.x) < i.left)
+		if ((cursorLocation.x + shift.x) < i.left) {
 			shift.x = i.left - cursorLocation.x;
+		}
 		else {
 			int w = d.width - i.right;
-			if ((cursorLocation.x + shift.x) > w)
+			if ((cursorLocation.x + shift.x) > w) {
 				shift.x = w - cursorLocation.x;
+			}
 		}
 
 		return true;
 	}
 
+	@Override
 	public void resize(int w, int h) {
 		shift.x = 0;
 		super.resize(w, h);
@@ -622,9 +714,11 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 		repaint();
 	}
 
+	@Override
 	public void focusGained(FocusEvent e) {
-		if (cursorOwner != null)
+		if (cursorOwner != null) {
 			cursorOwner.otdaiFocusTvojuMat();
+		}
 		cursorOwner = this;
 		if (buffer != null) {
 			setPos(buffer.length());
@@ -633,6 +727,7 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 		repaint();
 	}
 
+	@Override
 	public void focusLost(FocusEvent e) {
 		if (cursorOwner == this) {
 			cursorOwner = null;
@@ -644,16 +739,18 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 	protected void repaintPart() {
 		Insets i = insets();
 		Dimension d = size();
-		repaint(i.left, i.top, d.width - i.right - i.left + 1, d.height - i.bottom - i.top + 1);
+		repaint(i.left, i.top, (d.width - i.right - i.left) + 1, (d.height - i.bottom - i.top) + 1);
 	}
 
+	@Override
 	public Dimension preferredSize() {
 		return calcSize();
 	}
 
 	public void select(int pos, int w) {
-		if (selPos == pos && w == selWidth)
+		if ((selPos == pos) && (w == selWidth)) {
 			return;
+		}
 		selPos = pos;
 		selWidth = w;
 		repaintPart();
@@ -661,8 +758,9 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 
 	public boolean isSelected() {
 		int len = buffer.length();
-		if (selPos < 0 || selPos >= len || (selPos + selWidth) > len || selWidth == 0)
+		if ((selPos < 0) || (selPos >= len) || ((selPos + selWidth) > len) || (selWidth == 0)) {
 			return false;
+		}
 		return true;
 	}
 
@@ -671,18 +769,19 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 		repaintPart();
 	}
 
+	@Override
 	public boolean mouseDrag(Event e, int x, int y) {
 		int pos = calcTextPos(x, y);
 		if (pos >= 0) {
-			if (pos < cursorPos)
+			if (pos < cursorPos) {
 				select(pos, cursorPos - pos);
-			else
+			}
+			else {
 				select(cursorPos, pos - cursorPos);
+			}
 		}
 		return super.mouseDrag(e, x, y);
 	}
-
-	private static String clipboard;
 
 	/**
 	 *
@@ -699,12 +798,13 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 		java.awt.datatransfer.Clipboard c = java.awt.Toolkit.getDefaultToolkit().getSystemClipboard();
 		java.awt.datatransfer.Transferable t = c.getContents("e");
 
-		if (t.isDataFlavorSupported(java.awt.datatransfer.DataFlavor.stringFlavor))
+		if (t.isDataFlavorSupported(java.awt.datatransfer.DataFlavor.stringFlavor)) {
 			try {
 				return (String) t.getTransferData(java.awt.datatransfer.DataFlavor.stringFlavor);
 			}
 			catch (Exception ex) {
 			}
+		}
 		return "";
 	}
 }

@@ -17,9 +17,9 @@
 
 package org.zaval.awt.image;
 
-import java.io.*;
-import java.awt.*;
-import java.awt.image.*;
+import java.awt.image.ColorModel;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class BmpFileDecoder {
 	public static int BmpHints = 30;
@@ -66,10 +66,12 @@ public class BmpFileDecoder {
 		// transle into bmp_image, if needed.
 
 		if (info_header.CompressionMethod != BMP_Header.COMPRESS_RGB) {
-			if (info_header.BitsPerPixel == 8 || info_header.BitsPerPixel == 4)
+			if ((info_header.BitsPerPixel == 8) || (info_header.BitsPerPixel == 4)) {
 				readRLE(ByteWidth, pad, is, 8 / (info_header.CompressionMethod));
-			else
+			}
+			else {
 				throw new IllegalArgumentException("Can't uncompress " + info_header.BitsPerPixel + "bit files");
+			}
 		}
 		else { //  No compression
 			int tmp_buffer[][] = new int[getHeight()][ByteWidth];
@@ -80,54 +82,74 @@ public class BmpFileDecoder {
 
 			int ands[] = { 128, 64, 32, 16, 8, 4, 2, 1 };
 
-			if (info_header.BitsPerPixel == 8)
-				for (h = 0; h < getHeight(); h++)
-					for (w = 0; w < ByteWidth; w++)
+			if (info_header.BitsPerPixel == 8) {
+				for (h = 0; h < getHeight(); h++) {
+					for (w = 0; w < ByteWidth; w++) {
 						bmp_image[h][w] = tmp_buffer[h][w];
-			else if (info_header.BitsPerPixel == 4)
-				for (h = 0; h < getHeight(); h++)
+					}
+				}
+			}
+			else if (info_header.BitsPerPixel == 4) {
+				for (h = 0; h < getHeight(); h++) {
 					for (w = 0; w < ByteWidth; w++) {
 						bmp_image[h][w * 2] = MSN(tmp_buffer[h][w]);
-						bmp_image[h][w * 2 + 1] = LSN(tmp_buffer[h][w]);
+						bmp_image[h][(w * 2) + 1] = LSN(tmp_buffer[h][w]);
 					}
-			else if (info_header.BitsPerPixel == 1) {
-				for (h = 0; h < getHeight(); h++)
-					for (w = 0; w < ByteWidth; w++)
-						for (bb = 0; bb < 8; bb++)
-							if (w * 8 + bb < getWidth())
-								if (((tmp_buffer[h][w]) & (ands[bb])) == ands[bb])
-									bmp_image[h][w * 8 + bb] = 1;
-								else
-									bmp_image[h][w * 8 + bb] = 0;
+				}
 			}
-			else if (info_header.BitsPerPixel == 24)
-				for (h = 0; h < getHeight(); h++)
-					for (w = 0; w < getWidth(); w++)
+			else if (info_header.BitsPerPixel == 1) {
+				for (h = 0; h < getHeight(); h++) {
+					for (w = 0; w < ByteWidth; w++) {
+						for (bb = 0; bb < 8; bb++) {
+							if (((w * 8) + bb) < getWidth()) {
+								if (((tmp_buffer[h][w]) & (ands[bb])) == ands[bb]) {
+									bmp_image[h][(w * 8) + bb] = 1;
+								}
+								else {
+									bmp_image[h][(w * 8) + bb] = 0;
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (info_header.BitsPerPixel == 24) {
+				for (h = 0; h < getHeight(); h++) {
+					for (w = 0; w < getWidth(); w++) {
 						bmp_image[h][w] = 0xff000000
 							+ (tmp_buffer[h][w * 3] << 16)
-							+ (tmp_buffer[h][w * 3 + 1] << 8)
-							+ tmp_buffer[h][w * 3 + 2];
-			else if (info_header.BitsPerPixel == 16)
-				for (h = 0; h < getHeight(); h++)
+							+ (tmp_buffer[h][(w * 3) + 1] << 8)
+							+ tmp_buffer[h][(w * 3) + 2];
+					}
+				}
+			}
+			else if (info_header.BitsPerPixel == 16) {
+				for (h = 0; h < getHeight(); h++) {
 					for (w = 0; w < getWidth(); w++) {
-						int pixel = (tmp_buffer[h][w * 2]) + (tmp_buffer[h][w * 2 + 1] << 8);
-						int r = ((pixel & 0x7c00) >> 10) * 255 / 31;
-						int g = ((pixel & 0x03e0) >> 5) * 255 / 31;
-						int b = (pixel & 0x1f) * 255 / 31;
+						int pixel = (tmp_buffer[h][w * 2]) + (tmp_buffer[h][(w * 2) + 1] << 8);
+						int r = (((pixel & 0x7c00) >> 10) * 255) / 31;
+						int g = (((pixel & 0x03e0) >> 5) * 255) / 31;
+						int b = ((pixel & 0x1f) * 255) / 31;
 						bmp_image[h][w] = 0xff000000 + (b << 16) + (g << 8) + r;
 					}
-			else
+				}
+			}
+			else {
 				throw new IllegalArgumentException("Illegal BitsPerPixel " + info_header.BitsPerPixel);
+			}
 		}
 	}
 
 	protected void readRegular(int ByteWidth, int pad, int tmp_buffer[][], InputStream iss) throws IOException {
 		for (int h = 0; h < getHeight(); h++) {
-			for (int w = 0; w < ByteWidth; w++)
+			for (int w = 0; w < ByteWidth; w++) {
 				tmp_buffer[h][w] = iss.read();
-			if (pad != 0)
-				for (int ppad = 0; ppad < (4 - pad); ppad++)
+			}
+			if (pad != 0) {
+				for (int ppad = 0; ppad < (4 - pad); ppad++) {
 					iss.read();
+				}
+			}
 		}
 	}
 
@@ -162,24 +184,30 @@ public class BmpFileDecoder {
 
 	private int getByteWidth() {
 		int ByteWidth = 0;
-		if (info_header.BitsPerPixel == 8)
+		if (info_header.BitsPerPixel == 8) {
 			ByteWidth = getWidth();
+		}
 		else if (info_header.BitsPerPixel == 4) {
 			ByteWidth = getWidth() / 2;
-			if (ByteWidth * 2 < getWidth())
+			if ((ByteWidth * 2) < getWidth()) {
 				ByteWidth++;
+			}
 		}
 		else if (info_header.BitsPerPixel == 1) {
 			ByteWidth = getWidth() / 8;
-			if (ByteWidth * 8 < getWidth())
+			if ((ByteWidth * 8) < getWidth()) {
 				ByteWidth++;
+			}
 		}
-		else if (info_header.BitsPerPixel == 24)
+		else if (info_header.BitsPerPixel == 24) {
 			ByteWidth = getWidth() * 3;
-		else if (info_header.BitsPerPixel == 16)
+		}
+		else if (info_header.BitsPerPixel == 16) {
 			ByteWidth = getWidth() * 2;
-		else
+		}
+		else {
 			throw new IllegalArgumentException("Illegal BitsPerPixel " + info_header.BitsPerPixel);
+		}
 		return ByteWidth;
 	}
 
@@ -200,10 +228,9 @@ public class BmpFileDecoder {
 					y++;
 					// If escaped, byte 2 == 1 means end of bitmap
 				}
-				else if (byte2 == 1)
+				else if (byte2 == 1) {
 					return;
-				// if escaped, byte 2 == 2 adjusts the current x and y by
-				// an offset stored in the next two words
+				}
 				else if (byte2 == 2) {
 					int xoff = (char) in.readShort();
 					i += 2;
@@ -222,8 +249,9 @@ public class BmpFileDecoder {
 
 					for (int j = 0; j < byte2; j++) {
 						if (pixelSize == 4) {
-							if (whichBit == 0)
+							if (whichBit == 0) {
 								bmp_image[y][x] = (currByte >> 4) & 0xf;
+							}
 							else {
 								bmp_image[y][x] = currByte & 0xf;
 								currByte = in.read();
@@ -254,13 +282,16 @@ public class BmpFileDecoder {
 			else {
 				for (int j = 0; j < byte1; j++) {
 					if (pixelSize == 4) {
-						if ((j & 1) == 0)
+						if ((j & 1) == 0) {
 							bmp_image[y][x] = (byte2 >> 4) & 0xf;
-						else
+						}
+						else {
 							bmp_image[y][x] = byte2 & 0xf;
+						}
 					}
-					else
+					else {
 						bmp_image[y][x] = byte2;
+					}
 					x++;
 					if (x >= getWidth()) {
 						x = 0;

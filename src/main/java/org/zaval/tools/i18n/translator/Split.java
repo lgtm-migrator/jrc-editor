@@ -17,8 +17,17 @@
 
 package org.zaval.tools.i18n.translator;
 
-import java.io.*;
-import java.util.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.StringTokenizer;
+
 import org.zaval.util.SafeResourceBundle;
 
 public class Split {
@@ -33,10 +42,6 @@ public class Split {
 	}
 
 	private SafeResourceBundle rcTable = null;
-
-	private String RC(String key) {
-		return rcTable.getString(key);
-	}
 
 	private void join(BundleManager bundle2, boolean part) {
 		if (part) {
@@ -53,8 +58,9 @@ public class Split {
 				}
 			}
 		}
-		else
+		else {
 			bundle = bundle2;
+		}
 	}
 
 	public void readResources(String fileName, boolean part) throws Exception {
@@ -70,13 +76,14 @@ public class Split {
 
 	public void onSaveAs(String fileName) {
 		String filename = fileName;
-		if (filename != null)
+		if (filename != null) {
 			try {
 				bundle.store(filename);
 			}
 			catch (Exception e) {
 				infoException(fileName, e);
 			}
+		}
 	}
 
 	private void infoException(String fileName, Exception e) {
@@ -121,23 +128,9 @@ public class Split {
 		}
 	}
 
-	private String stretchPath(String name) {
-		if (name.length() < 60)
-			return name;
-		return name.substring(0, 4) + "..." + name.substring(name.length() - Math.min(name.length() - 7, 60 - 7));
-	}
-
-	private String[] getLangSet(String options) {
-		StringTokenizer st = new StringTokenizer(options, ";,");
-		String[] ask = new String[st.countTokens()];
-		for (int i = 0; i < ask.length; ++i)
-			ask[i] = st.nextToken();
-		return ask;
-	}
-
 	public void onSaveXml(String fileName, String[] parts) {
 		String filename = fileName;
-		if (filename != null)
+		if (filename != null) {
 			try {
 				DataOutputStream out = new DataOutputStream(new FileOutputStream(filename));
 				BundleSet set = bundle.getBundle();
@@ -150,8 +143,9 @@ public class Split {
 					out.writeChars("\t<key name=\"" + bi.getId() + "\">\n");
 					while (en.hasMoreElements()) {
 						String lang = (String) en.nextElement();
-						if (!inArray(parts, lang))
+						if (!inArray(parts, lang)) {
 							continue;
+						}
 						out.writeChars("\t\t<value lang=\"" + lang + "\">" + bi.getTranslation(lang) + "</value>\n");
 					}
 					out.writeChars("\t</key>\n");
@@ -162,11 +156,12 @@ public class Split {
 			catch (Exception e) {
 				infoException(fileName, e);
 			}
+		}
 	}
 
 	public void onSaveUtf(String fileName, String[] parts) {
 		String filename = fileName;
-		if (filename != null)
+		if (filename != null) {
 			try {
 				DataOutputStream out = new DataOutputStream(new FileOutputStream(filename));
 				BundleSet set = bundle.getBundle();
@@ -179,8 +174,9 @@ public class Split {
 					out.writeChars("KEY=\"" + bi.getId() + "\":\r\n");
 					while (en.hasMoreElements()) {
 						String lang = (String) en.nextElement();
-						if (!inArray(parts, lang))
+						if (!inArray(parts, lang)) {
 							continue;
+						}
 						out.writeChars("\t\"" + lang + "\"=\"" + bi.getTranslation(lang) + "\"\r\n");
 					}
 					out.writeChars("\r\n");
@@ -190,12 +186,15 @@ public class Split {
 			catch (Exception e) {
 				infoException(fileName, e);
 			}
+		}
 	}
 
 	private boolean inArray(String[] array, String lang) {
-		for (int j = 0; array != null && j < array.length; ++j)
-			if (array[j] != null && array[j].equalsIgnoreCase(lang))
+		for (int j = 0; (array != null) && (j < array.length); ++j) {
+			if ((array[j] != null) && array[j].equalsIgnoreCase(lang)) {
 				return true;
+			}
+		}
 		return false;
 	}
 
@@ -225,12 +224,14 @@ public class Split {
 			String k = (String) en.nextElement();
 			StringTokenizer st = new StringTokenizer(k, "!");
 			String key = st.nextToken();
-			if (!st.hasMoreTokens())
+			if (!st.hasMoreTokens()) {
 				continue;
+			}
 			String lang = st.nextToken();
 
-			if (bundle.getBundle().getLanguage(lang) == null)
+			if (bundle.getBundle().getLanguage(lang) == null) {
 				bundle.getBundle().addLanguage(lang);
+			}
 
 			bundle.getBundle().addKey(key);
 			bundle.getBundle().updateValue(key, lang, (String) tbl.get(k));
@@ -270,10 +271,6 @@ public class Split {
 		}
 	}
 
-	private void infoError(String error) {
-		System.err.println(error);
-	}
-
 	private void tryToLoad(String fileName) throws IOException {
 		try {
 			onParseCode(fileName);
@@ -307,28 +304,35 @@ public class Split {
 			String command = args[0];
 			String fileName = args[1];
 			String[] options = new String[args.length - 2];
-			for (int j = 0; j < options.length; ++j)
+			for (int j = 0; j < options.length; ++j) {
 				options[j] = args[j + 2];
+			}
 			Split obj = new Split(fileName);
 			if (command.equals("join")) {
-				for (int j = 0; j < options.length; ++j)
-					obj.tryToLoad(options[j]);
+				for (String option : options) {
+					obj.tryToLoad(option);
+				}
 				obj.onSaveAs(fileName);
 			}
 			else if (command.equals("split")) {
 				String dstFile = options[0];
 				options[0] = null;
-				if (dstFile.endsWith(".txt"))
+				if (dstFile.endsWith(".txt")) {
 					obj.onSaveUtf(dstFile, options);
-				else if (dstFile.endsWith(".xml"))
+				}
+				else if (dstFile.endsWith(".xml")) {
 					obj.onSaveXml(dstFile, options);
-				else if (dstFile.endsWith(".java"))
+				}
+				else if (dstFile.endsWith(".java")) {
 					obj.onGenCode(dstFile);
-				else
+				}
+				else {
 					throw new IOException(dstFile + ": wrong file format or I/O error");
+				}
 			}
-			else
+			else {
 				throw new Exception();
+			}
 		}
 		catch (IOException eio) {
 			System.err.println(eio.getMessage());

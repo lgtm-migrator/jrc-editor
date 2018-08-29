@@ -17,8 +17,13 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.LayoutManager;
+import java.awt.Point;
+import java.awt.Rectangle;
 
 public class FitLayout implements LayoutManager {
 	protected int gapX, gapY;
@@ -39,44 +44,55 @@ public class FitLayout implements LayoutManager {
 		return new Point(0, 0);
 	}
 
+	@Override
 	public void addLayoutComponent(String name, Component comp) {
 	}
 
+	@Override
 	public void removeLayoutComponent(Component comp) {
 	}
 
+	@Override
 	public Dimension preferredLayoutSize(Container parent) {
 		int i, wx = 0, wy = 0;
 		Component[] cc = parent.getComponents();
 		for (i = 0; i < cc.length; ++i) {
 			Dimension d2 = cc[i].preferredSize();
-			if (d2.width == 0 || d2.height == 0)
+			if ((d2.width == 0) || (d2.height == 0)) {
 				d2 = cc[i].size();
-			if (wx < d2.width)
+			}
+			if (wx < d2.width) {
 				wx = d2.width;
-			if (wy < d2.height)
+			}
+			if (wy < d2.height) {
 				wy = d2.height;
+			}
 		}
-		Insets is = parent.insets();
+		parent.insets();
 		return new Dimension(wx + gapX + gapW/*+is.left+is.right*/, wy + gapY + gapH/*+is.top+is.bottom*/);
 	}
 
+	@Override
 	public Dimension minimumLayoutSize(Container parent) {
 		int i, wx = 0, wy = 0;
 		Component[] cc = parent.getComponents();
 		for (i = 0; i < cc.length; ++i) {
 			Dimension d2 = cc[i].minimumSize();
-			if (d2.width == 0 || d2.height == 0)
+			if ((d2.width == 0) || (d2.height == 0)) {
 				d2 = cc[i].size();
-			if (wx < d2.width)
+			}
+			if (wx < d2.width) {
 				wx = d2.width;
-			if (wy < d2.height)
+			}
+			if (wy < d2.height) {
 				wy = d2.height;
+			}
 		}
-		Insets is = parent.insets();
+		parent.insets();
 		return new Dimension(wx + gapX + gapW/*+is.left+is.right*/, wy + gapY + gapH/*+is.top+is.bottom*/);
 	}
 
+	@Override
 	public void layoutContainer(Container parent) {
 		int i = 0, j = -1;
 		Rectangle r = parent.bounds();
@@ -87,21 +103,26 @@ public class FitLayout implements LayoutManager {
 		for (i = 0; i < c.length; ++i) {
 			if (gapX == -1) {
 				Dimension v = c[i].preferredSize();
-				if (v.width > r.width)
+				if (v.width > r.width) {
 					v.width = r.width;
-				if (v.height > r.height)
+				}
+				if (v.height > r.height) {
 					v.height = r.height;
+				}
 				gx = gw = (r.width - v.width) / 2;
 				gy = gh = (r.height - v.height) / 2;
 			}
 
 			c[i].move(gx + is.left, gy/* + is.top*/);
 			c[i].resize(r.width - gx - gw /*- is.right - is.left*/, r.height - gy - gh /*- is.bottom- is.top*/);
-			if (c[i].isVisible())
-				if (j >= 0)
+			if (c[i].isVisible()) {
+				if (j >= 0) {
 					c[i].hide();
-				else
+				}
+				else {
 					j = i;
+				}
+			}
 		}
 	}
 }

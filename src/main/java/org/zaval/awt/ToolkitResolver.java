@@ -17,7 +17,10 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Image;
+import java.awt.MediaTracker;
+import java.awt.Toolkit;
 
 public class ToolkitResolver implements ImageResolver {
 	private Toolkit kit;
@@ -39,6 +42,7 @@ public class ToolkitResolver implements ImageResolver {
 		return i;
 	}
 
+	@Override
 	public Image getImage(String str) {
 		return kit.getImage(str);
 	}

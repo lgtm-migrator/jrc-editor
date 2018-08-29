@@ -17,7 +17,8 @@
 
 package org.zaval.awt.image;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 
 class BMP_InputStream extends InputStream {
 	private InputStream in;
@@ -49,6 +50,7 @@ class BMP_InputStream extends InputStream {
 		return result;
 	}
 
+	@Override
 	public int read() throws IOException {
 		return in.read();
 	}

@@ -17,7 +17,11 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Panel;
+import java.awt.Point;
 
 public class ScrollObjectImpl extends Panel implements ScrollObject {
 	protected Component target;
@@ -28,18 +32,22 @@ public class ScrollObjectImpl extends Panel implements ScrollObject {
 		add("Center", target);
 	}
 
+	@Override
 	public Point getSOLocation() {
 		return location();
 	}
 
+	@Override
 	public void setSOLocation(int x, int y) {
 		move(x, y);
 	}
 
+	@Override
 	public Dimension getSOSize() {
 		return preferredSize();
 	}
 
+	@Override
 	public Component getScrollComponent() {
 		return this;
 	}

@@ -17,8 +17,13 @@
 
 package org.zaval.io;
 
-import java.io.*;
-import java.util.*;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Vector;
 
 public class IniFile {
 	private Vector keys = new Vector();
@@ -29,13 +34,15 @@ public class IniFile {
 
 	public IniFile(String name) throws IOException {
 		file = new File(name);
-		if (file.canRead())
+		if (file.canRead()) {
 			loadFile();
+		}
 	}
 
 	private void saveFile() throws IOException {
-		if (!dirty)
+		if (!dirty) {
 			return;
+		}
 		dirty = false;
 		PrintStream pr = new PrintStream(new FileOutputStream(file));
 		for (int j = 0; j < keys.size(); ++j) {
@@ -48,8 +55,9 @@ public class IniFile {
 
 	public void removeKey(String s) throws IOException {
 		int i = keys.indexOf(s);
-		if (i < 0)
+		if (i < 0) {
 			return;
+		}
 		keys.removeElementAt(i);
 		vals.removeElementAt(i);
 		dirty = true;
@@ -65,44 +73,52 @@ public class IniFile {
 
 		while ((line = in.readLine()) != null) {
 			int j = 0, k = line.length(), i;
-			if (k <= 0)
+			if (k <= 0) {
 				continue;
+			}
 			for (; j < k; ++j) {
 				ch = line.charAt(j);
-				if (ch != '\t' && ch != ' ')
+				if ((ch != '\t') && (ch != ' ')) {
 					break;
+				}
 			}
-			if (ch == '#' || ch == '\n' || ch == '\r')
+			if ((ch == '#') || (ch == '\n') || (ch == '\r')) {
 				continue;
+			}
 			for (i = j; j < k; ++j) {
 				ch = line.charAt(j);
-				if (ch == '\t' || ch == ' ' || ch == '\n' || ch == '\r' || ch == '=' || ch == '#')
+				if ((ch == '\t') || (ch == ' ') || (ch == '\n') || (ch == '\r') || (ch == '=') || (ch == '#')) {
 					break;
+				}
 			}
-			if (j != i)
+			if (j != i) {
 				keys.addElement(line.substring(i, j));
+			}
 			for (; j < k; ++j) {
 				ch = line.charAt(j);
-				if (ch == '=' || ch == '\n' || ch == '\r' || ch == '#')
+				if ((ch == '=') || (ch == '\n') || (ch == '\r') || (ch == '#')) {
 					break;
+				}
 			}
-			if (ch == '\n' || ch == '\r' || ch == '#') {
+			if ((ch == '\n') || (ch == '\r') || (ch == '#')) {
 				vals.addElement("");
 				continue;
 			}
 			for (++j; j < k; ++j) {
 				ch = line.charAt(j);
-				if (ch != ' ' && ch != '\t')
+				if ((ch != ' ') && (ch != '\t')) {
 					break;
+				}
 			}
-			if (ch == '\n' || ch == '\r' || ch == '#') {
+			if ((ch == '\n') || (ch == '\r') || (ch == '#')) {
 				vals.addElement("");
 				continue;
 			}
 			for (i = j; j < k; ++j) {
 				ch = line.charAt(j);
-				if (ch == '\n' || ch == '\r' || ch == '#')
+				if ((ch == '\n') || (ch == '\r') || (ch == '#')) {
 					break;
+				}
 			}
 			vals.addElement(j != i ? line.substring(i, j).trim() : "");
 		}
@@ -112,8 +128,9 @@ public class IniFile {
 
 	public synchronized String getString(String key) throws IOException {
 		int j = keys.indexOf(key);
-		if (j < 0)
+		if (j < 0) {
 			return "UNDEFINED";
+		}
 		return (String) vals.elementAt(j);
 	}
 
@@ -131,8 +148,9 @@ public class IniFile {
 			keys.addElement(key);
 			vals.addElement(value);
 		}
-		else
+		else {
 			vals.setElementAt(value, j);
+		}
 		dirty = true;
 		saveFile();
 	}
@@ -149,6 +167,7 @@ public class IniFile {
 		saveFile();
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("[IniFile = " + file.toString() + "]={");
@@ -166,10 +185,12 @@ public class IniFile {
 			ini = new IniFile(iniName);
 
 			String value = ini.getString(name);
-			if (value == null || value.length() == 0 || value.equals("UNDEFINED"))
+			if ((value == null) || (value.length() == 0) || value.equals("UNDEFINED")) {
 				return null;
-			else
+			}
+			else {
 				return value;
+			}
 		}
 		catch (IOException e) {
 			System.out.println("Loader getValue():" + e);

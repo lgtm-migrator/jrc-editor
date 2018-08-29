@@ -17,10 +17,11 @@
 
 package org.zaval.awt.image;
 
-import java.awt.image.*;
+import java.awt.image.RGBImageFilter;
 
 public abstract class ButtonImageFilter extends RGBImageFilter implements Cloneable {
 	public abstract void setup(int light, int border, int width, int height, boolean b);
 
+	@Override
 	public abstract int filterRGB(int x, int y, int rgb);
 }

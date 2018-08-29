@@ -17,20 +17,22 @@
 
 package org.zaval.util;
 
-import java.util.*;
+import java.util.Hashtable;
 
 public class Environment extends Hashtable {
 	public int getAsInt(String name) {
 		String s = (String) get(name);
-		if (s == null)
+		if (s == null) {
 			return Integer.MAX_VALUE;
+		}
 		return Integer.parseInt(s);
 	}
 
 	public long getAsLong(String name) {
 		String s = (String) get(name);
-		if (s == null)
+		if (s == null) {
 			return Long.MAX_VALUE;
+		}
 		return Long.parseLong(s);
 	}
 

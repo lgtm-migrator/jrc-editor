@@ -17,13 +17,17 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.Graphics;
 
 public class StubbComponent extends Canvas {
 //   private Image img;
 	private int size = 16;
 
+	@Override
 	public Dimension preferredSize() {
 		return new Dimension(size, size);
 	}
@@ -33,12 +37,14 @@ public class StubbComponent extends Canvas {
 	}
 
 	public void setSize(int s) {
-		if (size == s)
+		if (size == s) {
 			return;
+		}
 		size = s;
 		invalidate();
 	}
 
+	@Override
 	public void paint(Graphics g) {
 		/*  Dimension d = size();
 		  if (img == null || img.getWidth(this) != d.width || !isValid())
@@ -67,10 +73,12 @@ public class StubbComponent extends Canvas {
 		}
 	}
 
+	@Override
 	public boolean mouseEnter(Event e, int x, int y) {
 		return true;
 	}
 
+	@Override
 	public boolean mouseExit(Event e, int x, int y) {
 		return true;
 	}

@@ -17,8 +17,13 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.util.StringTokenizer;
 
 public class MultiLabel extends Canvas {
 	public final static int LEFT = 0;
@@ -76,6 +81,7 @@ public class MultiLabel extends Canvas {
 		this(text, LEFT, 40);
 	}
 
+	@Override
 	public void setFont(Font x) {
 		super.setFont(x);
 		width = 0;
@@ -83,38 +89,45 @@ public class MultiLabel extends Canvas {
 		repaint();
 	}
 
+	@Override
 	public void setForeground(Color color) {
 		super.setForeground(color);
 		repaint();
 	}
 
+	@Override
 	public void addNotify() {
 		super.addNotify();
 		measure();
 	}
 
+	@Override
 	public Dimension preferredSize() {
 		return new Dimension(width, height * lcount);
 	}
 
+	@Override
 	public Dimension minimumSize() {
 		return new Dimension(width, height * lcount);
 	}
 
 	public void measure() {
 		Font x = this.getFont();
-		if (x == null)
+		if (x == null) {
 			return;
+		}
 		FontMetrics fm = getFontMetrics(x);
-		if (fm == null)
+		if (fm == null) {
 			return;
+		}
 		height = fm.getHeight();
 		ascent = fm.getAscent();
 		int i;
 		for (i = 0; i < lcount; ++i) {
 			widths[i] = fm.stringWidth(lines[i]);
-			if (width < widths[i])
+			if (width < widths[i]) {
 				width = widths[i];
+			}
 		}
 	}
 
@@ -124,29 +137,34 @@ public class MultiLabel extends Canvas {
 		lines = new String[lcount * 5];
 		widths = new int[lcount * 5];
 		int i, j = 0, f = 0;
-		for (i = 0; i < lcount - 1; ++i) {
+		for (i = 0; i < (lcount - 1); ++i) {
 			String x = st.nextToken();
-			if (x.equals("^"))
+			if (x.equals("^")) {
 				++f;
-			else
+			}
+			else {
 				f = 0;
-			if (f > 1 || f == 0) {
-				if (f > 0)
+			}
+			if ((f > 1) || (f == 0)) {
+				if (f > 0) {
 					lines[j++] = " ";
+				}
 				else {
 					while (x.length() > LMAX) {
 						int k = LMAX;
 						k = x.lastIndexOf(" ", LMAX);
-						if (k < 0)
+						if (k < 0) {
 							k = LMAX;
+						}
 						lines[j++] = x.substring(0, k);
 						x = x.substring(k, x.length());
 					}
 					lines[j++] = x;
 				}
 			}
-			if (j == lcount * 5 - 1)
+			if (j == ((lcount * 5) - 1)) {
 				break;
+			}
 		}
 		lcount = j;
 	}
@@ -155,31 +173,31 @@ public class MultiLabel extends Canvas {
 		this.isVc = isVc;
 	}
 
-	private boolean fullrepaint = false;
-
+	@Override
 	public void repaint() {
 		synchronized (this) {
-			fullrepaint = true;
 		}
 		super.repaint();
 	}
 
+	@Override
 	public void repaint(int x, int y, int w, int h) {
 		synchronized (this) {
-			fullrepaint = true;
 		}
 		super.repaint(x, y, w, h);
 	}
 
+	@Override
 	public void paint(Graphics gr) {
 		synchronized (this) {
-			fullrepaint = false;
 		}
 		int x, y, i;
-		if (gr == null)
+		if (gr == null) {
 			return;
-		else if (width == 0)
+		}
+		else if (width == 0) {
 			measure();
+		}
 		Dimension d = size();
 		gr.clearRect(0, 0, d.width, d.height);
 		y = ascent + 1;//(d.height-lcount*height)/2;
@@ -192,17 +210,22 @@ public class MultiLabel extends Canvas {
 			y += height;
 			i = 1;
 		}
-		else
+		else {
 			i = 0;
-		if (isVc)
-			y += (d.height - height * lcount) / 2;
+		}
+		if (isVc) {
+			y += (d.height - (height * lcount)) / 2;
+		}
 		for (; i < lcount; ++i) {
-			if (align == LEFT)
+			if (align == LEFT) {
 				x = 1;
-			else if (align == RIGHT)
+			}
+			else if (align == RIGHT) {
 				x = d.width - 1 - widths[i];
-			else
+			}
+			else {
 				x = (d.width - widths[i]) / 2;
+			}
 			gr.drawString(lines[i], x, y);
 			y += height;
 		}

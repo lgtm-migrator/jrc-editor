@@ -17,12 +17,19 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
+import java.awt.Choice;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Panel;
+import java.awt.Toolkit;
 import java.util.Vector;
 
 public class IEChoice extends Panel {
-	private int wx = 0, wy = 0;
-	private int x = 0, y = 0;
 	private Choice ch;
 	private boolean fakeAdded = false;
 
@@ -46,19 +53,23 @@ public class IEChoice extends Panel {
 		// System.err.println("+++ " + ids);
 
 		Choice c = new Choice();
-		for (i = 0; i < k; ++i)
+		for (i = 0; i < k; ++i) {
 			c.addItem((String) items.elementAt(i));
-		for (; i < 2; ++i)
+		}
+		for (; i < 2; ++i) {
 			c.addItem(" ");
+		}
 		setChoice(c);
 	}
 
 	public void select(String value) {
 		// System.err.println("+++ set " + value + " " + ids);
-		if (value == null)
+		if (value == null) {
 			value = lastval;
-		if (value == null)
+		}
+		if (value == null) {
 			return;
+		}
 		select(ids.indexOf(lastval = value));
 	}
 
@@ -84,20 +95,24 @@ public class IEChoice extends Panel {
 		add(this.ch);
 	}
 
+	@Override
 	public void resize(int wx, int wy) {
 		Dimension d = ch.preferredSize();
 		if (d.height == 0) {
 			Font font = getFont();
-			if (font == null)
+			if (font == null) {
 				font = getParent().getFont();
+			}
 			if (font != null) {
 				FontMetrics fm = getFontMetrics(font);
-				if (fm == null)
+				if (fm == null) {
 					fm = Toolkit.getDefaultToolkit().getFontMetrics(font);
+				}
 				d.height = fm.getHeight() + 10;
 			}
-			else
+			else {
 				d.height = wy;
+			}
 		}
 		super.resize(wx, d.height);
 	}
@@ -108,28 +123,31 @@ public class IEChoice extends Panel {
 
 	private void setChoice(Choice x) {
 		String osName = System.getProperty("os.name");
-		boolean solaris = (osName != null && (osName.equalsIgnoreCase("Solaris") || osName.equalsIgnoreCase("Linux")));
+		boolean solaris = ((osName != null) && (osName.equalsIgnoreCase("Solaris") || osName.equalsIgnoreCase("Linux")));
 
 		Color c1 = ch.getBackground();
 		Color c2 = ch.getForeground();
 		Font f = ch.getFont();
 
 		Container parent = getParent();
-		if (solaris && parent != null)
+		if (solaris && (parent != null)) {
 			parent.remove(this);
+		}
 		removeAll();
 		add(x);
 
 		x.setBackground(c1);
 		x.setForeground(c2);
 		x.setFont(f);
-		if (isEnabled())
+		if (isEnabled()) {
 			x.enable();
-		else
+		}
+		else {
 			x.disable();
+		}
 
 		this.ch = x;
-		if (solaris && parent != null) {
+		if (solaris && (parent != null)) {
 			parent.add(this);
 			addNotify();
 		}
@@ -139,11 +157,13 @@ public class IEChoice extends Panel {
 		this.ch.requestFocus();
 	}
 
+	@Override
 	public void enable() {
 		ch.enable();
 		super.enable();
 	}
 
+	@Override
 	public void disable() {
 		ch.disable();
 		super.disable();
@@ -151,11 +171,13 @@ public class IEChoice extends Panel {
 
 	private final static int acceptE[] = { Event.LIST_SELECT, Event.ACTION_EVENT };
 
+	@Override
 	public boolean handleEvent(Event e) {
 		// if(e.id==e.GOT_FOCUS) return true;
 		// if(e.id==e.LOST_FOCUS && e.target!=ch) return false;
-		if (e.target != this && e.target != ch)
+		if ((e.target != this) && (e.target != ch)) {
 			return super.handleEvent(e);
+		}
 		// if (e.id!=e.MOUSE_MOVE && e.id!=e.MOUSE_ENTER && e.id!=e.MOUSE_EXIT)
 		//    System.err.println(e);
 		if (isSelectionEvent(e)) {
@@ -171,6 +193,7 @@ public class IEChoice extends Panel {
 		return super.handleEvent(e);
 	}
 
+	@Override
 	public boolean keyDown(Event e, int key) {
 		char c = (char) key;
 		if (Character.isLetter(c)) {
@@ -179,8 +202,9 @@ public class IEChoice extends Panel {
 			for (int i = 0; i < size; i++) {
 				StringBuffer item = new StringBuffer(ch.getItem(i));
 				if (Character.toLowerCase(item.charAt(0)) == c) {
-					if (ch.getSelectedIndex() != i)
+					if (ch.getSelectedIndex() != i) {
 						ch.select(i);
+					}
 					return true;
 				}
 			}
@@ -195,11 +219,12 @@ public class IEChoice extends Panel {
 			return false;
 		}
 
-		if (key == '\n' || key == '\t') {
+		if ((key == '\n') || (key == '\t')) {
 			try {
 				String s = (String) ids.elementAt(ch.getSelectedIndex());
-				if (s.equals(lastval))
+				if (s.equals(lastval)) {
 					return false;
+				}
 				sendSelectionEvent(s);
 			}
 			catch (Exception eee) {
@@ -209,16 +234,18 @@ public class IEChoice extends Panel {
 
 		if (key == Event.UP) {
 			int z = ch.getSelectedIndex() - 1;
-			if (z < 0)
+			if (z < 0) {
 				return true;
+			}
 			ch.select(z);
 			return true;
 		}
 
 		if (key == Event.DOWN) {
 			int z = ch.getSelectedIndex() + 1;
-			if (z >= ch.countItems())
+			if (z >= ch.countItems()) {
 				return true;
+			}
 			ch.select(z);
 			return true;
 		}
@@ -226,39 +253,48 @@ public class IEChoice extends Panel {
 		return super.keyDown(e, key);
 	}
 
+	@Override
 	public void requestFocus() {
 		ch.requestFocus();
 	}
 
+	@Override
 	public boolean lostFocus(Event e, Object o) {
-		if (e.target == this.ch && ids != null && lastval != null) {
+		if ((e.target == this.ch) && (ids != null) && (lastval != null)) {
 			try {
 				String s = (String) ids.elementAt(ch.getSelectedIndex());
-				if (lastval.equals(s))
+				if (lastval.equals(s)) {
 					return true;
+				}
 				sendSelectionEvent(s);
 			}
 			catch (Exception eee) {
 			}
 			return false;
 		}
-		else if (e.target == this)
+		else if (e.target == this) {
 			return true;
+		}
 		// return true;
 		return false;
 	}
 
+	@Override
 	public boolean gotFocus(Event e, Object o) {
-		if (ids != null)
+		if (ids != null) {
 			return false;
+		}
 		return true;
 	}
 
 	private boolean isSelectionEvent(Event e) {
-		if (e.target == ch) // && e.arg instanceof String)
-			for (int i = 0; i < acceptE.length; ++i)
-				if (acceptE[i] == e.id)
+		if (e.target == ch) {
+			for (int element : acceptE) {
+				if (element == e.id) {
 					return true;
+				}
+			}
+		}
 		return false;
 	}
 
@@ -278,8 +314,9 @@ public class IEChoice extends Panel {
 			int j, k = v.countItems() - 1;
 			for (j = 0; j < k; ++j) {
 				String s = v.getItem(j);
-				if (j == k - 1 && s.trim().length() == 0)
+				if ((j == (k - 1)) && (s.trim().length() == 0)) {
 					break;
+				}
 				x.addItem(s);
 			}
 			fakeAdded = false;
@@ -288,6 +325,7 @@ public class IEChoice extends Panel {
 		}
 	}
 
+	@Override
 	public void addNotify() {
 		try {
 			super.addNotify();
@@ -300,14 +338,15 @@ public class IEChoice extends Panel {
 
 	public void select(int i) {
 		// System.err.println("+++ set " + i);
-		if (i < 0 && !checkIeHack()) {
+		if ((i < 0) && !checkIeHack()) {
 			Choice x = getChoice();
 			int j = 0, k = x.countItems();
-			for (j = 0; j < k; ++j)
+			for (j = 0; j < k; ++j) {
 				if (x.getItem(j).trim().length() == 0) {
 					x.select(j);
 					return;
 				}
+			}
 			x.addItem(" ");
 			x.select(" ");
 			fakeAdded = true;
@@ -337,8 +376,9 @@ public class IEChoice extends Panel {
 		catch (Throwable t) {
 		}
 
-		if (!jver.startsWith("1.0") && jven.startsWith("Microsoft"))
+		if (!jver.startsWith("1.0") && jven.startsWith("Microsoft")) {
 			return true;
+		}
 		return false;
 	}
 }

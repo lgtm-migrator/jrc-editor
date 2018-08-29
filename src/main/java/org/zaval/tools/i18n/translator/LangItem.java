@@ -17,8 +17,6 @@
 
 package org.zaval.tools.i18n.translator;
 
-import java.util.*;
-
 class LangItem {
 	private String lng;
 	private String desc;

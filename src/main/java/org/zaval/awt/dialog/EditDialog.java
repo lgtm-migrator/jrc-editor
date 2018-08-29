@@ -17,10 +17,27 @@
 
 package org.zaval.awt.dialog;
 
-import org.zaval.awt.*;
+import java.awt.AWTEvent;
+import java.awt.Button;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.Label;
+import java.awt.LayoutManager;
+import java.awt.Panel;
+import java.awt.Toolkit;
+import java.util.Vector;
 
-import java.awt.*;
-import java.util.*;
+import org.zaval.awt.EmulatedTextField;
+import org.zaval.awt.ExGridLayout;
+import org.zaval.awt.IELabel;
 
 public class EditDialog extends Dialog implements java.awt.event.AWTEventListener {
 	private EmulatedTextField edit;
@@ -52,10 +69,12 @@ public class EditDialog extends Dialog implements java.awt.event.AWTEventListene
 	}
 
 	public void setText(String t) {
-		if (t == null)
+		if (t == null) {
 			edit.setText("");
-		else
+		}
+		else {
 			edit.setText(t);
+		}
 	}
 
 	public String getText() {
@@ -71,15 +90,16 @@ public class EditDialog extends Dialog implements java.awt.event.AWTEventListene
 		label.setText(l);
 	}
 
+	@Override
 	public boolean handleEvent(Event e) {
-		if (e.id == Event.WINDOW_DESTROY || (e.target == cancel && e.id == Event.ACTION_EVENT)) {
+		if ((e.id == Event.WINDOW_DESTROY) || ((e.target == cancel) && (e.id == Event.ACTION_EVENT))) {
 			isApply = false;
 			dispose();
 		}
 
-		if (e.target == ok && e.id == Event.ACTION_EVENT) {
+		if ((e.target == ok) && (e.id == Event.ACTION_EVENT)) {
 			isApply = true;
-			listener.postEvent(new Event(this, e.ACTION_EVENT, edit.getText()));
+			listener.postEvent(new Event(this, Event.ACTION_EVENT, edit.getText()));
 			dispose();
 		}
 
@@ -110,8 +130,9 @@ public class EditDialog extends Dialog implements java.awt.event.AWTEventListene
 		cc.weightx = wx;
 		cc.weighty = wy;
 
-		if (t + b + l + r > 0)
+		if ((t + b + l + r) > 0) {
 			cc.insets = new Insets(t, l, b, r);
+		}
 		LayoutManager lm = c.getLayout();
 		if (lm instanceof GridBagLayout) {
 			GridBagLayout gbl = (GridBagLayout) lm;
@@ -132,22 +153,25 @@ public class EditDialog extends Dialog implements java.awt.event.AWTEventListene
 		constrain(c, p, x, y, w, h, f, a, 1.0, 1.0, 0, 0, 5, 3);
 	}
 
+	@Override
 	public boolean keyDown(Event e, int key) {
-		if (key == '\t')
+		if (key == '\t') {
 			return moveFocus();
-		else if ((e.target == ok && key == Event.ENTER) || (e.target == edit && key == Event.ENTER)) {
+		}
+		else if (((e.target == ok) && (key == Event.ENTER)) || ((e.target == edit) && (key == Event.ENTER))) {
 			isApply = true;
-			listener.postEvent(new Event(this, e.ACTION_EVENT, edit.getText()));
+			listener.postEvent(new Event(this, Event.ACTION_EVENT, edit.getText()));
 			dispose();
 			return true;
 		}
-		else if (e.target == cancel && key == Event.ENTER) {
+		else if ((e.target == cancel) && (key == Event.ENTER)) {
 			isApply = false;
 			dispose();
 			return true;
 		}
-		else
+		else {
 			return false;
+		}
 	}
 
 	public boolean doModal() {
@@ -185,12 +209,15 @@ public class EditDialog extends Dialog implements java.awt.event.AWTEventListene
 
 		linearize(this, v);
 		optimize(v);
-		for (k = v.size(), j = 0; j < k; ++j)
-			if (c == v.elementAt(j))
+		for (k = v.size(), j = 0; j < k; ++j) {
+			if (c == v.elementAt(j)) {
 				break;
-		if (j >= k)
+			}
+		}
+		if (j >= k) {
 			j = -1;
-		if (j == k - 1) {
+		}
+		if (j == (k - 1)) {
 			ask = true;
 			j = -1; // see below +1
 		}
@@ -202,25 +229,33 @@ public class EditDialog extends Dialog implements java.awt.event.AWTEventListene
 		int j, k = cc.getComponentCount();
 		for (j = 0; j < k; ++j) {
 			Component c = cc.getComponent(j);
-			if (c instanceof Label)
+			if (c instanceof Label) {
 				continue;
-			else if (c instanceof IELabel)
+			}
+			else if (c instanceof IELabel) {
 				continue;
-			else if (c instanceof Container)
+			}
+			else if (c instanceof Container) {
 				linearize((Container) c, v);
-			else
+			}
+			else {
 				v.addElement(c);
+			}
 		}
 	}
 
+	@Override
 	public void eventDispatched(AWTEvent event) {
-		if (event.getID() != java.awt.event.KeyEvent.KEY_TYPED)
+		if (event.getID() != java.awt.event.KeyEvent.KEY_TYPED) {
 			return;
-		if (!(event instanceof java.awt.event.KeyEvent))
+		}
+		if (!(event instanceof java.awt.event.KeyEvent)) {
 			return;
+		}
 		java.awt.event.KeyEvent ke = (java.awt.event.KeyEvent) event;
-		if (ke.getKeyChar() != '\t')
+		if (ke.getKeyChar() != '\t') {
 			return;
+		}
 		moveFocus();
 	}
 }

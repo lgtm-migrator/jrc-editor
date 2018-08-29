@@ -17,8 +17,12 @@
 
 package org.zaval.awt;
 
-import java.util.*;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.LayoutManager;
+import java.awt.Panel;
 
 public class StatusBar extends Panel implements LayoutManager {
 	public static final int FULL = 1;
@@ -36,17 +40,20 @@ public class StatusBar extends Panel implements LayoutManager {
 	}
 
 	public void setFill(int f) {
-		if (fill == f)
+		if (fill == f) {
 			return;
+		}
 		fill = f;
 		invalidate();
 	}
 
+	@Override
 	public void addLayoutComponent(String name, Component comp) {
 	}
 
+	@Override
 	public void layoutContainer(Container parent) {
-		Dimension ds = parent.size();
+		parent.size();
 		Component[] cc = parent.getComponents();
 		int height = getActualHeight(parent);
 		int[] widths = getActualWidths(parent);
@@ -60,29 +67,34 @@ public class StatusBar extends Panel implements LayoutManager {
 		}
 	}
 
+	@Override
 	public Dimension minimumLayoutSize(Container parent) {
 		return preferredLayoutSize(parent);
 	}
 
+	@Override
 	public Dimension preferredLayoutSize(Container parent) {
 		int[] widths = getActualWidths(parent);
 		int height = getActualHeight(parent) + insets.top + insets.bottom;
-		int width = insets.left + insets.right + hgap * (widths.length - 1);
-		for (int i = 0; i < widths.length; i++)
-			width += widths[i];
+		int width = insets.left + insets.right + (hgap * (widths.length - 1));
+		for (int width2 : widths) {
+			width += width2;
+		}
 		return new Dimension(width, height);
 	}
 
+	@Override
 	public void removeLayoutComponent(Component comp) {
 	}
 
 	protected int getActualHeight(Container parent) {
 		Component[] cc = parent.getComponents();
 		int ah = 0;
-		for (int j = 0; j < cc.length; ++j) {
-			Dimension d = cc[j].preferredSize();
-			if (ah < d.height)
+		for (Component element : cc) {
+			Dimension d = element.preferredSize();
+			if (ah < d.height) {
 				ah = d.height;
+			}
 		}
 		return ah;
 	}
@@ -92,9 +104,9 @@ public class StatusBar extends Panel implements LayoutManager {
 		Component[] cc = parent.getComponents();
 		int aw = 0, j = 0;
 		int[] widths = new int[cc.length];
-		int xx = insets.left + hgap * (cc.length - 1);
+		int xx = insets.left + (hgap * (cc.length - 1));
 
-		ds.width -= (insets.left + insets.right + hgap * (cc.length - 1));
+		ds.width -= (insets.left + insets.right + (hgap * (cc.length - 1)));
 		ds.height -= (insets.top + insets.bottom);
 
 		for (j = 0; j < cc.length; ++j) {
@@ -121,8 +133,9 @@ public class StatusBar extends Panel implements LayoutManager {
 			if (cc[j] instanceof StatusBarElement) {
 				StatusBarElement e = (StatusBarElement) cc[j];
 				int perc = e.getPercent();
-				if (perc == 0)
+				if (perc == 0) {
 					continue;
+				}
 				widths[j] = (ds.width * perc) / 100;
 			}
 		}

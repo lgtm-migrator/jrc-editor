@@ -17,8 +17,13 @@
 
 package org.zaval.awt;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.LayoutManager;
+import java.awt.Panel;
+import java.awt.Scrollbar;
 
 public class ScrollPanel extends Panel implements ScrollArea, LayoutManager {
 	private Scrollbar hBar = new Scrollbar(Scrollbar.HORIZONTAL);
@@ -37,10 +42,12 @@ public class ScrollPanel extends Panel implements ScrollArea, LayoutManager {
 
 	protected void init(ScrollController m) {
 		metrics = m;
-		if (metrics == null)
+		if (metrics == null) {
 			metrics = new ScrollController(this, null);
-		if (metrics.getScrollArea() == null)
+		}
+		if (metrics.getScrollArea() == null) {
 			metrics.setScrollArea(this);
+		}
 
 		setLayout(layout);
 		add("Center", mainPanel);
@@ -57,49 +64,59 @@ public class ScrollPanel extends Panel implements ScrollArea, LayoutManager {
 		p.add(c);
 	}
 
+	@Override
 	public boolean handleEvent(Event e) {
-		if (metrics.handle(e, 1))
+		if (metrics.handle(e, 1)) {
 			return true;
+		}
 		return super.handleEvent(e);
 	}
 
+	@Override
 	public void invalidate() {
 		super.invalidate();
-		if (metrics != null)
+		if (metrics != null) {
 			metrics.invalidate();
+		}
 	}
 
+	@Override
 	public void reshape(int x, int y, int w, int h) {
 		super.reshape(x, y, w, h);
-		if (metrics != null)
+		if (metrics != null) {
 			metrics.invalidate();
+		}
 		invalidate();
 		recalc();
 	}
 
+	@Override
 	public void layout() {
 		recalc();
 		super.layout();
 	}
 
 	public void recalc() {
-		if (!metrics.isValid())
+		if (!metrics.isValid()) {
 			metrics.validate();
+		}
 
 		ScrollObject sobj = metrics.getScrollObject();
 		int maxV = metrics.getMaxVerScroll();
 		int maxH = metrics.getMaxHorScroll();
 
-		if (maxV < 0)
+		if (maxV < 0) {
 			vBar.hide();
+		}
 		else {
 			vBar.setValues(0, 0, 0, maxV);
 			sobj.setSOLocation(0, 0);
 			vBar.show();
 		}
 
-		if (maxH < 0)
+		if (maxH < 0) {
 			hBar.hide();
+		}
 		else {
 			hBar.setValues(0, 0, 0, maxH);
 			sobj.setSOLocation(0, 0);
@@ -109,14 +126,17 @@ public class ScrollPanel extends Panel implements ScrollArea, LayoutManager {
 		sobj.setSOLocation(0, 0);
 	}
 
+	@Override
 	public Scrollbar getVBar() {
 		return vBar;
 	}
 
+	@Override
 	public Scrollbar getHBar() {
 		return hBar;
 	}
 
+	@Override
 	public Dimension getSASize() {
 		return size();
 	}
@@ -125,35 +145,43 @@ public class ScrollPanel extends Panel implements ScrollArea, LayoutManager {
 		return metrics;
 	}
 
+	@Override
 	public void addLayoutComponent(String s, Component c) {
 	}
 
+	@Override
 	public void removeLayoutComponent(Component c) {
 	}
 
+	@Override
 	public Dimension minimumLayoutSize(Container target) {
 		return preferredLayoutSize(target);
 	}
 
+	@Override
 	public Dimension preferredLayoutSize(Container target) {
 		Component[] c = target.getComponents();
-		if (c.length > 0)
+		if (c.length > 0) {
 			return c[0].preferredSize();
+		}
 		return new Dimension(0, 0);
 	}
 
+	@Override
 	public void layoutContainer(Container target) {
 		Component[] c = target.getComponents();
 		ScrollArea a = metrics.getScrollArea();
 		Dimension td = target.size();
-		for (int i = 0; i < c.length; i++) {
-			Dimension d = c[i].preferredSize();
-			if (!a.getVBar().isVisible())
+		for (Component element : c) {
+			Dimension d = element.preferredSize();
+			if (!a.getVBar().isVisible()) {
 				d.height = td.height;
-			if (!a.getHBar().isVisible())
+			}
+			if (!a.getHBar().isVisible()) {
 				d.width = td.width;
+			}
 
-			c[i].resize(d.width, d.height);
+			element.resize(d.width, d.height);
 		}
 	}
 }

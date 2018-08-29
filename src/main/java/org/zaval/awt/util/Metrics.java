@@ -17,15 +17,13 @@
 
 package org.zaval.awt.util;
 
-import java.awt.*;
-import java.util.*;
-
 public abstract class Metrics {
 	private boolean isValid = false;
 
 	public void invalidate() {
-		if (isValid)
+		if (isValid) {
 			isValid = false;
+		}
 	}
 
 	public void validate() {

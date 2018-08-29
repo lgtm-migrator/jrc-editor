@@ -17,8 +17,10 @@
 
 package org.zaval.awt.image;
 
-import java.io.*;
-import java.awt.image.*;
+import java.awt.image.ColorModel;
+import java.awt.image.DirectColorModel;
+import java.awt.image.IndexColorModel;
+import java.io.IOException;
 
 // BMP Header, Win3.1 and on ( version 3 BMP )
 // BMP Palette
@@ -32,7 +34,7 @@ class BMP_Palette {
 	}
 
 	public BMP_Palette(int numcolors, BMP_InputStream in, int pixsize) throws IOException {
-		if (pixsize == 24 || pixsize == 16) {
+		if ((pixsize == 24) || (pixsize == 16)) {
 			cm = new DirectColorModel(24, 0x000000ff, 0x0000ff00, 0x00ff0000);
 			return;
 		}
@@ -49,6 +51,6 @@ class BMP_Palette {
 		}
 
 		cm = new IndexColorModel(pixsize, numcolors, red, green, blue);
-		readBytes = 3 + numcolors * 4;
+		readBytes = 3 + (numcolors * 4);
 	}
 }

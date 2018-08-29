@@ -23,73 +23,78 @@ import java.awt.Rectangle;
 public class AlignHelper {
 	public static Insets align2insets(int a) {
 		Insets i = new Insets(-1, -1, -1, -1);
-		i.top = ((a & Align.TOP) > 0) ? 1 : 0;
-		i.left = ((a & Align.LEFT) > 0) ? 1 : 0;
-		i.bottom = ((a & Align.BOTTOM) > 0) ? 1 : 0;
-		i.right = ((a & Align.RIGHT) > 0) ? 1 : 0;
-		if (!check(i))
+		i.top = ((a & AlignConstants.TOP) > 0) ? 1 : 0;
+		i.left = ((a & AlignConstants.LEFT) > 0) ? 1 : 0;
+		i.bottom = ((a & AlignConstants.BOTTOM) > 0) ? 1 : 0;
+		i.right = ((a & AlignConstants.RIGHT) > 0) ? 1 : 0;
+		if (!check(i)) {
 			return null;
+		}
 		return i;
 	}
 
 	public static int insets2align(Insets i) {
-		if (i == null || !check(i))
+		if ((i == null) || !check(i)) {
 			return -1;
+		}
 		int a = 0;
-		a |= ((i.top > 0) ? Align.TOP : 0);
-		a |= ((i.left > 0) ? Align.LEFT : 0);
-		a |= ((i.bottom > 0) ? Align.BOTTOM : 0);
-		a |= ((i.right > 0) ? Align.RIGHT : 0);
+		a |= ((i.top > 0) ? AlignConstants.TOP : 0);
+		a |= ((i.left > 0) ? AlignConstants.LEFT : 0);
+		a |= ((i.bottom > 0) ? AlignConstants.BOTTOM : 0);
+		a |= ((i.right > 0) ? AlignConstants.RIGHT : 0);
 		return a;
 	}
 
 	public static String align2str(int a) {
 		String r = null;
 		switch (a) {
-			case Align.TOP:
-				r = Align.STR_TOP;
+			case AlignConstants.TOP:
+				r = AlignConstants.STR_TOP;
 				break;
-			case Align.BOTTOM:
-				r = Align.STR_BOTTOM;
+			case AlignConstants.BOTTOM:
+				r = AlignConstants.STR_BOTTOM;
 				break;
-			case Align.LEFT:
-				r = Align.STR_LEFT;
+			case AlignConstants.LEFT:
+				r = AlignConstants.STR_LEFT;
 				break;
-			case Align.RIGHT:
-				r = Align.STR_RIGHT;
+			case AlignConstants.RIGHT:
+				r = AlignConstants.STR_RIGHT;
 				break;
-			case Align.TLEFT:
-				r = Align.STR_TLEFT;
+			case AlignConstants.TLEFT:
+				r = AlignConstants.STR_TLEFT;
 				break;
-			case Align.TRIGHT:
-				r = Align.STR_TRIGHT;
+			case AlignConstants.TRIGHT:
+				r = AlignConstants.STR_TRIGHT;
 				break;
-			case Align.BRIGHT:
-				r = Align.STR_BRIGHT;
+			case AlignConstants.BRIGHT:
+				r = AlignConstants.STR_BRIGHT;
 				break;
-			case Align.BLEFT:
-				r = Align.STR_BLEFT;
+			case AlignConstants.BLEFT:
+				r = AlignConstants.STR_BLEFT;
 				break;
-			case Align.CENTER:
-				r = Align.STR_CENTER;
+			case AlignConstants.CENTER:
+				r = AlignConstants.STR_CENTER;
 				break;
 		}
 		return r;
 	}
 
 	protected static boolean check(Insets i) {
-		if ((i.top > 0 && i.bottom > 0) || (i.left > 0 && i.right > 0))
+		if (((i.top > 0) && (i.bottom > 0)) || ((i.left > 0) && (i.right > 0))) {
 			return false;
+		}
 
-		if (i.top < 0 || i.bottom < 0 || i.left < 0 || i.right < 0)
+		if ((i.top < 0) || (i.bottom < 0) || (i.left < 0) || (i.right < 0)) {
 			return false;
+		}
 		return true;
 	}
 
 	public static boolean isBelongArea(AlignArea a, int x, int y) {
 		Rectangle r = a.getAlignRectangle();
-		if (r == null)
+		if (r == null) {
 			return false;
+		}
 
 		switch (a.getMode()) {
 			case AlignArea.INSIDE:
@@ -101,28 +106,34 @@ public class AlignHelper {
 	}
 
 	public static Insets getPointAlignInsets(AlignArea a, int x, int y) {
-		if (!isBelongArea(a, x, y))
+		if (!isBelongArea(a, x, y)) {
 			return null;
+		}
 
-		if (a.getMode() == AlignArea.INSIDE)
+		if (a.getMode() == AlignArea.INSIDE) {
 			return a.getAlignInsets();
+		}
 		Rectangle r = a.getAlignRectangle();
 		int maxx = r.x + r.width;
 		int maxy = r.y + r.height;
 		Insets code = new Insets(0, 0, 0, 0);
 
-		if (x > maxx)
+		if (x > maxx) {
 			code.right++;
+		}
 		else {
-			if (x < r.x)
+			if (x < r.x) {
 				code.left++;
+			}
 		}
 
-		if (y > maxy)
+		if (y > maxy) {
 			code.bottom++;
+		}
 		else {
-			if (y < r.y)
+			if (y < r.y) {
 				code.top++;
+			}
 		}
 
 		return code;

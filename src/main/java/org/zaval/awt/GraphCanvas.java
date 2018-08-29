@@ -17,9 +17,10 @@
 
 package org.zaval.awt;
 
-import java.applet.*;
-import java.awt.*;
-import java.util.*;
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
 
 public class GraphCanvas extends Canvas {
 	private int h, w;
@@ -31,10 +32,12 @@ public class GraphCanvas extends Canvas {
 		setBackground(Color.black);
 	}
 
+	@Override
 	public Dimension preferredSize() {
 		return new Dimension(w, h);
 	}
 
+	@Override
 	public Dimension minimumSize() {
 		return new Dimension(w, h);
 	}
@@ -42,18 +45,21 @@ public class GraphCanvas extends Canvas {
 	public void put(int persent) {
 	}
 
+	@Override
 	public void paint(Graphics gr) {
 		int w = size().width;
 		int h = size().height;
 
 		int count = w / 10;
 		gr.setColor(Color.green);
-		for (int i = 1; i < count; i++)
+		for (int i = 1; i < count; i++) {
 			gr.drawLine(i * 10, 0, i * 10, h);
+		}
 
 		count = h / 10;
-		for (int i = 1; i < count; i++)
+		for (int i = 1; i < count; i++) {
 			gr.drawLine(0, i * 10, w, i * 10);
+		}
 	}
 
 }

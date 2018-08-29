@@ -17,8 +17,7 @@
 
 package org.zaval.awt.event;
 
-import java.util.*;
-import org.zaval.util.*;
+import org.zaval.util.Environment;
 
 public class Event extends Environment {
 	private int id = -1;
