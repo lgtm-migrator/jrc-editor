@@ -78,28 +78,28 @@ class BundleManager implements TranslatorConstants {
 		return in2 >= 0 ? fn.substring(0, in2) : fn;
 	}
 
-	private Vector getResFiles(String dir, String baseFileName, String defExt) {
+	private Vector<String> getResFiles(String dir, String baseFileName, String defExt) {
 		File f = new File(dir);
 		String bpn = purifyFileName(baseFileName);
 		String[] fs = f.list();
 		if (fs.length == 0) {
 			return null;
 		}
-		Vector res = new Vector();
-		for (int i = 0; i < fs.length; ++i) {
-			if (!fs[i].startsWith(bpn)) {
+		Vector<String> res = new Vector<>();
+		for (String f1 : fs) {
+			if (!f1.startsWith(bpn)) {
 				continue;
 			}
-			String bfn = purifyFileName(fs[i]);
+			String bfn = purifyFileName(f1);
 			if (!bfn.equals(bpn)) {
 				continue;
 			}
-			if (!extName(fs[i]).equals(defExt)) {
+			if (!extName(f1).equals(defExt)) {
 				continue;
 			}
-			File f2 = new File(dir + fs[i]);
+			File f2 = new File(dir + f1);
 			if (!f2.isDirectory()) {
-				res.addElement(fs[i]);
+				res.addElement(f1);
 			}
 		}
 		return res;
@@ -120,30 +120,30 @@ class BundleManager implements TranslatorConstants {
 		String ext = extName(baseFileName);
 		baseFileName = baseName(baseFileName);
 
-		Vector fileNames = getResFiles(dir, baseFileName, ext);
+		Vector<String> fileNames = getResFiles(dir, baseFileName, ext);
 		for (int i = 0; i < fileNames.size(); i++) {
-			String fn = (String) fileNames.elementAt(i);
+			String fn = fileNames.elementAt(i);
 			readResource(dir + fn, determineLanguage(fn));
 		}
 	}
 
 	private void readResource(String fullName, String lang) throws IOException {
-		Vector lines = getLines(fullName);
+		Vector<String> lines = getLines(fullName);
 		proceedLines(lines, lang, fullName);
 	}
 
 	private void readResource(InputStream in, String lang) throws IOException {
-		Vector lines = getLines(in);
+		Vector<String> lines = getLines(in);
 		proceedLines(lines, lang, null);
 	}
 
-	private void proceedLines(Vector lines, String lang, String fullName) {
+	private void proceedLines(Vector<String> lines, String lang, String fullName) {
 		String lastComment = null;
 		fullName = fullName != null ? fullName : "tmp_" + lang;
 		set.addLanguage(lang);
 		set.getLanguage(lang).setLangFile(fullName);
 		for (int i = 0; i < lines.size(); i++) {
-			String line = (String) lines.elementAt(i);
+			String line = lines.elementAt(i);
 			line = line.trim();
 			if (line.length() == 0) {
 				continue;
@@ -184,8 +184,8 @@ class BundleManager implements TranslatorConstants {
 		bi.setComment(comment);
 	}
 
-	private Vector getLines(String fileName) throws IOException {
-		Vector res = new Vector();
+	private Vector<String> getLines(String fileName) throws IOException {
+		Vector<String> res = new Vector<>();
 		if (fileName.endsWith(RES_EXTENSION)) {
 			DataInputStream in = new DataInputStream(new FileInputStream(fileName));
 			String line = null;
@@ -211,7 +211,7 @@ class BundleManager implements TranslatorConstants {
 		}
 		else {
 			RandomAccessFile in = new RandomAccessFile(fileName, "r");
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			int factor1 = 1;
 			int factor2 = 256;
 			for (;;) {
@@ -238,8 +238,8 @@ class BundleManager implements TranslatorConstants {
 		return res;
 	}
 
-	private Vector getLines(InputStream xin) throws IOException {
-		Vector res = new Vector();
+	private Vector<String> getLines(InputStream xin) throws IOException {
+		Vector<String> res = new Vector<>();
 		DataInputStream in = new DataInputStream(xin);
 		String line = null;
 		while ((line = in.readLine()) != null) {
@@ -265,7 +265,7 @@ class BundleManager implements TranslatorConstants {
 	}
 
 	private static String toEscape(String s) {
-		StringBuffer res = new StringBuffer();
+		StringBuilder res = new StringBuilder();
 		for (int i = 0; i < s.length(); i++) {
 			char ch = s.charAt(i);
 			int val = ch;
@@ -288,7 +288,7 @@ class BundleManager implements TranslatorConstants {
 	}
 
 	private static String fromEscape(String s) {
-		StringBuffer res = new StringBuffer(s.length());
+		StringBuilder res = new StringBuilder(s.length());
 		for (int i = 0; i < s.length(); i++) {
 			char ch = s.charAt(i);
 			if ((ch == '\\') && ((i + 1) >= s.length())) {
@@ -325,7 +325,7 @@ class BundleManager implements TranslatorConstants {
 	}
 
 	String replace(String line, String from, String to) {
-		StringBuffer res = new StringBuffer(line.length());
+		StringBuilder res = new StringBuilder(line.length());
 		String tmpstr;
 		int ind = -1, lastind = 0;
 
@@ -374,11 +374,11 @@ class BundleManager implements TranslatorConstants {
 			return;
 		}
 
-		Vector lines = set.store(lang.getLangId());
+		Vector<String> lines = set.store(lang.getLangId());
 		if (fn.endsWith(RES_EXTENSION)) {
 			PrintStream f = new PrintStream(new FileOutputStream(fn));
 			for (int j = 0; j < lines.size(); j++) {
-				f.print(toEscape((String) lines.elementAt(j)) + System.getProperty("line.separator"));
+				f.print(toEscape(lines.elementAt(j)) + System.getProperty("line.separator"));
 			}
 			f.close();
 		}
@@ -387,7 +387,7 @@ class BundleManager implements TranslatorConstants {
 			f.write(0xFF);
 			f.write(0xFE);
 			for (int j = 0; j < lines.size(); j++) {
-				String s = (String) lines.elementAt(j);
+				String s = lines.elementAt(j);
 				s = replace(s, "\n", toEscape("\n"));
 				for (int k = 0; k < s.length(); k++) {
 					char ch = s.charAt(k);

@@ -46,7 +46,7 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 	public static final int LEFT = 1;
 	public static final int RIGHT = 2;
 
-	protected StringBuffer buffer = new StringBuffer("");
+	protected StringBuffer buffer = new StringBuffer();
 	Insets insets = new Insets(2, 5, 2, 5);
 	Point textLocation = new Point(0, 0);
 	Point cursorLocation = new Point(0, 0);
@@ -72,15 +72,17 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand().equals("Cut")) {
-			blCopy();
-			removeBlock();
-		}
-		else if (e.getActionCommand().equals("Copy")) {
-			blCopy();
-		}
-		else if (e.getActionCommand().equals("Paste")) {
-			blPaste();
+		switch (e.getActionCommand()) {
+			case "Cut":
+				blCopy();
+				removeBlock();
+				break;
+			case "Copy":
+				blCopy();
+				break;
+			case "Paste":
+				blPaste();
+				break;
 		}
 	}
 
@@ -230,8 +232,8 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 		else if (isCtrlDown && (key == KeyEvent.VK_LEFT)) {
 			seek(prevSpace() - cursorPos, shift);
 		}
-		else if (!isCtrlDown) {
-			return false;
+		else {
+			return isCtrlDown;
 		}
 		return true;
 	}
@@ -242,10 +244,8 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 			j = buffer.length() - 1;
 		}
 		for (; (j > 0) && Character.isSpaceChar(buffer.charAt(j)); --j) {
-			;
 		}
 		for (; (j > 0) && !Character.isSpaceChar(buffer.charAt(j)); --j) {
-			;
 		}
 		return j;
 	}
@@ -257,10 +257,8 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 			return cursorPos;
 		}
 		for (; (j < k) && Character.isSpaceChar(buffer.charAt(j)); ++j) {
-			;
 		}
 		for (; (j < k) && !Character.isSpaceChar(buffer.charAt(j)); ++j) {
-			;
 		}
 		return j;
 	}
@@ -758,10 +756,7 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 
 	public boolean isSelected() {
 		int len = buffer.length();
-		if ((selPos < 0) || (selPos >= len) || ((selPos + selWidth) > len) || (selWidth == 0)) {
-			return false;
-		}
-		return true;
+		return (selPos >= 0) && (selPos < len) && ((selPos + selWidth) <= len) && (selWidth != 0);
 	}
 
 	protected void clear() {

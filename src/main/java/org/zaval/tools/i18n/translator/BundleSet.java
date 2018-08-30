@@ -17,7 +17,6 @@
 
 package org.zaval.tools.i18n.translator;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -25,14 +24,14 @@ import java.util.Locale;
 import java.util.Vector;
 
 class BundleSet implements TranslatorConstants {
-	private Vector items;
-	private Vector lng;
-	private Hashtable nameCache;
+	private Vector<BundleItem> items;
+	private Vector<LangItem> lng;
+	private Hashtable<String, BundleItem> nameCache;
 
 	BundleSet() {
-		items = new Vector();
-		lng = new Vector();
-		nameCache = new Hashtable();
+		items = new Vector<>();
+		lng = new Vector<>();
+		nameCache = new Hashtable<>();
 	}
 
 	void addLanguage(String slng, String desc) {
@@ -49,7 +48,7 @@ class BundleSet implements TranslatorConstants {
 	}
 
 	LangItem getLanguage(int idx) {
-		return (LangItem) lng.elementAt(idx);
+		return lng.elementAt(idx);
 	}
 
 	LangItem getLanguage(String lng) {
@@ -70,7 +69,7 @@ class BundleSet implements TranslatorConstants {
 
 	LangItem[] getLanguageByDescription(String lng) {
 		int j, k = getLangCount();
-		Vector ask = new Vector();
+		Vector<LangItem> ask = new Vector<>();
 		for (j = 0; j < k; ++j) {
 			LangItem lx = getLanguage(j);
 			if (lx.getLangDescription().equals(lng)) {
@@ -82,7 +81,7 @@ class BundleSet implements TranslatorConstants {
 		}
 		LangItem[] li = new LangItem[k = ask.size()];
 		for (j = 0; j < k; ++j) {
-			li[j] = (LangItem) ask.elementAt(j);
+			li[j] = ask.elementAt(j);
 		}
 		return li;
 	}
@@ -92,11 +91,11 @@ class BundleSet implements TranslatorConstants {
 	}
 
 	BundleItem getItem(int idx) {
-		return (BundleItem) items.elementAt(idx);
+		return items.elementAt(idx);
 	}
 
 	BundleItem getItem(String key) {
-		return (BundleItem) nameCache.get(key);
+		return nameCache.get(key);
 	}
 
 	int getItemIndex(String key) {
@@ -127,8 +126,8 @@ class BundleSet implements TranslatorConstants {
 		nameCache.remove(key);
 	}
 
-	Enumeration getKeysBeginningWith(String key) {
-		Vector v = new Vector();
+	Enumeration<BundleItem> getKeysBeginningWith(String key) {
+		Vector<BundleItem> v = new Vector<>();
 		for (int j = 0; j < getItemCount(); ++j) {
 			BundleItem bi = getItem(j);
 			if (bi.getId().startsWith(key)) {
@@ -186,16 +185,13 @@ class BundleSet implements TranslatorConstants {
 			return null;
 		}
 		int capacity = key.length() + val.length() + 2;
-		StringBuffer sb = new StringBuffer(capacity);
-		sb.append(key);
-		sb.append('=');
-		sb.append(val);
-		return sb.toString();
+		String sb = key + '=' + val;
+		return sb;
 	}
 
-	Vector store(String lng) {
+	Vector<String> store(String lng) {
 		getLanguage(lng);
-		Vector lines = new Vector();
+		Vector<String> lines = new Vector<>();
 		lines.addElement("# Java Resource Bundle");
 		lines.addElement("# Modified by Zaval JRC Editor (C) Zaval CE Group");
 		lines.addElement("# http://www.zaval.org/products/jrc-editor/");
@@ -239,9 +235,9 @@ class BundleSet implements TranslatorConstants {
 	}
 
 	public void resort() {
-		Collections.sort(items, new Comparator() {
+		items.sort(new Comparator<BundleItem>() {
 			@Override
-			public int compare(Object o1, Object o2) {
+			public int compare(BundleItem o1, BundleItem o2) {
 				return ((BundleItem) o1).getId().compareTo(((BundleItem) o2).getId());
 			}
 

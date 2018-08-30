@@ -25,10 +25,11 @@ import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Panel;
 import java.awt.Point;
+import java.io.Serializable;
 import java.util.Vector;
 
 public class Toolbar extends Panel implements LayoutManager {
-	private Vector v = new Vector();
+	private Vector<Serializable> v = new Vector<>();
 
 	public Toolbar() {
 		super();

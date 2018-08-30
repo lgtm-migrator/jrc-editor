@@ -29,7 +29,6 @@ public class BmpFileDecoder {
 	BMP_Palette palette;
 
 	public int[][] bmp_image;
-	private BMP_InputStream is;
 
 	public int[][] getMatrix() {
 		return bmp_image;
@@ -40,7 +39,7 @@ public class BmpFileDecoder {
 	}
 
 	public void init(InputStream is_in) throws IOException {
-		this.is = new BMP_InputStream(is_in);
+		BMP_InputStream is = new BMP_InputStream(is_in);
 		header = new BMP_Header(is);
 		info_header = new BMP_Info_Header(is);
 

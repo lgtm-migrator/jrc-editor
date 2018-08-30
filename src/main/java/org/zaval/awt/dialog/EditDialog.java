@@ -189,10 +189,10 @@ public class EditDialog extends Dialog implements java.awt.event.AWTEventListene
 		return moveFocus(owner);
 	}
 
-	private void optimize(Vector v) {
+	private void optimize(Vector<Component> v) {
 		int j, k = v.size();
 		for (j = 0; j < k; ++j) {
-			Component c = (Component) v.elementAt(j);
+			Component c = v.elementAt(j);
 			if (c instanceof Button) {
 				v.removeElementAt(j);
 				v.addElement(c);
@@ -205,7 +205,7 @@ public class EditDialog extends Dialog implements java.awt.event.AWTEventListene
 	private boolean moveFocus(Component c) {
 		int j, k;
 		boolean ask = false;
-		Vector v = new Vector();
+		Vector<Component> v = new Vector<>();
 
 		linearize(this, v);
 		optimize(v);
@@ -221,19 +221,17 @@ public class EditDialog extends Dialog implements java.awt.event.AWTEventListene
 			ask = true;
 			j = -1; // see below +1
 		}
-		((Component) v.elementAt(j + 1)).requestFocus();
+		v.elementAt(j + 1).requestFocus();
 		return ask;
 	}
 
-	private void linearize(Container cc, Vector v) {
+	private void linearize(Container cc, Vector<Component> v) {
 		int j, k = cc.getComponentCount();
 		for (j = 0; j < k; ++j) {
 			Component c = cc.getComponent(j);
 			if (c instanceof Label) {
-				continue;
 			}
 			else if (c instanceof IELabel) {
-				continue;
 			}
 			else if (c instanceof Container) {
 				linearize((Container) c, v);

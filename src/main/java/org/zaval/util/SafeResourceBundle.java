@@ -64,31 +64,31 @@ public class SafeResourceBundle {
 
 	public String getString(String k, Hashtable ht) {
 		String templ = getString(k);
-		String res = "";
+		StringBuilder res = new StringBuilder();
 		int ind, ind2;
 		do {
 			ind = templ.indexOf(START_VAR);
 			if (ind < 0) {
-				res += templ;
+				res.append(templ);
 			}
 			else {
-				res += templ.substring(0, ind);
+				res.append(templ.substring(0, ind));
 				ind2 = templ.indexOf(FINISH_VAR, ind);
 				if (ind2 >= 0) {
 					String repl = (String) ht.get(templ.substring(ind + 2, ind2));
 					if (repl == null) {
 						repl = "";
 					}
-					res += repl;
+					res.append(repl);
 					templ = templ.substring(ind2 + 2);
 				}
 				else {
-					res += START_VAR;
+					res.append(START_VAR);
 					templ = templ.substring(ind + 2);
 				}
 			}
 		} while (ind >= 0);
-		return res;
+		return res.toString();
 	}
 
 	public static Locale parseSuffix(String suffix) {

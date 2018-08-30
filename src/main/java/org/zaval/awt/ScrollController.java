@@ -298,11 +298,11 @@ public class ScrollController extends org.zaval.awt.util.Metrics {
 		int maxx = 0;
 		int maxy = 0;
 
-		for (int i = 0; i < c.length; i++) {
-			if (!c[i].isVisible()) {
+		for (Component aC : c) {
+			if (!aC.isVisible()) {
 				continue;
 			}
-			Rectangle r = c[i].bounds();
+			Rectangle r = aC.bounds();
 			int mx = r.x + r.width;
 			int my = r.y + r.height;
 			if (maxx < mx) {

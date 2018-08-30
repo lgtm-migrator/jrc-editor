@@ -156,7 +156,7 @@ public class MultiLabel extends Canvas {
 							k = LMAX;
 						}
 						lines[j++] = x.substring(0, k);
-						x = x.substring(k, x.length());
+						x = x.substring(k);
 					}
 					lines[j++] = x;
 				}

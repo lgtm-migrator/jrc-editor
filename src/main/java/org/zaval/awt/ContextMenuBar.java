@@ -169,7 +169,7 @@ public class ContextMenuBar extends MenuBar {
 				evt.id = java.awt.Event.ACTION_EVENT;
 				if (support.size() > 0) {
 					org.zaval.awt.event.Event e = new org.zaval.awt.event.Event(this, EV_MENU_ENTER);
-					e.put("event", evt);
+					e.put("event", evt.toString());
 					support.perform(e);
 				}
 				else {

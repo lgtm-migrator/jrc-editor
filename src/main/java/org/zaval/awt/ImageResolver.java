@@ -20,5 +20,5 @@ package org.zaval.awt;
 import java.awt.Image;
 
 public interface ImageResolver {
-	public Image getImage(String str);
+	Image getImage(String str);
 }

@@ -21,9 +21,9 @@ import java.awt.Dimension;
 import java.awt.Scrollbar;
 
 public interface ScrollArea {
-	public Dimension getSASize();
+	Dimension getSASize();
 
-	public Scrollbar getVBar();
+	Scrollbar getVBar();
 
-	public Scrollbar getHBar();
+	Scrollbar getHBar();
 }

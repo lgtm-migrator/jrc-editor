@@ -216,12 +216,7 @@ public abstract class BaseCheckbox extends Canvas {
 			if (condition() && insideBox(x, y)) {
 				mouse_down = false;
 
-				if (state) {
-					state = false;
-				}
-				else {
-					state = true;
-				}
+				state = !state;
 				repaint();
 
 				Event e = new Event(this, Event.ACTION_EVENT, "1");
@@ -315,7 +310,6 @@ public abstract class BaseCheckbox extends Canvas {
 	public void drawVLine(Graphics gr, int y1, int y2, int x1) {
 		int dy = y2 - y1;
 		int count = (dy / 2) + (dy % 2);
-		;
 		for (int i = 0; i < count; i++) {
 			gr.drawLine(x1, y1, x1, y1);
 			y1 += 2;

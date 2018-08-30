@@ -20,7 +20,7 @@ package org.zaval.awt.event;
 import java.util.Vector;
 
 public class ListenerSupport {
-	protected Vector v = new Vector();
+	protected Vector<Listener> v = new Vector<>();
 
 	public void addListener(Listener l) {
 		if (v.contains(l)) {
@@ -40,17 +40,11 @@ public class ListenerSupport {
 		return v.size();
 	}
 
-	public Vector getListeners() {
+	public Vector<Listener> getListeners() {
 		return v;
 	}
 
 	public boolean perform(Event e) {
-		for (int i = 0; i < v.size(); i++) {
-			Listener l = (Listener) v.elementAt(i);
-			if (l.eventOccured(e)) {
-				return true;
-			}
-		}
-		return false;
+		return v.stream().anyMatch(l -> l.eventOccured(e));
 	}
 }

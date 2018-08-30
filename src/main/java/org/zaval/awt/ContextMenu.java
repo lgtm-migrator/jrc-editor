@@ -42,7 +42,7 @@ public class ContextMenu extends Menu {
 	int index = -1;
 	boolean act = false;
 	Color col_mark = new Color(128);
-	Hashtable types = new Hashtable();
+	Hashtable<String, String> types = new Hashtable<>();
 
 	public ContextMenu(String name) {
 		super(name);
@@ -233,7 +233,7 @@ public class ContextMenu extends Menu {
 	}
 
 	private void drawCheckit(Graphics gr, int index, String name, int x, int y) {
-		String state = (String) types.get(name);
+		String state = types.get(name);
 		if (state != null) {
 			getParent();
 			if (state.equals("1")) {
@@ -333,17 +333,14 @@ public class ContextMenu extends Menu {
 		if (mi == null) {
 			return false;
 		}
-		if (types.get(mi.getLabel()) != null) {
-			return true;
-		}
-		return false;
+		return types.get(mi.getLabel()) != null;
 	}
 
 	public void invCheckit(int act) {
 		if (!isCheckit(act)) {
 			return;
 		}
-		String state = (String) types.get(getItem(act).getLabel());
+		String state = types.get(getItem(act).getLabel());
 		if (state.equals("1")) {
 			types.put(getItem(act).getLabel(), "0");
 		}
@@ -440,10 +437,7 @@ public class ContextMenu extends Menu {
 	}
 
 	public boolean inside(int x, int y) {
-		if ((x > (size.x + size.width)) || (x < size.x) || (y > (size.y + size.height)) || (y < size.y)) {
-			return false;
-		}
-		return true;
+		return (x <= (size.x + size.width)) && (x >= size.x) && (y <= (size.y + size.height)) && (y >= size.y);
 	}
 
 	public boolean handleEvent(Event evt) {
@@ -463,7 +457,6 @@ public class ContextMenu extends Menu {
 				pressKey(evt);
 				break;
 			case Event.MOUSE_DRAG:
-				;
 			case Event.MOUSE_MOVE:
 				pressMouse(evt);
 				break;

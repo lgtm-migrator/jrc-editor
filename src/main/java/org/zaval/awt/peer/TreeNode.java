@@ -37,7 +37,7 @@ public class TreeNode {
 	public boolean isExpanded = false;
 	public int numberOfChildren;
 	public int contextMenu = -1;
-	public Hashtable property = null;
+	public Hashtable<String, Object> property = null;
 	public boolean hidden = false;
 	public String caption;
 	public Image indicator;
@@ -53,7 +53,7 @@ public class TreeNode {
 	}
 
 	public TreeNode(String text, String nameCollImage, String nameExpImage) {
-		property = new Hashtable();
+		property = new Hashtable<>();
 		this.text = text;
 		this.sibling = null;
 		this.child = null;

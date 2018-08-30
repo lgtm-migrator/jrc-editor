@@ -33,9 +33,8 @@ public class WinIniFile {
 	public static final int OPEN_EXISTS = 2;
 	public static final String NO_VALUE = "NOVALUE";
 
-	private Hashtable sections = null;
+	private Hashtable<String, Hashtable<String, String>> sections = null;
 	private String name = null;
-	private InputStream isdata = null;
 	private char buf[] = new char[WinIniFile.MAX_LEN_LINE];
 	private String begSecSymb = "[";
 	private String endSecSymb = "]";
@@ -47,7 +46,7 @@ public class WinIniFile {
 				// if this file allready exist => clear it
 				FileOutputStream file = new FileOutputStream(name);
 				file.close();
-				sections = new Hashtable();
+				sections = new Hashtable<>();
 			}
 				break;
 			case OPEN_EXISTS:
@@ -66,10 +65,10 @@ public class WinIniFile {
 	}
 
 	public void init(InputStream is) throws IOException {
-		String data = new String();
-		Hashtable sect = null;
-		sections = new Hashtable();
-		isdata = is;
+		String data = "";
+		Hashtable<String, String> sect = null;
+		sections = new Hashtable<>();
+		InputStream isdata = is;
 		DataInputStream dis = new DataInputStream(isdata);
 		for (;;) {
 			data = readLine(is);
@@ -88,7 +87,7 @@ public class WinIniFile {
 				if (end != (data.length() - 1)) {
 					continue;
 				}
-				sect = new Hashtable();
+				sect = new Hashtable<>();
 				sections.put(data.substring(beg + 1, end).toLowerCase(), sect);
 				continue;
 			}
@@ -137,7 +136,7 @@ public class WinIniFile {
 	}
 
 	public String getValue(String section, String name) {
-		Hashtable tab = (Hashtable) sections.get(section.toLowerCase());
+		Hashtable tab = sections.get(section.toLowerCase());
 		if (tab == null) {
 			return null;
 		}
@@ -145,22 +144,22 @@ public class WinIniFile {
 	}
 
 	public String getValue(String name) {
-		Hashtable tab = foundSection(name.toLowerCase());
+		Hashtable<String, String> tab = foundSection(name.toLowerCase());
 		if (tab == null) {
 			return null;
 		}
-		return (String) tab.get(name.toLowerCase());
+		return tab.get(name.toLowerCase());
 	}
 
-	public Hashtable getSection(String name) {
-		return (Hashtable) sections.get(name.toLowerCase());
+	public Hashtable<String, String> getSection(String name) {
+		return sections.get(name.toLowerCase());
 	}
 
-	public Hashtable foundSection(String namevalue) {
-		Enumeration el = sections.elements();
+	public Hashtable<String, String> foundSection(String namevalue) {
+		Enumeration<Hashtable<String, String>> el = sections.elements();
 		while (el.hasMoreElements()) {
-			Hashtable tab = (Hashtable) el.nextElement();
-			String res = (String) tab.get(namevalue.toLowerCase());
+			Hashtable<String, String> tab = el.nextElement();
+			String res = tab.get(namevalue.toLowerCase());
 			if (res != null) {
 				return tab;
 			}
@@ -169,7 +168,7 @@ public class WinIniFile {
 	}
 
 	public int size(String section) {
-		Hashtable tab = getSection(section);
+		Hashtable<String, String> tab = getSection(section);
 		if (tab == null) {
 			return -1;
 		}
@@ -177,13 +176,13 @@ public class WinIniFile {
 	}
 
 	public int size() {
-		Enumeration el = sections.elements();
+		Enumeration<Hashtable<String, String>> el = sections.elements();
 		int count = 0;
 		if ((el == null) || (!el.hasMoreElements())) {
 			return -1;
 		}
 		while (el.hasMoreElements()) {
-			Hashtable tab = (Hashtable) el.nextElement();
+			Hashtable tab = el.nextElement();
 			count += tab.size();
 		}
 		return count;
@@ -191,7 +190,7 @@ public class WinIniFile {
 
 	public int sizeNumber(String section) {
 		int count = 0;
-		Hashtable tab = (Hashtable) sections.get(section.toLowerCase());
+		Hashtable tab = sections.get(section.toLowerCase());
 		if (tab == null) {
 			return -1;
 		}
@@ -203,7 +202,7 @@ public class WinIniFile {
 	}
 
 	public int putValue(String section, String name, String value) {
-		Hashtable tab = getSection(section.toLowerCase());
+		Hashtable<String, String> tab = getSection(section.toLowerCase());
 		if (tab == null) {
 			return -1;
 		}
@@ -212,7 +211,7 @@ public class WinIniFile {
 	}
 
 	public int putValue(String name, String value) {
-		Hashtable tab = foundSection(name.toLowerCase());
+		Hashtable<String, String> tab = foundSection(name.toLowerCase());
 		if (tab == null) {
 			return -1;
 		}
@@ -229,7 +228,7 @@ public class WinIniFile {
 	}
 
 	public int delValue(String section, String name) {
-		Hashtable tab = getSection(section.toLowerCase());
+		Hashtable<String, String> tab = getSection(section.toLowerCase());
 		if (tab == null) {
 			return -1;
 		}
@@ -241,7 +240,7 @@ public class WinIniFile {
 		if ((sections == null) || (sections.get(name.toLowerCase()) != null)) {
 			return -1;
 		}
-		sections.put(name.toLowerCase(), new Hashtable());
+		sections.put(name.toLowerCase(), new Hashtable<>());
 		return 0;
 	}
 
@@ -250,16 +249,16 @@ public class WinIniFile {
 			return -1;
 		}
 		RandomAccessFile file = new RandomAccessFile(name, "rw");
-		Enumeration el = sections.elements();
-		Enumeration sk = sections.keys();
+		Enumeration<Hashtable<String, String>> el = sections.elements();
+		Enumeration<String> sk = sections.keys();
 		while (el.hasMoreElements()) {
-			Hashtable tab = (Hashtable) el.nextElement();
+			Hashtable tab = el.nextElement();
 			if (tab == null) {
 				break;
 			}
 			Enumeration keys = tab.keys();
 			Enumeration values = tab.elements();
-			writeLine(file, begSecSymb + (String) sk.nextElement() + endSecSymb);
+			writeLine(file, begSecSymb + sk.nextElement() + endSecSymb);
 			while (keys.hasMoreElements()) {
 				String key = (String) keys.nextElement();
 				String value = (String) values.nextElement();

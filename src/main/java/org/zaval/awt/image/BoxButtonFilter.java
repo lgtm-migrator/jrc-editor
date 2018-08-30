@@ -75,7 +75,7 @@ public class BoxButtonFilter extends ButtonImageFilter {
 	public int filterRGB(int rgb, boolean brighter, int percent) {
 		int r = (rgb >> 16) & 0xff;
 		int g = (rgb >> 8) & 0xff;
-		int b = (rgb >> 0) & 0xff;
+		int b = (rgb) & 0xff;
 		int npercent = 100 - percent;
 		if (brighter) {
 			r = (255 - (((255 - r) * (npercent)) / 100));
@@ -87,6 +87,6 @@ public class BoxButtonFilter extends ButtonImageFilter {
 			g = ((g * (npercent)) / 100);
 			b = ((b * (npercent)) / 100);
 		}
-		return (r << 16) | (g << 8) | (b << 0) | 0xFF000000;
+		return (r << 16) | (g << 8) | (b) | 0xFF000000;
 	}
 }

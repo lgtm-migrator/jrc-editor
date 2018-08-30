@@ -18,7 +18,7 @@
 package org.zaval.awt.event;
 
 public interface Listener {
-	public abstract void init(Object o);
+	void init(Object o);
 
-	public abstract boolean eventOccured(Event e);
+	boolean eventOccured(Event e);
 }

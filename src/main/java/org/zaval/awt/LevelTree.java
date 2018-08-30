@@ -29,8 +29,8 @@ public class LevelTree {
 	public static final int NEXT = CHILD + 1;
 	public static final int LAST = CHILD + 2;
 
-	public Vector e = new Vector(); // e is vector of existing nodes
-	public Vector v = new Vector(); // v is vector of viewable nodes
+	public Vector<TreeNode> e = new Vector<>(); // e is vector of existing nodes
+	public Vector<TreeNode> v = new Vector<>(); // v is vector of viewable nodes
 	private TreeNode rootNode; // root node of tree
 	private ImageResolver imgres; // To autosetup
 
@@ -40,7 +40,7 @@ public class LevelTree {
 	private String treeStructure[];
 	String delim = ".";
 
-	private Hashtable nameCache = new Hashtable();
+	private Hashtable<String, TreeNode> nameCache = new Hashtable<>();
 
 	public LevelTree() {
 		count = 0;
@@ -115,7 +115,7 @@ public class LevelTree {
 			return false;
 		}
 		for (int i = 0; i < viewCount; i++) {
-			TreeNode tn = (TreeNode) v.elementAt(i);
+			TreeNode tn = v.elementAt(i);
 			if ((tn.text != null) && s.equals(tn.text)) {
 				return true;
 			}
@@ -144,7 +144,7 @@ public class LevelTree {
 		}
 
 		for (int i = 0; i < count; i++) {
-			TreeNode tn = (TreeNode) e.elementAt(i);
+			TreeNode tn = e.elementAt(i);
 			if ((tn.text != null) && s.equals(tn.text)) {
 				return true;
 			}
@@ -158,10 +158,10 @@ public class LevelTree {
 			return null;
 		}
 		if (nameCache.get(name) != null) {
-			return (TreeNode) nameCache.get(name);
+			return nameCache.get(name);
 		}
 		for (int i = 0; i < count; i++) {
-			TreeNode tn = (TreeNode) e.elementAt(i);
+			TreeNode tn = e.elementAt(i);
 			if ((tn.text != null) && name.equals(tn.text)) {
 				return tn;
 			}
@@ -309,7 +309,6 @@ public class LevelTree {
 			while ((whereNode.sibling != null) && (whereNode.sibling != mark)) {
 				whereNode = whereNode.sibling;
 			}
-			;
 			if (whereNode.sibling != null) {
 				newNode.sibling = whereNode.sibling;
 			}
@@ -356,7 +355,7 @@ public class LevelTree {
 	public TreeNode remove(String s) {
 		recount();
 		for (int i = 0; i < count; i++) {
-			TreeNode tn = (TreeNode) e.elementAt(i);
+			TreeNode tn = e.elementAt(i);
 
 			if (tn.text != null) {
 				if (s.equals(tn.text)) {
@@ -430,8 +429,8 @@ public class LevelTree {
 
 	private void recount() {
 		count = 0;
-		e = new Vector();
-		nameCache = new Hashtable();
+		e = new Vector<>();
+		nameCache = new Hashtable<>();
 
 		if (rootNode != null) {
 			rootNode.depth = 0;
@@ -458,7 +457,7 @@ public class LevelTree {
 		// Traverses tree to put nodes into vector v
 		// for internal processing. Depths of nodes are set,
 		// and viewCount and viewWidest is set.
-		v = new Vector(count);
+		v = new Vector<>(count);
 
 		if (count < 1) {
 			viewCount = 0;
@@ -603,7 +602,7 @@ public class LevelTree {
 		}
 		int i;
 		for (i = 0; i < e.size(); ++i) {
-			TreeNode c = (TreeNode) e.elementAt(i);
+			TreeNode c = e.elementAt(i);
 			c.setResolver(imgres);
 		}
 	}
@@ -674,7 +673,7 @@ public class LevelTree {
 			return;
 		}
 		for (int i = 0; i < e.size(); i++) {
-			TreeNode tn = (TreeNode) e.elementAt(i);
+			TreeNode tn = e.elementAt(i);
 			tn.expand();
 		}
 	}
@@ -685,7 +684,7 @@ public class LevelTree {
 			return;
 		}
 		for (int i = 0; i < e.size(); i++) {
-			TreeNode tn = (TreeNode) e.elementAt(i);
+			TreeNode tn = e.elementAt(i);
 			tn.collapse();
 		}
 	}

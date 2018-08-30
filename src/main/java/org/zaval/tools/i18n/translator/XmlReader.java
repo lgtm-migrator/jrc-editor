@@ -44,17 +44,17 @@ class XmlReader {
 		return xml;
 	}
 
-	public Hashtable getTable() {
-		Hashtable ask = new Hashtable();
-		Enumeration en = xml.enumerateChildren();
+	public Hashtable<String, String> getTable() {
+		Hashtable<String, String> ask = new Hashtable<>();
+		Enumeration<XmlElement> en = xml.enumerateChildren();
 		while (en.hasMoreElements()) {
-			XmlElement child = (XmlElement) en.nextElement();
+			XmlElement child = en.nextElement();
 			getTable(ask, child, "");
 		}
 		return ask;
 	}
 
-	private void getTable(Hashtable place, XmlElement root, String prefix) {
+	private void getTable(Hashtable<String, String> place, XmlElement root, String prefix) {
 		String xmap = (String) root.getAttribute("lang");
 		if (xmap != null) {
 			xmap = xmap;
@@ -67,14 +67,14 @@ class XmlReader {
 		}
 		String name = prefix + xmap + "!";
 
-		Enumeration en;
+		Enumeration<XmlElement> en;
 		if (root.getContent() != null) {
 			place.put(prefix + xmap, root.getContent());
 		}
 
 		en = root.enumerateChildren();
 		while (en.hasMoreElements()) {
-			XmlElement child = (XmlElement) en.nextElement();
+			XmlElement child = en.nextElement();
 			getTable(place, child, name);
 		}
 	}

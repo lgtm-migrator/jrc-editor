@@ -228,10 +228,7 @@ public class BorderedPanel extends Panel {
 		if (hideMode == 0) {
 			return super.isVisible();
 		}
-		if (type == NONE) {
-			return false;
-		}
-		return true;
+		return type != NONE;
 	}
 
 	@Override

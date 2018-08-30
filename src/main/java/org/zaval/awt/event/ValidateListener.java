@@ -18,7 +18,7 @@
 package org.zaval.awt.event;
 
 public interface ValidateListener extends Listener {
-	public abstract void validatePerform(ValidateEvent e);
+	void validatePerform(ValidateEvent e);
 
-	public abstract void invalidatePerform(ValidateEvent e);
+	void invalidatePerform(ValidateEvent e);
 }

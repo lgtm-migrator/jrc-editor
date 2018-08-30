@@ -22,11 +22,11 @@ import java.awt.Dimension;
 import java.awt.Point;
 
 public interface ScrollObject {
-	public Point getSOLocation();
+	Point getSOLocation();
 
-	public void setSOLocation(int x, int y);
+	void setSOLocation(int x, int y);
 
-	public Dimension getSOSize();
+	Dimension getSOSize();
 
-	public Component getScrollComponent();
+	Component getScrollComponent();
 }

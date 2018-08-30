@@ -28,8 +28,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 
-import org.zaval.util.SafeResourceBundle;
-
 public class Split {
 	private BundleManager bundle = new BundleManager();
 
@@ -41,8 +39,6 @@ public class Split {
 		}
 	}
 
-	private SafeResourceBundle rcTable = null;
-
 	private void join(BundleManager bundle2, boolean part) {
 		if (part) {
 			BundleSet set = bundle2.getBundle();
@@ -50,9 +46,9 @@ public class Split {
 			for (int i = 0; i < items; ++i) {
 				BundleItem bi = set.getItem(i);
 				bundle.getBundle().addKey(bi.getId());
-				Enumeration en = bi.getLanguages();
+				Enumeration<String> en = bi.getLanguages();
 				while (en.hasMoreElements()) {
-					String lang = (String) en.nextElement();
+					String lang = en.nextElement();
 					bundle.getBundle().addLanguage(lang);
 					bundle.getBundle().updateValue(bi.getId(), lang, bi.getTranslation(lang));
 				}
@@ -104,26 +100,21 @@ public class Split {
 	}
 
 	private void onParseCode(String fileName) throws Exception {
-		try {
-			String filename = fileName;
-			if (fileName != null) {
-				filename = bundle.replace(filename, "\\", "/");
-				JavaParser parser = new JavaParser(new FileInputStream(filename));
-				Hashtable ask = parser.parse();
+		String filename = fileName;
+		if (fileName != null) {
+			filename = bundle.replace(filename, "\\", "/");
+			JavaParser parser = new JavaParser(new FileInputStream(filename));
+			Hashtable<String, String> ask = parser.parse();
 
-				bundle.getBundle().addLanguage("en");
-				String rlng = bundle.getBundle().getLanguage(0).getLangId();
+			bundle.getBundle().addLanguage("en");
+			String rlng = bundle.getBundle().getLanguage(0).getLangId();
 
-				Enumeration en = ask.keys();
-				while (en.hasMoreElements()) {
-					String key = (String) en.nextElement();
-					bundle.getBundle().addKey(key);
-					bundle.getBundle().updateValue(key, rlng, (String) ask.get(key));
-				}
+			Enumeration<String> en = ask.keys();
+			while (en.hasMoreElements()) {
+				String key = en.nextElement();
+				bundle.getBundle().addKey(key);
+				bundle.getBundle().updateValue(key, rlng, ask.get(key));
 			}
-		}
-		catch (Exception e) {
-			throw e;
 		}
 	}
 
@@ -138,10 +129,10 @@ public class Split {
 				out.writeChars("<xml>\n");
 				for (int i = 0; i < items; ++i) {
 					BundleItem bi = set.getItem(i);
-					Enumeration en = bi.getLanguages();
+					Enumeration<String> en = bi.getLanguages();
 					out.writeChars("\t<key name=\"" + bi.getId() + "\">\n");
 					while (en.hasMoreElements()) {
-						String lang = (String) en.nextElement();
+						String lang = en.nextElement();
 						if (!inArray(parts, lang)) {
 							continue;
 						}
@@ -169,10 +160,10 @@ public class Split {
 				out.writeChars("#JRC Editor 2.0: do not modify this line\r\n\r\n");
 				for (int i = 0; i < items; ++i) {
 					BundleItem bi = set.getItem(i);
-					Enumeration en = bi.getLanguages();
+					Enumeration<String> en = bi.getLanguages();
 					out.writeChars("KEY=\"" + bi.getId() + "\":\r\n");
 					while (en.hasMoreElements()) {
-						String lang = (String) en.nextElement();
+						String lang = en.nextElement();
 						if (!inArray(parts, lang)) {
 							continue;
 						}
@@ -203,7 +194,7 @@ public class Split {
 	private String getBody(String file) throws IOException {
 		char ch;
 		DataInputStream in = new DataInputStream(new FileInputStream(file));
-		StringBuffer buf = new StringBuffer(in.available());
+		StringBuilder buf = new StringBuilder(in.available());
 
 		try {
 			in.readChar(); // skip UCS16 marker FEFF
@@ -217,10 +208,10 @@ public class Split {
 		return buf.toString();
 	}
 
-	private void fillTable(Hashtable tbl) {
-		Enumeration en = tbl.keys();
+	private void fillTable(Hashtable<String, String> tbl) {
+		Enumeration<String> en = tbl.keys();
 		while (en.hasMoreElements()) {
-			String k = (String) en.nextElement();
+			String k = en.nextElement();
 			StringTokenizer st = new StringTokenizer(k, "!");
 			String key = st.nextToken();
 			if (!st.hasMoreTokens()) {
@@ -233,7 +224,7 @@ public class Split {
 			}
 
 			bundle.getBundle().addKey(key);
-			bundle.getBundle().updateValue(key, lang, (String) tbl.get(k));
+			bundle.getBundle().updateValue(key, lang, tbl.get(k));
 		}
 	}
 
@@ -242,14 +233,9 @@ public class Split {
 		if (filename != null) {
 			bundle.getBundle().addLanguage("en");
 
-			try {
-				XmlReader xml = new XmlReader(getBody(filename));
-				Hashtable tbl = xml.getTable();
-				fillTable(tbl);
-			}
-			catch (Exception e) {
-				throw e;
-			}
+			XmlReader xml = new XmlReader(getBody(filename));
+			Hashtable<String, String> tbl = xml.getTable();
+			fillTable(tbl);
 		}
 	}
 
@@ -257,14 +243,9 @@ public class Split {
 		String filename = fileName;
 		if (filename != null) {
 			bundle.getBundle().addLanguage("en");
-			try {
-				UtfParser parser = new UtfParser(new StringReader(getBody(filename)));
-				Hashtable tbl = parser.parse();
-				fillTable(tbl);
-			}
-			catch (Exception e) {
-				throw e;
-			}
+			UtfParser parser = new UtfParser(new StringReader(getBody(filename)));
+			Hashtable<String, String> tbl = parser.parse();
+			fillTable(tbl);
 		}
 	}
 
@@ -301,34 +282,33 @@ public class Split {
 			String command = args[0];
 			String fileName = args[1];
 			String[] options = new String[args.length - 2];
-			for (int j = 0; j < options.length; ++j) {
-				options[j] = args[j + 2];
-			}
+			System.arraycopy(args, 2, options, 0, options.length);
 			Split obj = new Split(fileName);
-			if (command.equals("join")) {
-				for (String option : options) {
-					obj.tryToLoad(option);
-				}
-				obj.onSaveAs(fileName);
-			}
-			else if (command.equals("split")) {
-				String dstFile = options[0];
-				options[0] = null;
-				if (dstFile.endsWith(".txt")) {
-					obj.onSaveUtf(dstFile, options);
-				}
-				else if (dstFile.endsWith(".xml")) {
-					obj.onSaveXml(dstFile, options);
-				}
-				else if (dstFile.endsWith(".java")) {
-					obj.onGenCode(dstFile);
-				}
-				else {
-					throw new IOException(dstFile + ": wrong file format or I/O error");
-				}
-			}
-			else {
-				throw new Exception();
+			switch (command) {
+				case "join":
+					for (String option : options) {
+						obj.tryToLoad(option);
+					}
+					obj.onSaveAs(fileName);
+					break;
+				case "split":
+					String dstFile = options[0];
+					options[0] = null;
+					if (dstFile.endsWith(".txt")) {
+						obj.onSaveUtf(dstFile, options);
+					}
+					else if (dstFile.endsWith(".xml")) {
+						obj.onSaveXml(dstFile, options);
+					}
+					else if (dstFile.endsWith(".java")) {
+						obj.onGenCode(dstFile);
+					}
+					else {
+						throw new IOException(dstFile + ": wrong file format or I/O error");
+					}
+					break;
+				default:
+					throw new Exception();
 			}
 		}
 		catch (IOException eio) {

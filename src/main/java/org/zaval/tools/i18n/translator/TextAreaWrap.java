@@ -140,7 +140,7 @@ public class TextAreaWrap {
 	}
 
 	public Component getControl() {
-		return flavor == NATIVE ? (Component) tf2 : (Component) tf1;
+		return flavor == NATIVE ? tf2 : tf1;
 	}
 
 	public void setLocale(Locale l) {

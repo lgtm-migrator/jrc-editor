@@ -200,19 +200,19 @@ public class TextAlignArea extends AlignArea {
 	public static String[] breakString(String t, FontMetrics fm, int width) {
 		if (t != null) {
 			StringTokenizer st = new StringTokenizer(t, "\n");
-			Vector vv = new Vector();
+			Vector<String> vv = new Vector<>();
 
 			while (st.hasMoreTokens()) {
 				vv.addElement(st.nextToken());
 			}
 
-			Vector vvv = new Vector();
+			Vector<String> vvv = new Vector<>();
 			String[] ps = new String[2];
 
 			for (int i = 0; i < vv.size(); i++) {
-				String ss = (String) vv.elementAt(i);
+				String ss = vv.elementAt(i);
 
-				String tk = "";
+				StringBuilder tk = new StringBuilder();
 				int tw = 0;
 				int c = 0;
 
@@ -231,19 +231,19 @@ public class TextAlignArea extends AlignArea {
 					int len = fm.stringWidth(token);
 					if ((tw + len) > width) {
 						if (tk.length() > 0) {
-							vvv.addElement(tk);
-							tk = token;
+							vvv.addElement(tk.toString());
+							tk = new StringBuilder(token);
 							tw = len;
 						}
 						else {
 							vvv.addElement(token);
-							tk = "";
+							tk = new StringBuilder();
 							tw = 0;
 						}
 					}
 					else {
 						c++;
-						tk += token;
+						tk.append(token);
 						tw += len;
 					}
 
@@ -253,14 +253,14 @@ public class TextAlignArea extends AlignArea {
 				}
 
 				if (c > 0) {
-					vvv.addElement(tk);
+					vvv.addElement(tk.toString());
 				}
 
 			}
 
 			String[] strs = new String[vvv.size()];
 			for (int i = 0; i < vvv.size(); i++) {
-				strs[i] = (String) vvv.elementAt(i);
+				strs[i] = vvv.elementAt(i);
 			}
 			return strs;
 		}

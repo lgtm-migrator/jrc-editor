@@ -19,7 +19,7 @@ package org.zaval.util;
 
 import java.util.Hashtable;
 
-public class Environment extends Hashtable {
+public class Environment extends Hashtable<String, String> {
 	public int getAsInt(String name) {
 		String s = (String) get(name);
 		if (s == null) {

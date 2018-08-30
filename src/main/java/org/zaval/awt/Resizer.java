@@ -172,19 +172,19 @@ public class Resizer extends Canvas {
 
 	private static Component getComponentAtFix(Container top, int x, int y) {
 		Component[] c = top.getComponents();
-		Vector v = new Vector();
-		for (int i = 0; i < c.length; i++) {
-			if (!c[i].isVisible()) {
+		Vector<Component> v = new Vector<>();
+		for (Component aC : c) {
+			if (!aC.isVisible()) {
 				continue;
 			}
-			Rectangle b = c[i].bounds();
+			Rectangle b = aC.bounds();
 			if (b.inside(x, y)) {
-				v.addElement(c[i]);
+				v.addElement(aC);
 			}
 		}
 
 		if (v.size() > 0) {
-			return (Component) v.elementAt(0);
+			return v.elementAt(0);
 		}
 		return null;
 	}

@@ -18,26 +18,26 @@
 package org.zaval.awt;
 
 public interface AlignConstants {
-	public static final int LEFT = 0x1;
-	public static final int RIGHT = 0x2;
-	public static final int TOP = 0x4;
-	public static final int BOTTOM = 0x8;
-	public static final int FIT = 0x10;
-	public static final int JUSTIFY = 0x20;
+	int LEFT = 0x1;
+	int RIGHT = 0x2;
+	int TOP = 0x4;
+	int BOTTOM = 0x8;
+	int FIT = 0x10;
+	int JUSTIFY = 0x20;
 
-	public static final int TLEFT = LEFT | TOP;
-	public static final int TRIGHT = RIGHT | TOP;
-	public static final int BLEFT = LEFT | BOTTOM;
-	public static final int BRIGHT = RIGHT | BOTTOM;
-	public static final int CENTER = 0;
+	int TLEFT = LEFT | TOP;
+	int TRIGHT = RIGHT | TOP;
+	int BLEFT = LEFT | BOTTOM;
+	int BRIGHT = RIGHT | BOTTOM;
+	int CENTER = 0;
 
-	public static final String STR_LEFT = "left";
-	public static final String STR_RIGHT = "right";
-	public static final String STR_TOP = "top";
-	public static final String STR_BOTTOM = "bottom";
-	public static final String STR_TLEFT = "topLeft";
-	public static final String STR_TRIGHT = "topRight";
-	public static final String STR_BLEFT = "bottomLeft";
-	public static final String STR_BRIGHT = "bottomRight";
-	public static final String STR_CENTER = "center";
+	String STR_LEFT = "left";
+	String STR_RIGHT = "right";
+	String STR_TOP = "top";
+	String STR_BOTTOM = "bottom";
+	String STR_TLEFT = "topLeft";
+	String STR_TRIGHT = "topRight";
+	String STR_BLEFT = "bottomLeft";
+	String STR_BRIGHT = "bottomRight";
+	String STR_CENTER = "center";
 }

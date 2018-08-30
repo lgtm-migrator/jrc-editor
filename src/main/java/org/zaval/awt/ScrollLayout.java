@@ -35,20 +35,21 @@ public class ScrollLayout implements LayoutManager {
 	@Override
 	public void addLayoutComponent(String s, Component c) {
 		if (s != null) {
-			if (s.equals("East")) {
-				vs = c;
-			}
-			else if (s.equals("South")) {
-				hs = c;
-			}
-			else if (s.equals("Center")) {
-				center = c;
-			}
-			else if (s.equals("Stubb")) {
-				stubb = c;
-				stubb.resize(0, 0);
-				stubb.setBackground(Color.lightGray);
-				return;
+			switch (s) {
+				case "East":
+					vs = c;
+					break;
+				case "South":
+					hs = c;
+					break;
+				case "Center":
+					center = c;
+					break;
+				case "Stubb":
+					stubb = c;
+					stubb.resize(0, 0);
+					stubb.setBackground(Color.lightGray);
+					break;
 			}
 		}
 	}

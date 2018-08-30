@@ -24,31 +24,31 @@ import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 
-public class InputIniFile extends Object {
-	private Hashtable hash;
+public class InputIniFile {
+	private Hashtable<String, String> hash;
 	private DataInputStream in;
 	private String name;
 
-	public Hashtable getTable() {
+	public Hashtable<String, String> getTable() {
 		return hash;
 	}
 
 	public InputIniFile(String name) throws IOException {
 		this.name = name;
 		in = new DataInputStream(new FileInputStream(name));
-		hash = new Hashtable();
+		hash = new Hashtable<>();
 		load();
 	}
 
 	public InputIniFile(InputStream in) throws IOException {
 		this.name = in.toString();
 		this.in = new DataInputStream(in);
-		hash = new Hashtable();
+		hash = new Hashtable<>();
 		load();
 	}
 
-	public synchronized String getString(String key) throws IOException {
-		return (String) hash.get(key);
+	public synchronized String getString(String key) {
+		return hash.get(key);
 	}
 
 	public int getInt(String key) throws IOException {
@@ -68,10 +68,7 @@ public class InputIniFile extends Object {
 		if ("On".equalsIgnoreCase(s)) {
 			return true;
 		}
-		if ("1".equals(s)) {
-			return true;
-		}
-		return false;
+		return "1".equals(s);
 	}
 
 	public synchronized void close() throws IOException {

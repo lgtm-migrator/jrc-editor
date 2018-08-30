@@ -141,9 +141,6 @@ public class Align implements AlignConstants {
 			return false;
 		}
 
-		if ((i.top < 0) || (i.bottom < 0) || (i.left < 0) || (i.right < 0)) {
-			return false;
-		}
-		return true;
+		return (i.top >= 0) && (i.bottom >= 0) && (i.left >= 0) && (i.right >= 0);
 	}
 }

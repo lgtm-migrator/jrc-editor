@@ -54,7 +54,7 @@ class BMP_Header {
 
 	@Override
 	public String toString() {
-		String res = new String("type " + FileType + " size " + FileSize + " offset " + dataOffset + "reses: " + res1 + " " + res2);
+		String res = "type " + FileType + " size " + FileSize + " offset " + dataOffset + "reses: " + res1 + " " + res2;
 		return res;
 	}
 }

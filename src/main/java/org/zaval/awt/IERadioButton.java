@@ -85,9 +85,6 @@ public class IERadioButton extends BaseCheckbox {
 
 	@Override
 	protected boolean condition() {
-		if (getState()) {
-			return false;
-		}
-		return true;
+		return !getState();
 	}
 }

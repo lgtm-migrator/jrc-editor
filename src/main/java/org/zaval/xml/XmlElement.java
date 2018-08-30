@@ -34,11 +34,11 @@ public class XmlElement {
 	public static final int NANOXML_MAJOR_VERSION = 2;
 	public static final int NANOXML_MINOR_VERSION = 2;
 
-	private Hashtable attributes;
-	private Vector children;
+	private Hashtable<String, String> attributes;
+	private Vector<XmlElement> children;
 	private String name;
 	private String contents;
-	private Hashtable entities;
+	private Hashtable<Object, Object> entities;
 
 	private int lineNr;
 	private boolean ignoreCase;
@@ -67,16 +67,17 @@ public class XmlElement {
 		this(entities, skipLeadingWhitespace, true, ignoreCase);
 	}
 
-	protected XmlElement(Hashtable entities, boolean skipLeadingWhitespace, boolean fillBasicConversionTable, boolean ignoreCase) {
+	protected XmlElement(Hashtable<Object, Object> entities, boolean skipLeadingWhitespace, boolean fillBasicConversionTable,
+		boolean ignoreCase) {
 		this.ignoreWhitespace = skipLeadingWhitespace;
 		this.ignoreCase = ignoreCase;
 		this.name = null;
 		this.contents = "";
-		this.attributes = new Hashtable();
-		this.children = new Vector();
+		this.attributes = new Hashtable<>();
+		this.children = new Vector<>();
 		this.entities = entities;
 		this.lineNr = 0;
-		Enumeration e = this.entities.keys();
+		Enumeration<Object> e = this.entities.keys();
 		while (e.hasMoreElements()) {
 			Object key = e.nextElement();
 			Object value = this.entities.get(key);
@@ -109,17 +110,17 @@ public class XmlElement {
 		return this.children.size();
 	}
 
-	public Enumeration enumerateAttributeNames() {
+	public Enumeration<String> enumerateAttributeNames() {
 		return this.attributes.keys();
 	}
 
-	public Enumeration enumerateChildren() {
+	public Enumeration<XmlElement> enumerateChildren() {
 		return this.children.elements();
 	}
 
-	public Vector getChildren() {
+	public Vector<XmlElement> getChildren() {
 		try {
-			return (Vector) this.children.clone();
+			return (Vector<XmlElement>) this.children.clone();
 		}
 		catch (Exception e) {
 			// this never happens, however, some Java compilers are so
@@ -159,7 +160,7 @@ public class XmlElement {
 		if (this.ignoreCase) {
 			name = name.toLowerCase();
 		}
-		Object key = this.attributes.get(name);
+		String key = this.attributes.get(name);
 		Object result;
 		if (key == null) {
 			key = defaultKey;
@@ -170,7 +171,7 @@ public class XmlElement {
 				result = key;
 			}
 			else {
-				throw this.invalidValue(name, (String) key);
+				throw this.invalidValue(name, key);
 			}
 		}
 		return result;
@@ -274,11 +275,11 @@ public class XmlElement {
 		writer.print('<');
 		writer.print(this.name);
 		if (!this.attributes.isEmpty()) {
-			Enumeration e = this.attributes.keys();
+			Enumeration<String> e = this.attributes.keys();
 			while (e.hasMoreElements()) {
 				writer.print(' ');
-				String key = (String) e.nextElement();
-				String value = (String) this.attributes.get(key);
+				String key = e.nextElement();
+				String value = this.attributes.get(key);
 				writer.print(key);
 				writer.print('=');
 				writer.write('"');
@@ -300,9 +301,9 @@ public class XmlElement {
 		}
 		else {
 			writer.print('>');
-			Enumeration e = this.enumerateChildren();
+			Enumeration<XmlElement> e = this.enumerateChildren();
 			while (e.hasMoreElements()) {
-				XmlElement child = (XmlElement) e.nextElement();
+				XmlElement child = e.nextElement();
 				child.write(writer);
 			}
 			writer.print('<');
@@ -312,7 +313,7 @@ public class XmlElement {
 		}
 	}
 
-	protected void writeEncoded(PrintStream writer, String str) throws IOException {
+	protected void writeEncoded(PrintStream writer, String str) {
 		for (int i = 0; i < str.length(); i += 1) {
 			char ch = str.charAt(i);
 			switch (ch) {
@@ -712,7 +713,7 @@ public class XmlElement {
 
 	protected void resolveEntity(StringBuffer buf) throws IOException {
 		char ch = '\0';
-		StringBuffer keyBuf = new StringBuffer();
+		StringBuilder keyBuf = new StringBuilder();
 		for (;;) {
 			ch = this.readChar();
 			if (ch == ';') {

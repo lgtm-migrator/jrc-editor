@@ -25,7 +25,7 @@ import java.util.Locale;
 import org.zaval.util.SafeResourceBundle;
 
 public class Main {
-	public static void main(String arg[]) throws Exception {
+	public static void main(String arg[]) {
 		String altDir = System.getProperty("my.root.dir");
 		File f = new File(altDir != null ? altDir : ".");
 		String path = f.getAbsolutePath();

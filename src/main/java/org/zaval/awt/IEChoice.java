@@ -191,7 +191,7 @@ public class IEChoice extends Panel {
 			c = Character.toLowerCase(c);
 			int size = ch.countItems();
 			for (int i = 0; i < size; i++) {
-				StringBuffer item = new StringBuffer(ch.getItem(i));
+				StringBuilder item = new StringBuilder(ch.getItem(i));
 				if (Character.toLowerCase(item.charAt(0)) == c) {
 					if (ch.getSelectedIndex() != i) {
 						ch.select(i);
@@ -263,18 +263,14 @@ public class IEChoice extends Panel {
 			}
 			return false;
 		}
-		else if (e.target == this) {
-			return true;
+		else {
+			return e.target == this;
 		}
-		return false;
 	}
 
 	@Override
 	public boolean gotFocus(Event e, Object o) {
-		if (ids != null) {
-			return false;
-		}
-		return true;
+		return ids == null;
 	}
 
 	private boolean isSelectionEvent(Event e) {
@@ -361,9 +357,6 @@ public class IEChoice extends Panel {
 		catch (Throwable t) {
 		}
 
-		if (!jver.startsWith("1.0") && jven.startsWith("Microsoft")) {
-			return true;
-		}
-		return false;
+		return !jver.startsWith("1.0") && jven.startsWith("Microsoft");
 	}
 }

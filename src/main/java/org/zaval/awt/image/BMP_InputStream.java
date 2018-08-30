@@ -33,7 +33,7 @@ class BMP_InputStream extends InputStream {
 		ch1 = ch2 = 0;
 		ch2 = in.read();
 		ch1 = in.read();
-		result = (short) ((ch1 << 8) + (ch2 << 0));
+		result = (short) ((ch1 << 8) + (ch2));
 		return result;
 	}
 
@@ -46,7 +46,7 @@ class BMP_InputStream extends InputStream {
 		ch2 = in.read();
 		ch1 = in.read();
 		// now swap bytes
-		result = ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4 << 0));
+		result = ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4));
 		return result;
 	}
 

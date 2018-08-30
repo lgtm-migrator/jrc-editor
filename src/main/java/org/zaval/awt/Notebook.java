@@ -40,7 +40,7 @@ public class Notebook extends Panel implements LayoutManager {
 	public static final int ROUNDED = 0;
 	public static final int SQUARE = 1;
 
-	private final int IMAGE_SIZE = 16;
+	private static final int IMAGE_SIZE = 16;
 
 	private int TF_LEFT = 0; // old 9
 	private int TF_RIGHT = 0; // old -9
@@ -65,7 +65,7 @@ public class Notebook extends Panel implements LayoutManager {
 	private Polygon nullPoly;
 	private int lastWidth = -1;
 
-	private Vector pages = null;
+	private Vector<NotebookPage> pages = null;
 	private Panel oobj = null;
 	private CardLayout card = null;
 	private ImageResolver imgres;
@@ -93,7 +93,7 @@ public class Notebook extends Panel implements LayoutManager {
 	}
 
 	public Notebook(int tabsPostion, int tabsStyle) {
-		pages = new Vector();
+		pages = new Vector<>();
 		setTabsInfo(tabsPostion, tabsStyle);
 
 		fReg = new Font("Helvetica", Font.PLAIN, 12);
@@ -159,31 +159,31 @@ public class Notebook extends Panel implements LayoutManager {
 	}
 
 	public void removePanel(int pos) {
-		NotebookPage np = (NotebookPage) pages.elementAt(pos);
+		NotebookPage np = pages.elementAt(pos);
 		pages.removeElementAt(pos);
 		oobj.remove(np.comp);
 		showPanel(curIndex);
 	}
 
 	public boolean isHidden(int pos) {
-		NotebookPage np = (NotebookPage) pages.elementAt(pos);
+		NotebookPage np = pages.elementAt(pos);
 		return np.hidden;
 	}
 
 	public Component getPanel(int pos) {
-		NotebookPage np = (NotebookPage) pages.elementAt(pos);
+		NotebookPage np = pages.elementAt(pos);
 		return np.comp;
 	}
 
 	public void showPanel(int pos) {
-		NotebookPage np = (NotebookPage) pages.elementAt(pos);
+		NotebookPage np = pages.elementAt(pos);
 		card.show(oobj, np.name);
 		curIndex = pos;
 		repaint();
 	}
 
 	public void setColor(int pos, Color color) {
-		NotebookPage np = (NotebookPage) pages.elementAt(pos);
+		NotebookPage np = pages.elementAt(pos);
 		np.color = color;
 		repaint();
 	}
@@ -267,7 +267,7 @@ public class Notebook extends Panel implements LayoutManager {
 	}
 
 	public void setVisible(int pos, boolean vis) {
-		NotebookPage np = (NotebookPage) pages.elementAt(pos);
+		NotebookPage np = pages.elementAt(pos);
 		np.hidden = !vis;
 		layout();
 		repaint();
@@ -339,7 +339,7 @@ public class Notebook extends Panel implements LayoutManager {
 		int w;
 		NotebookPage[] npages = new NotebookPage[sze];
 		for (w = 0; w < sze; ++w) {
-			npages[w] = (NotebookPage) pages.elementAt(w);
+			npages[w] = pages.elementAt(w);
 			npages[w].poly = nullPoly;
 		}
 
@@ -714,7 +714,7 @@ public class Notebook extends Panel implements LayoutManager {
 				NotebookPage np = null;
 				for (int x = 0; x < sizeR; x++) {
 					try {
-						np = (NotebookPage) pages.elementAt(x);
+						np = pages.elementAt(x);
 						if ((np.poly != nullPoly) && np.poly.inside(evt.x, evt.y)) {
 							if (isHidden(x)) {
 								continue;
@@ -769,7 +769,7 @@ public class Notebook extends Panel implements LayoutManager {
 	}
 
 	public void setImage(int pos, String image) {
-		NotebookPage np = (NotebookPage) pages.elementAt(pos);
+		NotebookPage np = pages.elementAt(pos);
 		np.setImage(image);
 		repaint();
 	}
@@ -827,7 +827,6 @@ public class Notebook extends Panel implements LayoutManager {
 	public static void drawVLine(Graphics gr, int y1, int y2, int x1) {
 		int dy = y2 - y1;
 		int count = (dy / 2) + (dy % 2);
-		;
 		for (int i = 0; i < count; i++) {
 			gr.drawLine(x1, y1, x1, y1);
 			y1 += 2;

@@ -25,7 +25,7 @@ import java.awt.Panel;
 import java.util.Vector;
 
 public class StatusBarPanel extends Panel implements LayoutManager {
-	private Vector elements = new Vector();
+	private Vector<StatusBarElement> elements = new Vector<>();
 
 	public StatusBarPanel() {
 		setLayout(this);
@@ -53,7 +53,7 @@ public class StatusBarPanel extends Panel implements LayoutManager {
 
 		int x = 0;
 		for (int i = 0; i < size; i++) {
-			StatusBarElement c = (StatusBarElement) elements.elementAt(i);
+			StatusBarElement c = elements.elementAt(i);
 			Dimension ps = c.preferredSize();
 			if (i > 0) {
 				x += 2;
@@ -88,7 +88,7 @@ public class StatusBarPanel extends Panel implements LayoutManager {
 		}
 
 		for (int i = 0; i < size; i++) {
-			StatusBarElement c = (StatusBarElement) elements.elementAt(i);
+			StatusBarElement c = elements.elementAt(i);
 			Dimension d1 = c.preferredSize();
 			int perc = c.getPercent();
 			if (perc > 0) {

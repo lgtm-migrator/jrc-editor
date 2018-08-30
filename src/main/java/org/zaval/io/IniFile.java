@@ -26,8 +26,8 @@ import java.io.PrintStream;
 import java.util.Vector;
 
 public class IniFile {
-	private Vector keys = new Vector();
-	private Vector vals = new Vector();
+	private Vector<String> keys = new Vector<>();
+	private Vector<Object> vals = new Vector<>();
 	private boolean dirty = false;
 
 	private File file = null;
@@ -169,8 +169,8 @@ public class IniFile {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append("[IniFile = " + file.toString() + "]={");
+		StringBuilder sb = new StringBuilder();
+		sb.append("[IniFile = ").append(file.toString()).append("]={");
 		for (int j = 0; j < keys.size(); ++j) {
 			sb.append("\n\t" + keys.elementAt(j) + "=" + vals.elementAt(j));
 		}

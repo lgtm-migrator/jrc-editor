@@ -22,12 +22,12 @@ import java.util.Hashtable;
 
 class BundleItem {
 	private String identifier;
-	private Hashtable translations;
+	private Hashtable<String, String> translations;
 	private String comment;
 
 	BundleItem(String id) {
 		identifier = id;
-		translations = new Hashtable();
+		translations = new Hashtable<>();
 	}
 
 	String getId() {
@@ -35,7 +35,7 @@ class BundleItem {
 	}
 
 	String getTranslation(String lng) {
-		return (String) translations.get(lng);
+		return translations.get(lng);
 	}
 
 	String getComment() {
@@ -50,7 +50,7 @@ class BundleItem {
 		translations.put(lng, txt);
 	}
 
-	Enumeration getLanguages() {
+	Enumeration<String> getLanguages() {
 		return translations.keys();
 	}
 }

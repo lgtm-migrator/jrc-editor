@@ -31,7 +31,7 @@ import java.util.Hashtable;
 public class ExGridLayout implements LayoutManager {
 	private static int hackIE401 = -1;
 
-	protected Hashtable comptable;
+	protected Hashtable<Component, GridBagConstraints> comptable;
 	protected GridBagConstraints defaultConstraints;
 
 	protected int startx = 0;
@@ -68,7 +68,7 @@ public class ExGridLayout implements LayoutManager {
 	public ExGridLayout() {
 		widths = new int[MAX_X + 1];
 		heights = new int[MAX_Y + 1];
-		comptable = new Hashtable();
+		comptable = new Hashtable<>();
 		defaultConstraints = new GridBagConstraints();
 		initFix();
 	}
@@ -76,7 +76,7 @@ public class ExGridLayout implements LayoutManager {
 	public ExGridLayout(int realw, int realh) {
 		widths = new int[MAX_X + 1];
 		heights = new int[MAX_Y + 1];
-		comptable = new Hashtable();
+		comptable = new Hashtable<>();
 		defaultConstraints = new GridBagConstraints();
 		initFix();
 	}
@@ -84,11 +84,11 @@ public class ExGridLayout implements LayoutManager {
 	public void setConstraints(Component comp, GridBagConstraints constraints) {
 		bags = null;
 		sizes = null;
-		comptable.put(comp, constraints.clone());
+		comptable.put(comp, (GridBagConstraints) constraints.clone());
 	}
 
 	public GridBagConstraints getConstraints(Component comp) {
-		GridBagConstraints constraints = (GridBagConstraints) comptable.get(comp);
+		GridBagConstraints constraints = comptable.get(comp);
 		return constraints;
 	}
 
@@ -178,10 +178,10 @@ public class ExGridLayout implements LayoutManager {
 		Component comps;
 
 		i = 0;
-		Enumeration en = comptable.keys();
+		Enumeration<Component> en = comptable.keys();
 		while (en.hasMoreElements()) {
-			comps = (Component) en.nextElement();
-			GridBagConstraints gb = (GridBagConstraints) comptable.get(comps);
+			comps = en.nextElement();
+			GridBagConstraints gb = comptable.get(comps);
 			sizes[i] = pref ? comps.preferredSize() : comps.minimumSize();
 			sizes[i].width += gb.insets.right + gb.insets.left;
 			sizes[i].height += gb.insets.top + gb.insets.bottom;
@@ -240,7 +240,7 @@ public class ExGridLayout implements LayoutManager {
 		}
 
 		for (i = 0; i < comps.length; ++i) {
-			GridBagConstraints gb = (GridBagConstraints) comptable.get(comps[i]);
+			GridBagConstraints gb = comptable.get(comps[i]);
 			if (gb == null) {
 				comps[i].hide();
 				continue;
