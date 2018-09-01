@@ -26,25 +26,25 @@ import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Rectangle;
 
-public abstract class BaseCheckbox extends Canvas {
-	public final static int LEFT = 1;
-	public final static int RIGHT = 2;
+abstract class BaseCheckbox extends Canvas {
+	private final static int LEFT = 1;
+	private final static int RIGHT = 2;
 
-	private Dimension sqSize = new Dimension(12, 12);
-	private int textInset = 3;
+	private final Dimension sqSize = new Dimension(12, 12);
+	private final int textInset = 3;
 
 	boolean state = false;
-	boolean hasFocus = false;
-	boolean isCalc = false;
+	private boolean hasFocus = false;
+	private boolean isCalc = false;
 	boolean mouse_down;
 
 	private int align = LEFT;
 	int posY = 0, posX = 0;
-	Rectangle textArea = new Rectangle();
-	Rectangle eventBox = new Rectangle();
-	private TextAlignArea alignArea = new TextAlignArea();
+	private Rectangle textArea = new Rectangle();
+	private final Rectangle eventBox = new Rectangle();
+	private final TextAlignArea alignArea = new TextAlignArea();
 
-	public String getLabel() {
+	private String getLabel() {
 		return alignArea.getText();
 	}
 
@@ -69,20 +69,16 @@ public abstract class BaseCheckbox extends Canvas {
 		repaint();
 	}
 
-	public void setAlign(int a) {
-		if (a == align) {
+	void setAlign() {
+		if (BaseCheckbox.LEFT == align) {
 			return;
 		}
-		align = a;
+		align = BaseCheckbox.LEFT;
 		if (alignArea.isValid()) {
 			return;
 		}
 		invalidate();
 		repaint();
-	}
-
-	public int getAlign() {
-		return align;
 	}
 
 	public boolean getState() {
@@ -192,7 +188,7 @@ public abstract class BaseCheckbox extends Canvas {
 		paint(g, posX, posY, sqSize.width, sqSize.height);
 	}
 
-	protected boolean insideBox(int x, int y) {
+	private boolean insideBox(int x, int y) {
 		return eventBox.inside(x, y);
 	}
 
@@ -202,9 +198,7 @@ public abstract class BaseCheckbox extends Canvas {
 			if (insideBox(x, y)) {
 				mouse_down = true;
 				requestFocus();
-				if (condition()) {
-					stateChanged();
-				}
+				condition();
 			}
 		}
 		return super.mouseDown(ev, x, y);
@@ -262,15 +256,8 @@ public abstract class BaseCheckbox extends Canvas {
 		return new Dimension(w, h);
 	}
 
-	public void stateChanged() {
-	}
-
-	protected boolean condition() {
+	boolean condition() {
 		return true;
-	}
-
-	public TextAlignArea getAlignArea() {
-		return alignArea;
 	}
 
 	@Override
@@ -288,16 +275,16 @@ public abstract class BaseCheckbox extends Canvas {
 		return true;
 	}
 
-	public abstract void paint(Graphics g, int x, int y, int width, int height);
+	protected abstract void paint(Graphics g, int x, int y, int width, int height);
 
-	public void drawRect(Graphics gr, int x, int y, int w, int h) {
+	private void drawRect(Graphics gr, int x, int y, int w, int h) {
 		drawVLine(gr, y, y + h, x);
 		drawVLine(gr, y, y + h, x + w);
 		drawHLine(gr, x, x + w, y);
 		drawHLine(gr, x, x + w, y + h);
 	}
 
-	public void drawHLine(Graphics gr, int x1, int x2, int y1) {
+	private void drawHLine(Graphics gr, int x1, int x2, int y1) {
 		int dx = x2 - x1;
 		int count = (dx / 2) + (dx % 2);
 		for (int i = 0; i < count; i++) {
@@ -307,7 +294,7 @@ public abstract class BaseCheckbox extends Canvas {
 		gr.drawLine(x2, y1, x2, y1);
 	}
 
-	public void drawVLine(Graphics gr, int y1, int y2, int x1) {
+	private void drawVLine(Graphics gr, int y1, int y2, int x1) {
 		int dy = y2 - y1;
 		int count = (dy / 2) + (dy % 2);
 		for (int i = 0; i < count; i++) {

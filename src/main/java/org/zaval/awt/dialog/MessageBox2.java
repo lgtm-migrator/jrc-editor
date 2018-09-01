@@ -33,7 +33,6 @@ import java.awt.LayoutManager;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
-import java.util.Enumeration;
 import java.util.Vector;
 
 import org.zaval.awt.AlignConstants;
@@ -44,11 +43,10 @@ import org.zaval.awt.TextAlignArea;
 public class MessageBox2 extends Dialog implements LayoutManager {
 	private StaticImage icon = null;
 	private Vector<Button> buttons = null;
-	private ResultField text;
+	private final ResultField text;
 	private Color storedColor = null;
 
-	private Vector<Component> listeners = new Vector<>();
-	private Button pressedButton = null;
+	private final Vector<Component> listeners = new Vector<>();
 
 	private static final int INDENT = 10;
 	private static final int ICON_TEXT_GAP = 5;
@@ -115,7 +113,7 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 		}
 	}
 
-	public void setButtons(Vector<Button> b) {
+	private void setButtons(Vector<Button> b) {
 		if (buttons != null) {
 			for (int i = 0; i < buttons.size(); i++) {
 				remove(buttons.elementAt(i));
@@ -127,10 +125,6 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 		}
 		invalidate();
 		validate();
-	}
-
-	public Vector<Button> getButtons() {
-		return buttons;
 	}
 
 	public void setButtons(String[] sa) {
@@ -164,25 +158,14 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 		text.setText(str);
 	}
 
-	public String getText() {
-		return text.getText();
-	}
-
 	public void addListener(Component ls) {
 		listeners.addElement(ls);
-	}
-
-	public void removeListener(Component ls) {
-		listeners.removeElement(ls);
 	}
 
 	@Override
 	public boolean action(Event e, Object o) {
 		if (e.target instanceof Button) {
-			pressedButton = (Button) e.target;
-			Enumeration<Component> els = listeners.elements();
-			while (els.hasMoreElements()) {
-				Component listener = els.nextElement();
+			for (Component listener : listeners) {
 				listener.postEvent(new Event(this, Event.ACTION_EVENT, e.target));
 			}
 			hide();
@@ -291,8 +274,7 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 		if (prefwidth < (d2.width / 4)) {
 			prefwidth = d2.width / 4;
 		}
-		Dimension d111 = new Dimension(prefwidth + ins.left + ins.right + (2 * INDENT), prefheight + ins.top + ins.bottom + (2 * INDENT));
-		return d111;
+		return new Dimension(prefwidth + ins.left + ins.right + (2 * INDENT), prefheight + ins.top + ins.bottom + (2 * INDENT));
 
 	}
 
@@ -352,13 +334,6 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 			return true;
 		}
 		return super.handleEvent(e);
-	}
-
-	public Button getPressedButton() {
-		return pressedButton;
-	}
-
-	public void init() {
 	}
 
 	@Override

@@ -24,7 +24,7 @@ import java.util.Locale;
 
 import org.zaval.util.SafeResourceBundle;
 
-public class Main {
+public class Main { // NO_UCD (unused code)
 	public static void main(String arg[]) {
 		String altDir = System.getProperty("my.root.dir");
 		File f = new File(altDir != null ? altDir : ".");
@@ -34,7 +34,7 @@ public class Main {
 		}
 		path += "/images/";
 
-		Translator t = null;
+		Translator t;
 		if (arg.length > 0) {
 			t = new Translator(path, new SafeResourceBundle("jrc-editor", Locale.getDefault()), arg[0]);
 		}

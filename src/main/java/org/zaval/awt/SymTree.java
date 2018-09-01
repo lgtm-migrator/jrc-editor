@@ -18,8 +18,6 @@
 package org.zaval.awt;
 
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.Font;
@@ -28,45 +26,42 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.LayoutManager;
 import java.awt.Panel;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Scrollbar;
 
 import org.zaval.awt.peer.TreeNode;
 
-public class SymTree extends Panel implements ScrollArea, ScrollObject {
-	public static final int SEL_CHANGED = 1006; //selection changed event
+class SymTree extends Panel implements ScrollArea, ScrollObject {
 
 	private TreeNode selectedNode; // highlighted node
 
-	private Scrollbar sbV; // vertical scrollbar
-	private Scrollbar sbH; // vertical scrollbar
+	private final Scrollbar sbV; // vertical scrollbar
+	private final Scrollbar sbH; // vertical scrollbar
 
 	private Color bgHighlightColor = Color.gray; // selection bg color
-	private Color fgHighlightColor = Color.white; // selection fg color
+	private final Color fgHighlightColor = Color.white; // selection fg color
 	private int viewHeight = 300;
 	private int viewWidth = 300; // pixel size of tree display
 
 	private final int cellSize = 16; // size of node image
-	private int clickSize = 8; // size of mouse toggle (plus or minus)
-	private int textInset = 6; // left margin for text
-	private int textBaseLine = 3; // position of font baseline from bottom of cell
+	private final int clickSize = 8; // size of mouse toggle (plus or minus)
+	private final int textInset = 6; // left margin for text
 	private FontMetrics fm; // current font metrics
-	private ScrollController sm;
+	private final ScrollController sm;
 
-	protected Image im1; // offscreen image
-	protected Graphics g1 = null; // offscreen graphics context
-	protected boolean noChoice = false;
+	private Image im1; // offscreen image
+	private Graphics g1 = null; // offscreen graphics context
+	boolean noChoice = false;
 
 	private int posx = 0, posy = 0;
-	private Dimension scrollInsets = new Dimension(10, 0);
-	private LevelTree ltree = null;
-	private ScrollLayout sl = new ScrollLayout();
+	private final Dimension scrollInsets = new Dimension(10, 0);
+	private final LevelTree ltree;
+	private final ScrollLayout sl = new ScrollLayout();
 
 	private static final int DELETE = 127;
 	private static final int INSERT = 1025;
 
-	public SymTree() {
+	SymTree() {
 		super.setLayout(sl);
 
 		add("East", sbV = new Scrollbar(Scrollbar.VERTICAL));
@@ -79,11 +74,6 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 		sbH.setBackground(Color.lightGray);
 		sm = new ScrollController(this, this);
 		ltree = new LevelTree();
-	}
-
-	public SymTree(TreeNode head) {
-		this();
-		selectedNode = ltree.getRootNode();
 	}
 
 	@Override
@@ -110,18 +100,6 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 		return ltree.getRootNode();
 	}
 
-	public int getCount() {
-		return ltree.getCount();
-	}
-
-	public boolean exists(TreeNode node) {
-		return ltree.exists(node);
-	}
-
-	public boolean exists(String s) {
-		return ltree.exists(s);
-	}
-
 	private void resetVector() {
 		ltree.resetVector();
 	}
@@ -132,56 +110,9 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 		return ltree.getNode(name);
 	}
 
-	public boolean insertChild(String name, String addname) {
-		boolean b = insertChild(name, addname, null, null);
+	public void insertRoot(String addname) {
+		ltree.insertRoot(addname);
 		validate2();
-		return b;
-	}
-
-	public boolean insertChild(String name, String addname, String im1, String im2) {
-		boolean b = ltree.insertChild(name, addname, im1, im2);
-		validate2();
-		return b;
-	}
-
-	public boolean insertNext(String name, String addname) {
-		boolean b = insertNext(name, addname, null, null);
-		validate2();
-		return b;
-	}
-
-	public boolean insertNext(String name, String addname, String im1, String im2) {
-		boolean b = ltree.insertNext(name, addname, im1, im2);
-		validate2();
-		return b;
-	}
-
-	public boolean insertRoot(String addname) {
-		boolean b = insertRoot(addname, null, null);
-		validate2();
-		return b;
-	}
-
-	public boolean insertRoot(String addname, String im1, String im2) {
-		boolean b = ltree.insertRoot(addname, im1, im2);
-		validate2();
-		return b;
-	}
-
-	public boolean setImages(String name, String img1, String img2) {
-		return setImageOpen(name, img1) && setImageClose(name, img2);
-	}
-
-	public boolean setImageOpen(String name, String img) {
-		return ltree.setImageOpen(name, img);
-	}
-
-	public boolean setImageClose(String name, String img) {
-		return ltree.setImageClose(name, img);
-	}
-
-	public boolean changeText(String name, String newname) {
-		return ltree.changeText(name, newname);
 	}
 
 	public boolean selectNode(String name) {
@@ -209,9 +140,9 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 		return true;
 	}
 
-	public boolean selectNodeAndOpen(String name) {
+	public void selectNodeAndOpen(String name) {
 		if (!selectNode(name)) {
-			return false;
+			return;
 		}
 		TreeNode x = selectedNode.parent;
 		while (x != null) {
@@ -219,35 +150,12 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 			x = x.parent;
 		}
 		validate2();
-		return true;
 	}
 
-	public void setNamesDelim(String delim) {
-		ltree.setNamesDelim(delim);
-	}
-
-	public TreeNode findNode(String name, String d) {
-		return ltree.findNode(name, d);
-	}
-
-// end add
-
-	// add new node to level 0
-	public void append(TreeNode newNode) {
-		ltree.append(newNode);
-		if (getRootNode() == null) {
-			selectedNode = getRootNode();
-		}
-	}
+	// end add
 
 	public void remove(String s) {
 		remove(getNode(s));
-	}
-
-	public void removeSelected() {
-		if (selectedNode != null) {
-			remove(selectedNode);
-		}
 	}
 
 	public void remove(TreeNode node) {
@@ -278,7 +186,7 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 		ltree.remove(node);
 	}
 
-	protected boolean checkScrolls() {
+	private boolean checkScrolls() {
 		if (!isVisible()) {
 			return false;
 		}
@@ -365,16 +273,7 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 		return (super.handleEvent(event));
 	}
 
-	public String getCaption(String name) {
-		TreeNode t = getNode(name);
-		if (t == null) {
-			return null;
-		}
-		return t.getCaption();
-	}
-
-	int mouse_down = 0;
-	long time = 0;
+	private long time = 0;
 
 	@Override
 	public boolean mouseUp(Event event, int x, int y) {
@@ -393,7 +292,6 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 		}
 		requestFocus();
 
-		mouse_down = 1;
 		boolean[] flags = new boolean[1];
 		changeSelection(event, x, y, true, flags);
 		if (!flags[0]) {
@@ -415,8 +313,7 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 		}
 		int index = getIndex(selectedNode);
 		int viewCount = getViewCount();
-		TreeNode f = null;
-		mouse_down = 0;
+		TreeNode f;
 		switch (key) {
 			case 10:
 				sendActionEvent(event);
@@ -501,7 +398,7 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 		int id = event.id;
 		Object arg = event.arg;
 		event.id = Event.ACTION_EVENT;
-		event.arg = new String(selectedNode.getText());
+		event.arg = selectedNode.getText();
 		postEvent(event);
 		event.id = id;
 		event.arg = arg;
@@ -519,21 +416,7 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 		return selectedNode.getText();
 	}
 
-	public TreeNode getNode(int x, int y) {
-		int index = ((Math.abs(posy) + y) / cellSize);
-		for (int i = 0; (i <= index) && (i < ltree.v.size()); ++i) {
-			TreeNode tmpNode = ltree.v.elementAt(i);
-			if (tmpNode.getHide()) {
-				++index;
-			}
-		}
-		if (index >= ltree.v.size()) {
-			return null;
-		}
-		return ltree.v.elementAt(index);
-	}
-
-	public boolean changeSelection(Event evt, int x, int y, boolean isToggle, boolean[] flags) {
+	void changeSelection(Event evt, int x, int y, boolean isToggle, boolean[] flags) {
 		requestFocus();
 
 		Dimension d = size();
@@ -546,7 +429,7 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 		int index2 = y / cellSize;
 		if (index2 > (viewCount - 1)) {
 			noChoice = true;
-			return false; //clicked below the last node
+			return; //clicked below the last node
 		}
 
 		for (int i = 0; (i <= index) && (i < ltree.v.size()); ++i) {
@@ -557,7 +440,7 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 		}
 
 		if (index >= ltree.v.size()) {
-			return false;
+			return;
 		}
 
 		TreeNode oldNode = selectedNode;
@@ -572,7 +455,7 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 
 			if ((rec.inside(x, y)) && (isToggle)) {
 				toggleEvent(newNode, newNode.isExpanded() ? 1 : 0);
-				return false;
+				return;
 			}
 		}
 
@@ -592,7 +475,7 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 
 		if ((x > x2) || (x < x1)) {
 			noChoice = true;
-			return false;
+			return;
 		}
 
 		if (newNode == oldNode) {
@@ -607,7 +490,7 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 
 		if ((evt.modifiers != 4) && (isToggle) && (newNode == oldNode)) {
 			toggleEvent(newNode, newNode.isExpanded() ? 0 : 1);
-			return false;
+			return;
 		}
 
 		if (newNode.getImage() != null) {
@@ -621,7 +504,6 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 			sendActionEvent(evt);
 		}
 
-		return false;
 	}
 
 	private void validate2() {
@@ -657,7 +539,7 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 		checkSelection(index);
 	}
 
-	protected void checkSelection(int index) {
+	private void checkSelection(int index) {
 		if (!sbV.isVisible() || (index < 0)) {
 			return;
 		}
@@ -697,12 +579,12 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 		g.drawRect(0, 0, d.width - 1, d.height - 1);
 	}
 
-	public void redraw() {
+	private void redraw() {
 		resetVector();
 		drawTree();
 	}
 
-	public void drawTree() {
+	private void drawTree() {
 		Dimension d = size();
 		if ((d.width != viewWidth) || (d.height != viewHeight) || (g1 == null)) {
 			if ((d.width * d.height) <= 0) {
@@ -729,10 +611,8 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 		}
 
 		//Make certain the graphics object has a font (Mac doesn't seem to)
-		if (f != null) {
-			if (g1.getFont() == null) {
-				g1.setFont(f);
-			}
+		if (g1.getFont() == null) {
+			g1.setFont(f);
 		}
 
 		sbV.isVisible();
@@ -856,8 +736,8 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 
 	private void drawNodeText(TreeNode node, int yPosition, boolean eraseBackground) {
 		String text = node.caption == null ? node.text : node.caption;
-		Color fg = null;
-		Color bg = null;
+		Color fg;
+		Color bg;
 		int textOffset = getTextPos(node);
 
 		if (node == selectedNode) {
@@ -872,19 +752,15 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 		fm.stringWidth(text);
 		if (eraseBackground) {
 			g1.setColor(bg);
-			if (styleMark != RECT_MARK) {
-				g1.fillRect(textOffset - 1, yPosition + 1, fm.stringWidth(text) + 4, cellSize - 1);
-				g1.setColor(fg);
-			}
-			else {
-				g1.setColor(Color.black);
-				g1.drawRect(textOffset - 1, yPosition + 1, fm.stringWidth(text) + 4, cellSize - 2);
-			}
+			g1.fillRect(textOffset - 1, yPosition + 1, fm.stringWidth(text) + 4, cellSize - 1);
+			g1.setColor(fg);
 		}
 		else {
 			g1.setColor(fg);
 		}
 
+		// position of font baseline from bottom of cell
+		int textBaseLine = 3;
 		g1.drawString(text, textOffset, (yPosition + cellSize) - textBaseLine);
 	}
 
@@ -899,16 +775,6 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 				g1.drawLine(x0, i, x1, i);
 			}
 		}
-	}
-
-	public void setTreeStructure(String s[]) {
-		ltree.setTreeStructure(s);
-		selectedNode = null;
-		invalidate();
-	}
-
-	public String[] getTreeStructure() {
-		return ltree.getTreeStructure();
 	}
 
 	@Override
@@ -930,37 +796,6 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 		ltree.setResolver(imgres);
 	}
 
-	public void show(String name) {
-		TreeNode t = getNode(name);
-		if (t != null) {
-			t.setHide(false);
-		}
-	}
-
-	public void hide(String name) {
-		TreeNode t = getNode(name);
-		if (t != null) {
-			t.setHide(true);
-		}
-		else {
-			return;
-		}
-
-		if ((t == selectedNode) && (fm != null)) {
-			correctSelect(t.parent);
-			return;
-		}
-
-		if (!isExpandable(t.parent)) {
-			t.parent.collapse();
-			if (fm != null) {
-				correctSelect(t.parent);
-			}
-		}
-
-		validate2();
-	}
-
 	private void correctSelect(TreeNode n) {
 		resetVector();
 		if ((selectedNode != null) && (ltree.v.indexOf(selectedNode) < 0)) {
@@ -968,15 +803,6 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 			Event event = new Event(this, 0, null);
 			sendActionEvent(event);
 		}
-	}
-
-	public void setCaption(String name, String caption) {
-		TreeNode t = getNode(name);
-		if (t == null) {
-			return;
-		}
-		t.setCaption(caption);
-		validate2();
 	}
 
 	private boolean isExpandable(TreeNode node) {
@@ -1033,7 +859,7 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 		validate2();
 	}
 
-	public boolean isHidden(String name) {
+	private boolean isHidden(String name) {
 		TreeNode t = getNode(name);
 		if (t == null) {
 			return false;
@@ -1059,45 +885,8 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 		validate2();
 	}
 
-	public TreeNode getNode2(String name) {
-		return ltree.getNode2(name);
-	}
-
-	protected int getNumChild(TreeNode parent) {
-		return ltree.getNumChild(parent);
-	}
-
-	protected TreeNode getChild(TreeNode parent, String nameChild) {
-		return ltree.getChild(parent, nameChild);
-	}
-
-	public TreeNode[] enumChild(String name) {
-		return ltree.enumChild(name);
-	}
-
 	public TreeNode[] enumChild(TreeNode tn) {
 		return ltree.enumChild(tn);
-	}
-
-	public static int NONE_FRAME = 0;
-	public static int LINE_FRAME = 1;
-
-	public void styleFrame(int style) {
-		repaint();
-	}
-
-	public static int RECT_MARK = 0;
-	public static int FILLRECT_MARK = 1;
-	private int styleMark = 1;
-
-	public void styleMark(int style) {
-		styleMark = style;
-		repaint();
-	}
-
-	public void insertNode(String top, String news, String before) {
-		ltree.insertNode(top, news, before);
-		repaint();
 	}
 
 	private boolean isExpanded(TreeNode node) {
@@ -1114,7 +903,7 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 		return false;
 	}
 
-	public int getViewCount() {
+	private int getViewCount() {
 		return ltree.getViewCount();
 	}
 
@@ -1134,29 +923,10 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 	}
 
 	@Override
-	public Point getSOLocation() {
-		return null;
-	}
-
-	@Override
-	public void setSOLocation(int x, int y) {
-	}
-
-	@Override
 	public Dimension getSOSize() {
 		int v = getViewCount();
 		Dimension r = new Dimension(getMaxWidth(), 0);
 		r.height = v * cellSize;
-		return r;
-	}
-
-	@Override
-	public Component getScrollComponent() {
-		return null;
-	}
-
-	public Rectangle getVisibleArea(Container c) {
-		Rectangle r = new Rectangle();
 		return r;
 	}
 
@@ -1192,7 +962,7 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 		validate2();
 	}
 
-	protected boolean scrollPages(int pages) {
+	private void scrollPages(int pages) {
 		int index = getIndex(selectedNode);
 		int height = viewHeight - ((sbH.isVisible()) ? ScrollController.SCROLL_SIZE : 0);
 		int lines = height / cellSize;
@@ -1210,17 +980,17 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 		}
 		changeSelection(ltree.v.elementAt(pg), pg);
 		repaint();
-		return vscroll(lines);
+		vscroll(lines);
 	}
 
-	protected boolean vscroll(int lines) {
+	private void vscroll(int lines) {
 		sbV.setValue(sbV.getValue() + lines);
 		int id = (lines < 0) ? Event.SCROLL_LINE_DOWN : Event.SCROLL_LINE_UP;
 		Event e = new Event(sbV, id, null);
-		return scroll(e);
+		scroll(e);
 	}
 
-	protected boolean scroll(Event e) {
+	private boolean scroll(Event e) {
 		boolean b = false;
 		if (e.target == sbV) {
 			if (sbV.isVisible()) {
@@ -1242,7 +1012,7 @@ public class SymTree extends Panel implements ScrollArea, ScrollObject {
 		return b;
 	}
 
-	protected int getTextPos(TreeNode node) {
+	private int getTextPos(TreeNode node) {
 		int depth = node.depth;
 		int textOffset = ((depth - 1) * (cellSize)) + cellSize + textInset + posx;
 		if (node.getImage() != null) {

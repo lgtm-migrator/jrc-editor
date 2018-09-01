@@ -24,50 +24,29 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
-import java.io.StringReader;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
 public class XmlElement {
-	static final long serialVersionUID = 6685035139346394777L;
-	public static final int NANOXML_MAJOR_VERSION = 2;
-	public static final int NANOXML_MINOR_VERSION = 2;
 
-	private Hashtable<String, String> attributes;
-	private Vector<XmlElement> children;
+	private final Hashtable<String, String> attributes;
+	private final Vector<XmlElement> children;
 	private String name;
 	private String contents;
-	private Hashtable<Object, Object> entities;
+	private final Hashtable<String, char[]> entities;
 
-	private int lineNr;
-	private boolean ignoreCase;
-	private boolean ignoreWhitespace;
+	private final boolean ignoreCase;
+	private final boolean ignoreWhitespace;
 	private char charReadTooMuch;
 	private Reader reader;
 	private int parserLineNr;
 
 	public XmlElement() {
-		this(new Hashtable(), false, true, true);
+		this(new Hashtable<>(), false, true, true);
 	}
 
-	public XmlElement(Hashtable entities) {
-		this(entities, false, true, true);
-	}
-
-	public XmlElement(boolean skipLeadingWhitespace) {
-		this(new Hashtable(), skipLeadingWhitespace, true, true);
-	}
-
-	public XmlElement(Hashtable entities, boolean skipLeadingWhitespace) {
-		this(entities, skipLeadingWhitespace, true, true);
-	}
-
-	public XmlElement(Hashtable entities, boolean skipLeadingWhitespace, boolean ignoreCase) {
-		this(entities, skipLeadingWhitespace, true, ignoreCase);
-	}
-
-	protected XmlElement(Hashtable<Object, Object> entities, boolean skipLeadingWhitespace, boolean fillBasicConversionTable,
+	private XmlElement(Hashtable<String, char[]> entities, boolean skipLeadingWhitespace, boolean fillBasicConversionTable,
 		boolean ignoreCase) {
 		this.ignoreWhitespace = skipLeadingWhitespace;
 		this.ignoreCase = ignoreCase;
@@ -76,16 +55,6 @@ public class XmlElement {
 		this.attributes = new Hashtable<>();
 		this.children = new Vector<>();
 		this.entities = entities;
-		this.lineNr = 0;
-		Enumeration<Object> e = this.entities.keys();
-		while (e.hasMoreElements()) {
-			Object key = e.nextElement();
-			Object value = this.entities.get(key);
-			if (value instanceof String) {
-				value = ((String) value).toCharArray();
-				this.entities.put(key, value);
-			}
-		}
 		if (fillBasicConversionTable) {
 			this.entities.put("amp", new char[] { '&' });
 			this.entities.put("quot", new char[] { '"' });
@@ -95,104 +64,40 @@ public class XmlElement {
 		}
 	}
 
-	public void addChild(XmlElement child) {
+	private void addChild(XmlElement child) {
 		this.children.addElement(child);
 	}
 
-	public void setAttribute(String name, Object value) {
+	private void setAttribute(String name, Object value) {
 		if (this.ignoreCase) {
 			name = name.toLowerCase();
 		}
 		this.attributes.put(name, value.toString());
 	}
 
-	public int countChildren() {
-		return this.children.size();
-	}
-
-	public Enumeration<String> enumerateAttributeNames() {
-		return this.attributes.keys();
-	}
-
 	public Enumeration<XmlElement> enumerateChildren() {
 		return this.children.elements();
-	}
-
-	public Vector<XmlElement> getChildren() {
-		try {
-			return (Vector<XmlElement>) this.children.clone();
-		}
-		catch (Exception e) {
-			// this never happens, however, some Java compilers are so
-			// braindead that they require this exception clause
-			return null;
-		}
-	}
-
-	public String getContents() {
-		return this.getContent();
 	}
 
 	public String getContent() {
 		return this.contents;
 	}
 
-	public int getLineNr() {
-		return this.lineNr;
-	}
-
 	public Object getAttribute(String name) {
-		return this.getAttribute(name, null);
-	}
-
-	public Object getAttribute(String name, Object defaultValue) {
 		if (this.ignoreCase) {
 			name = name.toLowerCase();
 		}
-		Object value = this.attributes.get(name);
-		if (value == null) {
-			value = defaultValue;
-		}
-		return value;
-	}
-
-	public Object getAttribute(String name, Hashtable valueSet, String defaultKey, boolean allowLiterals) {
-		if (this.ignoreCase) {
-			name = name.toLowerCase();
-		}
-		String key = this.attributes.get(name);
-		Object result;
-		if (key == null) {
-			key = defaultKey;
-		}
-		result = valueSet.get(key);
-		if (result == null) {
-			if (allowLiterals) {
-				result = key;
-			}
-			else {
-				throw this.invalidValue(name, key);
-			}
-		}
-		return result;
+		return this.attributes.get(name);
 	}
 
 	public String getName() {
 		return this.name;
 	}
 
-	public String getTagName() {
-		return this.getName();
-	}
-
 	public void parse(Reader reader) throws IOException, XmlParseException {
-		this.parse(reader, /*startingLineNr*/ 1);
-	}
-
-	public void parse(Reader reader, int startingLineNr) throws IOException, XmlParseException {
 		this.charReadTooMuch = '\0';
 		this.reader = reader;
-		this.parserLineNr = startingLineNr;
+		this.parserLineNr = 1;
 
 		for (;;) {
 			char ch = this.scanWhitespace();
@@ -214,42 +119,15 @@ public class XmlElement {
 		}
 	}
 
-	public void parse(String string) throws XmlParseException {
-		try {
-			this.parse(new StringReader(string), 1);
-		}
-		catch (IOException e) {
-		}
-	}
-
-	public void removeChild(XmlElement child) {
-		this.children.removeElement(child);
-	}
-
-	public void removeAttribute(String name) {
-		if (this.ignoreCase) {
-			name = name.toLowerCase();
-		}
-		this.attributes.remove(name);
-	}
-
-	public void removeChild(String name) {
-		this.removeAttribute(name);
-	}
-
-	protected XmlElement createAnotherElement() {
+	private XmlElement createAnotherElement() {
 		return new XmlElement(this.entities, this.ignoreWhitespace, false, this.ignoreCase);
 	}
 
-	public void setContent(String content) {
+	private void setContent(String content) {
 		this.contents = content;
 	}
 
-	public void setTagName(String name) {
-		this.setName(name);
-	}
-
-	public void setName(String name) {
+	private void setName(String name) {
 		this.name = name;
 	}
 
@@ -267,7 +145,7 @@ public class XmlElement {
 		}
 	}
 
-	public void write(PrintStream writer) throws IOException {
+	private void write(PrintStream writer) {
 		if (this.name == null) {
 			this.writeEncoded(writer, this.contents);
 			return;
@@ -275,12 +153,10 @@ public class XmlElement {
 		writer.print('<');
 		writer.print(this.name);
 		if (!this.attributes.isEmpty()) {
-			Enumeration<String> e = this.attributes.keys();
-			while (e.hasMoreElements()) {
+			for (String s : this.attributes.keySet()) {
 				writer.print(' ');
-				String key = e.nextElement();
-				String value = this.attributes.get(key);
-				writer.print(key);
+				String value = this.attributes.get(s);
+				writer.print(s);
 				writer.print('=');
 				writer.write('"');
 				this.writeEncoded(writer, value);
@@ -313,7 +189,7 @@ public class XmlElement {
 		}
 	}
 
-	protected void writeEncoded(PrintStream writer, String str) {
+	private void writeEncoded(PrintStream writer, String str) {
 		for (int i = 0; i < str.length(); i += 1) {
 			char ch = str.charAt(i);
 			switch (ch) {
@@ -353,12 +229,11 @@ public class XmlElement {
 					writer.write(';');
 					break;
 				default:
-					int unicode = ch;
-					if ((unicode < 32) || (unicode > 126)) {
+					if (((int) ch < 32) || ((int) ch > 126)) {
 						writer.write('&');
 						writer.write('#');
 						writer.write('x');
-						writer.print(Integer.toString(unicode, 16));
+						writer.print(Integer.toString((int) ch, 16));
 						writer.write(';');
 					}
 					else {
@@ -368,7 +243,7 @@ public class XmlElement {
 		}
 	}
 
-	protected void scanIdentifier(StringBuffer result) throws IOException {
+	private void scanIdentifier(StringBuffer result) throws IOException {
 		for (;;) {
 			char ch = this.readChar();
 			if (((ch < 'A') || (ch > 'Z'))
@@ -386,7 +261,7 @@ public class XmlElement {
 		}
 	}
 
-	protected char scanWhitespace() throws IOException {
+	private char scanWhitespace() throws IOException {
 		for (;;) {
 			char ch = this.readChar();
 			switch (ch) {
@@ -401,7 +276,7 @@ public class XmlElement {
 		}
 	}
 
-	protected char scanWhitespace(StringBuffer result) throws IOException {
+	private char scanWhitespace(StringBuffer result) throws IOException {
 		for (;;) {
 			char ch = this.readChar();
 			switch (ch) {
@@ -417,7 +292,7 @@ public class XmlElement {
 		}
 	}
 
-	protected void scanString(StringBuffer string) throws IOException {
+	private void scanString(StringBuffer string) throws IOException {
 		char delimiter = this.readChar();
 		if ((delimiter != '\'') && (delimiter != '"')) {
 			throw this.expectedInput("' or \"");
@@ -436,7 +311,7 @@ public class XmlElement {
 		}
 	}
 
-	protected void scanPCData(StringBuffer data) throws IOException {
+	private void scanPCData(StringBuffer data) throws IOException {
 		for (;;) {
 			char ch = this.readChar();
 			if (ch == '<') {
@@ -458,7 +333,7 @@ public class XmlElement {
 		}
 	}
 
-	protected boolean checkCDATA(StringBuffer buf) throws IOException {
+	private boolean checkCDATA(StringBuffer buf) throws IOException {
 		char ch = this.readChar();
 		if (ch != '[') {
 			this.unreadChar(ch);
@@ -508,7 +383,7 @@ public class XmlElement {
 		}
 	}
 
-	protected void skipComment() throws IOException {
+	private void skipComment() throws IOException {
 		int dashesToRead = 2;
 		while (dashesToRead > 0) {
 			char ch = this.readChar();
@@ -524,7 +399,7 @@ public class XmlElement {
 		}
 	}
 
-	protected void skipSpecialTag(int bracketLevel) throws IOException {
+	private void skipSpecialTag(int bracketLevel) throws IOException {
 		int tagLevel = 1; // <
 		char stringDelimiter = '\0';
 		if (bracketLevel == 0) {
@@ -575,7 +450,7 @@ public class XmlElement {
 		}
 	}
 
-	protected boolean checkLiteral(String literal) throws IOException {
+	private boolean checkLiteral(String literal) throws IOException {
 		int length = literal.length();
 		for (int i = 0; i < length; i += 1) {
 			if (this.readChar() != literal.charAt(i)) {
@@ -585,7 +460,7 @@ public class XmlElement {
 		return true;
 	}
 
-	protected char readChar() throws IOException {
+	private char readChar() throws IOException {
 		if (this.charReadTooMuch != '\0') {
 			char ch = this.charReadTooMuch;
 			this.charReadTooMuch = '\0';
@@ -606,7 +481,7 @@ public class XmlElement {
 		}
 	}
 
-	protected void scanElement(XmlElement elt) throws IOException {
+	private void scanElement(XmlElement elt) throws IOException {
 		StringBuffer buf = new StringBuffer();
 		this.scanIdentifier(buf);
 		String name = buf.toString();
@@ -711,8 +586,8 @@ public class XmlElement {
 		}
 	}
 
-	protected void resolveEntity(StringBuffer buf) throws IOException {
-		char ch = '\0';
+	private void resolveEntity(StringBuffer buf) throws IOException {
+		char ch;
 		StringBuilder keyBuf = new StringBuilder();
 		for (;;) {
 			ch = this.readChar();
@@ -737,7 +612,7 @@ public class XmlElement {
 			buf.append(ch);
 		}
 		else {
-			char[] value = (char[]) this.entities.get(key);
+			char[] value = this.entities.get(key);
 			if (value == null) {
 				throw this.unknownEntity(key);
 			}
@@ -745,36 +620,21 @@ public class XmlElement {
 		}
 	}
 
-	protected void unreadChar(char ch) {
+	private void unreadChar(char ch) {
 		this.charReadTooMuch = ch;
 	}
 
-	protected XmlParseException invalidValueSet(String name) {
-		String msg = "Invalid value set (entity name = \"" + name + "\")";
-		return new XmlParseException(this.getName(), this.parserLineNr, msg);
-	}
-
-	protected XmlParseException invalidValue(String name, String value) {
-		String msg = "Attribute \"" + name + "\" does not contain a valid " + "value (\"" + value + "\")";
-		return new XmlParseException(this.getName(), this.parserLineNr, msg);
-	}
-
-	protected XmlParseException unexpectedEndOfData() {
+	private XmlParseException unexpectedEndOfData() {
 		String msg = "Unexpected end of data reached";
 		return new XmlParseException(this.getName(), this.parserLineNr, msg);
 	}
 
-	protected XmlParseException syntaxError(String context) {
-		String msg = "Syntax error while parsing " + context;
-		return new XmlParseException(this.getName(), this.parserLineNr, msg);
-	}
-
-	protected XmlParseException expectedInput(String charSet) {
+	private XmlParseException expectedInput(String charSet) {
 		String msg = "Expected: " + charSet;
 		return new XmlParseException(this.getName(), this.parserLineNr, msg);
 	}
 
-	protected XmlParseException unknownEntity(String name) {
+	private XmlParseException unknownEntity(String name) {
 		String msg = "Unknown or invalid entity: &" + name + ";";
 		return new XmlParseException(this.getName(), this.parserLineNr, msg);
 	}

@@ -32,15 +32,14 @@ import java.awt.LayoutManager;
 import java.awt.Panel;
 import java.awt.Toolkit;
 
-import org.zaval.awt.ExGridLayout;
 import org.zaval.awt.IELabel;
 
-public class LangDialog extends Dialog {
-	private java.awt.List edit;
-	private Button ok, cancel;
+class LangDialog extends Dialog {
+	private final java.awt.List edit;
+	private final Button ok, cancel;
 	private boolean isApply;
-	private Component listener;
-	private IELabel label;
+	private final Component listener;
+	private final IELabel label;
 
 	public LangDialog(Frame f, String s, boolean b, Component l) {
 		super(f, s, b);
@@ -66,7 +65,7 @@ public class LangDialog extends Dialog {
 	}
 
 	public void setList(LangItem[] t) {
-		edit.clear();
+		edit.removeAll();
 		if (t == null) {
 			return;
 		}
@@ -110,13 +109,13 @@ public class LangDialog extends Dialog {
 		return isApply;
 	}
 
-	public void toCenter() {
+	private void toCenter() {
 		Dimension s = Toolkit.getDefaultToolkit().getScreenSize();
 		Dimension d = getSize();
 		move((s.width - d.width) / 2, (s.height - d.height) / 2);
 	}
 
-	static public void constrain(Container c, Component p, int x, int y, int w, int h, int f, int a, double wx, double wy, int t, int l,
+	static private void constrain(Container c, Component p, int x, int y, int w, int h, int f, int a, double wx, double wy, int t, int l,
 		int r, int b) {
 		GridBagConstraints cc = new GridBagConstraints();
 
@@ -138,19 +137,7 @@ public class LangDialog extends Dialog {
 			GridBagLayout gbl = (GridBagLayout) lm;
 			gbl.setConstraints(p, cc);
 		}
-		else if (lm instanceof ExGridLayout) {
-			ExGridLayout gbl = (ExGridLayout) lm;
-			gbl.setConstraints(p, cc);
-		}
 		c.add(p);
-	}
-
-	static public void constrain(Container c, Component p, int x, int y, int w, int h) {
-		constrain(c, p, x, y, w, h, GridBagConstraints.NONE, GridBagConstraints.NORTHWEST, 1.0, 1.0, 0, 0, 5, 3);
-	}
-
-	static public void constrain(Container c, Component p, int x, int y, int w, int h, int f, int a) {
-		constrain(c, p, x, y, w, h, f, a, 1.0, 1.0, 0, 0, 5, 3);
 	}
 
 	@Override
@@ -176,10 +163,9 @@ public class LangDialog extends Dialog {
 		return d;
 	}
 
-	public boolean doModal() {
+	public void doModal() {
 		pack();
 		toCenter();
 		show();
-		return true;
 	}
 }

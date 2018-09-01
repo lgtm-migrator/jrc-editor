@@ -21,12 +21,6 @@ import java.awt.Color;
 import java.awt.Graphics;
 
 public class IERadioButton extends BaseCheckbox {
-	public IERadioButton() {
-	}
-
-	public IERadioButton(boolean state) {
-		this(null, state);
-	}
 
 	public IERadioButton(String label, boolean state) {
 		setState(state);

@@ -25,26 +25,17 @@ import java.awt.LayoutManager;
 import java.awt.Panel;
 
 public class StatusBar extends Panel implements LayoutManager {
-	public static final int FULL = 1;
+	private static final int FULL = 1;
 
-	private Insets insets = new Insets(2, 1, 0, -1);
-	private int hgap = 2;
-	private int fill = 0;
+	private final Insets insets = new Insets(2, 1, 0, -1);
+	private final int hgap = 2;
 
 	public StatusBar() {
 		setLayout(this);
 	}
 
-	public int getFill() {
-		return fill;
-	}
-
-	public void setFill(int f) {
-		if (fill == f) {
-			return;
-		}
-		fill = f;
-		invalidate();
+	private int getFill() {
+		return 0;
 	}
 
 	@Override
@@ -87,7 +78,7 @@ public class StatusBar extends Panel implements LayoutManager {
 	public void removeLayoutComponent(Component comp) {
 	}
 
-	protected int getActualHeight(Container parent) {
+	private int getActualHeight(Container parent) {
 		Component[] cc = parent.getComponents();
 		int ah = 0;
 		for (Component element : cc) {
@@ -99,10 +90,10 @@ public class StatusBar extends Panel implements LayoutManager {
 		return ah;
 	}
 
-	protected int[] getActualWidths(Container parent) {
+	private int[] getActualWidths(Container parent) {
 		Dimension ds = parent.size();
 		Component[] cc = parent.getComponents();
-		int aw = 0, j = 0;
+		int aw = 0, j;
 		int[] widths = new int[cc.length];
 		int xx = insets.left + (hgap * (cc.length - 1));
 

@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 class SrcGenerator {
-	private PrintStream out = null;
-	private String filename = null;
+	private PrintStream out;
+	private String filename;
 
 	SrcGenerator(String filename) throws IOException {
 		FileOutputStream fop = new FileOutputStream(filename);
@@ -31,7 +31,7 @@ class SrcGenerator {
 		this.filename = filename;
 	}
 
-	void perform(BundleSet set) throws IOException {
+	void perform(BundleSet set) {
 		out.println("import java.util.*;\n\npublic class " + baseName(filename) + "\n{");
 		int j, k = set.getItemCount();
 		for (j = 0; j < k; ++j) {
@@ -95,9 +95,6 @@ class SrcGenerator {
 			return s;
 		}
 		int j2 = s.lastIndexOf('.', j1 - 1);
-		if (j2 < 0) {
-			j2 = -1;
-		}
 		s = s.substring(j2 + 1, j1) + capitalize(s.substring(j1 + 1));
 		return s;
 	}

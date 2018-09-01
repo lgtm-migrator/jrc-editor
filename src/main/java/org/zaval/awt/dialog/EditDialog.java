@@ -36,15 +36,14 @@ import java.awt.Toolkit;
 import java.util.Vector;
 
 import org.zaval.awt.EmulatedTextField;
-import org.zaval.awt.ExGridLayout;
 import org.zaval.awt.IELabel;
 
 public class EditDialog extends Dialog implements java.awt.event.AWTEventListener {
-	private EmulatedTextField edit;
-	private Button ok, cancel;
+	private final EmulatedTextField edit;
+	private final Button ok, cancel;
 	private boolean isApply;
-	private Component listener;
-	private IELabel label;
+	private final Component listener;
+	private final IELabel label;
 
 	public EditDialog(Frame f, String s, boolean b, Component l) {
 		super(f, s, b);
@@ -110,13 +109,13 @@ public class EditDialog extends Dialog implements java.awt.event.AWTEventListene
 		return isApply;
 	}
 
-	public void toCenter() {
+	private void toCenter() {
 		Dimension s = Toolkit.getDefaultToolkit().getScreenSize();
 		Dimension d = getSize();
 		move((s.width - d.width) / 2, (s.height - d.height) / 2);
 	}
 
-	static public void constrain(Container c, Component p, int x, int y, int w, int h, int f, int a, double wx, double wy, int t, int l,
+	protected static void constrain(Container c, Component p, int x, int y, int w, int h, int f, int a, double wx, double wy, int t, int l,
 		int r, int b) {
 		GridBagConstraints cc = new GridBagConstraints();
 
@@ -138,19 +137,7 @@ public class EditDialog extends Dialog implements java.awt.event.AWTEventListene
 			GridBagLayout gbl = (GridBagLayout) lm;
 			gbl.setConstraints(p, cc);
 		}
-		else if (lm instanceof ExGridLayout) {
-			ExGridLayout gbl = (ExGridLayout) lm;
-			gbl.setConstraints(p, cc);
-		}
 		c.add(p);
-	}
-
-	static public void constrain(Container c, Component p, int x, int y, int w, int h) {
-		constrain(c, p, x, y, w, h, GridBagConstraints.NONE, GridBagConstraints.NORTHWEST, 1.0, 1.0, 0, 0, 5, 3);
-	}
-
-	static public void constrain(Container c, Component p, int x, int y, int w, int h, int f, int a) {
-		constrain(c, p, x, y, w, h, f, a, 1.0, 1.0, 0, 0, 5, 3);
 	}
 
 	@Override
@@ -174,14 +161,13 @@ public class EditDialog extends Dialog implements java.awt.event.AWTEventListene
 		}
 	}
 
-	public boolean doModal() {
+	public void doModal() {
 		Toolkit.getDefaultToolkit().addAWTEventListener(this, AWTEvent.KEY_EVENT_MASK);
 		pack();
 		toCenter();
 		edit.requestFocus();
 		show();
 		Toolkit.getDefaultToolkit().removeAWTEventListener(this);
-		return isApply();
 	}
 
 	private boolean moveFocus() {
@@ -230,8 +216,10 @@ public class EditDialog extends Dialog implements java.awt.event.AWTEventListene
 		for (j = 0; j < k; ++j) {
 			Component c = cc.getComponent(j);
 			if (c instanceof Label) {
+				// ignore
 			}
 			else if (c instanceof IELabel) {
+				// ignore
 			}
 			else if (c instanceof Container) {
 				linearize((Container) c, v);

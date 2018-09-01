@@ -29,18 +29,18 @@ import org.zaval.awt.IECheckbox;
 import org.zaval.awt.IERadioButton;
 import org.zaval.awt.dialog.EditDialog;
 
-public class SearchDialog extends EditDialog {
-	IERadioButton inKeys;
-	IERadioButton inVals;
+class SearchDialog extends EditDialog {
+	private final IERadioButton inKeys;
+	private final IERadioButton inVals;
 
-	IERadioButton regex;
-	IERadioButton mask;
-	IERadioButton exact;
+	private final IERadioButton regex;
+	private final IERadioButton mask;
+	private final IERadioButton exact;
 
-	IECheckbox cases;
+	private final IECheckbox cases;
 
-	IERadioButton cg1[];
-	IERadioButton cg2[];
+	private final IERadioButton cg1[];
+	private final IERadioButton cg2[];
 
 	public void setKVGroupLabels(String s1, String s2) {
 		inKeys.setLabel(s1);
@@ -59,14 +59,6 @@ public class SearchDialog extends EditDialog {
 
 	public boolean isKeyMatching() {
 		return inKeys.getState();
-	}
-
-	public boolean isDataMatching() {
-		return inVals.getState();
-	}
-
-	public boolean isExactMatching() {
-		return exact.getState();
 	}
 
 	public boolean isMaskMatching() {

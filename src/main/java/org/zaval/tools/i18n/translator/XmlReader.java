@@ -18,8 +18,6 @@
 package org.zaval.tools.i18n.translator;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -28,20 +26,11 @@ import org.zaval.xml.XmlElement;
 import org.zaval.xml.XmlParseException;
 
 class XmlReader {
-	private XmlElement xml;
-
-	public XmlReader(InputStream in) throws IOException, XmlParseException {
-		xml = new XmlElement();
-		xml.parse(new InputStreamReader(in));
-	}
+	private final XmlElement xml;
 
 	public XmlReader(String body) throws IOException, XmlParseException {
 		xml = new XmlElement();
 		xml.parse(new StringReader(body));
-	}
-
-	public XmlElement getRootNode() {
-		return xml;
 	}
 
 	public Hashtable<String, String> getTable() {
@@ -56,9 +45,6 @@ class XmlReader {
 
 	private void getTable(Hashtable<String, String> place, XmlElement root, String prefix) {
 		String xmap = (String) root.getAttribute("lang");
-		if (xmap != null) {
-			xmap = xmap;
-		}
 		if (xmap == null) {
 			xmap = (String) root.getAttribute("name");
 		}

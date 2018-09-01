@@ -20,7 +20,7 @@ package org.zaval.awt;
 import java.awt.Dimension;
 import java.awt.Scrollbar;
 
-public interface ScrollArea {
+interface ScrollArea {
 	Dimension getSASize();
 
 	Scrollbar getVBar();

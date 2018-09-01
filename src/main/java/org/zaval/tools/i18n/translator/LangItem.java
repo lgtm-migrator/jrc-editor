@@ -18,8 +18,8 @@
 package org.zaval.tools.i18n.translator;
 
 class LangItem {
-	private String lng;
-	private String desc;
+	private final String lng;
+	private final String desc;
 	private String fname;
 
 	LangItem(String lng, String dsc) {
@@ -37,10 +37,6 @@ class LangItem {
 
 	String getLangFile() {
 		return fname;
-	}
-
-	void setLangDescription(String s) {
-		this.desc = s;
 	}
 
 	void setLangFile(String s) {

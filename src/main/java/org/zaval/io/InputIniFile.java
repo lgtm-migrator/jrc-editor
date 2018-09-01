@@ -17,74 +17,29 @@
 
 package org.zaval.io;
 
-import java.io.DataInputStream;
-import java.io.FileInputStream;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 
 public class InputIniFile {
-	private Hashtable<String, String> hash;
-	private DataInputStream in;
-	private String name;
+	private final Hashtable<String, String> hash = new Hashtable<>();
+	private String postponed = null;
 
 	public Hashtable<String, String> getTable() {
 		return hash;
 	}
 
-	public InputIniFile(String name) throws IOException {
-		this.name = name;
-		in = new DataInputStream(new FileInputStream(name));
-		hash = new Hashtable<>();
-		load();
+	public InputIniFile(String path) throws IOException {
+		load(path);
 	}
 
-	public InputIniFile(InputStream in) throws IOException {
-		this.name = in.toString();
-		this.in = new DataInputStream(in);
-		hash = new Hashtable<>();
-		load();
-	}
-
-	public synchronized String getString(String key) {
-		return hash.get(key);
-	}
-
-	public int getInt(String key) throws IOException {
-		try {
-			return Integer.parseInt(getString(key));
-		}
-		catch (NumberFormatException e) {
-			return 0;
-		}
-	}
-
-	public boolean getBoolean(String key) throws IOException {
-		String s = getString(key);
-		if ("True".equalsIgnoreCase(s)) {
-			return true;
-		}
-		if ("On".equalsIgnoreCase(s)) {
-			return true;
-		}
-		return "1".equals(s);
-	}
-
-	public synchronized void close() throws IOException {
-		if (in != null) {
-			in.close();
-		}
-		in = null;
-	}
-
-	private String postponed = null;
-
-	private String readLine(DataInputStream in) throws IOException {
+	private String readLine(BufferedReader in) throws IOException {
 		String x = postponed == null ? in.readLine() : postponed;
 		postponed = null;
 		if (x == null) {
-			return x;
+			return null;
 		}
 		x = x.trim();
 
@@ -119,17 +74,19 @@ public class InputIniFile {
 		return x;
 	}
 
-	private void load() throws IOException {
-		String line = null;
-		while ((line = readLine(in)) != null) {
-			StringTokenizer st = new StringTokenizer(line, "=", true); // key = value
-			if (st.countTokens() < 3) {
-				continue; // syntax error, ignored
+	private void load(String path) throws IOException {
+		try (BufferedReader in = new BufferedReader(new FileReader(path))) {
+			String line;
+			while ((line = readLine(in)) != null) {
+				StringTokenizer st = new StringTokenizer(line, "=", true); // key = value
+				if (st.countTokens() < 3) {
+					continue; // syntax error, ignored
+				}
+				String key = st.nextToken().trim();
+				st.nextToken(); // '='
+				String value = st.nextToken("").trim();
+				hash.put(key, value);
 			}
-			String key = st.nextToken().trim();
-			st.nextToken(); // '='
-			String value = st.nextToken("").trim();
-			hash.put(key, value);
 		}
 	}
 }

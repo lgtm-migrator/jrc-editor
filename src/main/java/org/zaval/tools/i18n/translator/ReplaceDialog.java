@@ -31,16 +31,16 @@ import org.zaval.awt.IELabel;
 import org.zaval.awt.IERadioButton;
 import org.zaval.awt.dialog.EditDialog;
 
-public class ReplaceDialog extends EditDialog {
-	IERadioButton regex;
-	IERadioButton exact;
-	IERadioButton cg2[];
+class ReplaceDialog extends EditDialog {
+	private final IERadioButton regex;
+	private final IERadioButton exact;
+	private final IERadioButton cg2[];
 
-	IECheckbox cases;
-	IECheckbox prompt;
-	IECheckbox all;
-	EmulatedTextField replaceTo;
-	IELabel label;
+	private final IECheckbox cases;
+	private final IECheckbox prompt;
+	private final IECheckbox all;
+	private final EmulatedTextField replaceTo;
+	private final IELabel label;
 
 	public void setReplaceLabel(String s) {
 		label.setText(s);
@@ -55,10 +55,6 @@ public class ReplaceDialog extends EditDialog {
 		cases.setLabel(s1);
 		prompt.setLabel(s2);
 		all.setLabel(s3);
-	}
-
-	public boolean isExactMatching() {
-		return exact.getState();
 	}
 
 	public boolean isRegexMatching() {

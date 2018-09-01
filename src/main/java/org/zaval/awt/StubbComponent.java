@@ -23,8 +23,8 @@ import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.Graphics;
 
-public class StubbComponent extends Canvas {
-	private int size = 16;
+class StubbComponent extends Canvas {
+	private final int size = 16;
 
 	@Override
 	public Dimension preferredSize() {
@@ -35,20 +35,12 @@ public class StubbComponent extends Canvas {
 		setBackground(Color.lightGray);
 	}
 
-	public void setSize(int s) {
-		if (size == s) {
-			return;
-		}
-		size = s;
-		invalidate();
-	}
-
 	@Override
 	public void paint(Graphics g) {
 		draw(g);
 	}
 
-	protected void draw(Graphics g) {
+	private void draw(Graphics g) {
 		Dimension d = size();
 		g.setColor(Color.lightGray);
 		g.fillRect(0, 0, d.width, d.height);

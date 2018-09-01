@@ -25,8 +25,8 @@ import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Rectangle;
 
-public class ScrollLayout implements LayoutManager {
-	protected Component hs, vs, stubb, center;
+class ScrollLayout implements LayoutManager {
+	private Component hs, vs, stubb, center;
 
 	public ScrollLayout() {
 		super();
@@ -54,7 +54,7 @@ public class ScrollLayout implements LayoutManager {
 		}
 	}
 
-	protected Insets getInsets(Container c) {
+	private Insets getInsets(Container c) {
 		return c.insets();
 	}
 
@@ -140,7 +140,7 @@ public class ScrollLayout implements LayoutManager {
 		}
 
 		if ((center != null) && center.isVisible()) {
-			layoutCenter(parent, left, top, right - left, bottom - top);
+			layoutCenter(left, top, right - left, bottom - top);
 		}
 
 		if (hb && vb) {
@@ -176,7 +176,7 @@ public class ScrollLayout implements LayoutManager {
 		return d;
 	}
 
-	protected void layoutCenter(Container cont, int x, int y, int w, int h) {
+	private void layoutCenter(int x, int y, int w, int h) {
 		center.reshape(x, y, w, h);
 	}
 }

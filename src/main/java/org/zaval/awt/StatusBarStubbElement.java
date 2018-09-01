@@ -27,10 +27,6 @@ public class StatusBarStubbElement extends StatusBarElement {
 		super(c, p, pref);
 	}
 
-	public StatusBarStubbElement(Component c, int p) {
-		this(c, p, null);
-	}
-
 	@Override
 	public void paint(Graphics gr) {
 		super.paint(gr);

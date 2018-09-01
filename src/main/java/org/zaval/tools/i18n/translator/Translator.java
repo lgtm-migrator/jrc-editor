@@ -55,12 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.StringReader;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Locale;
-import java.util.StringTokenizer;
-import java.util.Vector;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -91,19 +86,16 @@ import org.zaval.io.IniFile;
 import org.zaval.io.InputIniFile;
 import org.zaval.util.SafeResourceBundle;
 
-public class Translator extends Frame implements TranslatorConstants, java.awt.event.AWTEventListener {
+class Translator extends Frame implements TranslatorConstants, java.awt.event.AWTEventListener {
 	private MessageBox2 closeDialog = null;
 	private MessageBox2 delDialog = null;
 	private MessageBox2 errDialog = null;
 	private MessageBox2 repDialog = null;
 
 	private EmulatedTextField keyName = null;
-	private IELabel keyLabel = null;
 	private Button keyInsertButton = null;
 	private Button keyDeleteButton = null;
 	private Button dropComment = null;
-	private GridBagLayout textLayout = null;
-	private IELabel commLab = null;
 	private IELabel keynLab = null;
 	private GraphTree tree = null;
 	private Panel textPanel = null;
@@ -128,7 +120,6 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 	private MenuItem expandTreeMenu, collapseTreeMenu, expandNodeMenu, collapseNodeMenu;
 	private CheckboxMenuItem hideTransMenu;
 	private MenuItem statisticsMenu;
-	private Menu optionsMenu;
 	private CheckboxMenuItem showNullsMenu;
 
 	// Options
@@ -146,16 +137,16 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 	private String wasSelectedKey = null;
 	private String SYS_DIR;
 	private BundleManager bundle = new BundleManager();
-	private Panel pane = new Panel();
+	private final Panel pane = new Panel();
 	private Toolbar tool;
 	private SimpleScrollPanel scrPanel;
 
-	private String[] CLOSE_BUTTONS = new String[3];
-	private String[] YESNO_BUTTONS = new String[2];
-	private String[] DELETE_BUTTONS = new String[3];
-	private String[] DELETE_BUTTONS2 = new String[2];
-	private String[] DELETE_BUTTONS3 = new String[2];
-	private String[] REPLACE_BUTTONS = new String[3];
+	private final String[] CLOSE_BUTTONS = new String[3];
+	private final String[] YESNO_BUTTONS = new String[2];
+	private final String[] DELETE_BUTTONS = new String[3];
+	private final String[] DELETE_BUTTONS2 = new String[2];
+	private final String[] DELETE_BUTTONS3 = new String[2];
+	private final String[] REPLACE_BUTTONS = new String[3];
 
 	private MenuItem[] tbar2menu;
 
@@ -177,7 +168,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 	private BundleItem curItemForReplace = null;
 	private LangItem curLangForReplace = null;
 
-	private Vector<Component> tabOrder = new Vector<>();
+	private final Vector<Component> tabOrder = new Vector<>();
 
 	public Translator(String s, SafeResourceBundle res) {
 		init(s, res);
@@ -270,7 +261,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		GridBagLayout gbl = new GridBagLayout();
 		Panel keyPanel = new Panel(gbl);
 
-		keyLabel = new IELabel(RC("tools.translator.label.key"));
+		IELabel keyLabel = new IELabel(RC("tools.translator.label.key"));
 		constrain(keyPanel, keyLabel, 0, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, 0.0, 0.0, 5, 5, 5, 5);
 
 		keyName = new EmulatedTextField();
@@ -294,7 +285,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		mainPanel.add(tree);
 		mainPanel.add(scrPanel);
 		mainPanel.add(rss);
-		textLayout = new GridBagLayout();
+		GridBagLayout textLayout = new GridBagLayout();
 		textPanel.setLayout(textLayout);
 
 		tabOrder.add(tree);
@@ -341,7 +332,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		showNullsMenu = new CheckboxMenuItem(RC("tools.translator.menu.nulls"), false);
 		langMenu = new Menu(RC("tools.translator.menu.showres"));
 		langMenu.disable();
-		optionsMenu = new Menu/*Item*/(RC("tools.translator.menu.options"));
+		Menu optionsMenu = new Menu/*Item*/(RC("tools.translator.menu.options"));
 		keepLastDirMenu = new CheckboxMenuItem(RC("tools.translator.menu.options.keeplastdir"), true);
 		omitSpacesMenu = new CheckboxMenuItem(RC("tools.translator.menu.options.omitspaces"), true);
 		autoExpandTFMenu = new CheckboxMenuItem(RC("tools.translator.menu.options.autofit"), true);
@@ -463,7 +454,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		String[] OK_BUT = { RC("dialog.button.ok") };
 		errDialog.setButtons(OK_BUT);
 
-		MenuItem[] _tbar2menu = {
+		tbar2menu = new MenuItem[] {
 			newBundleMenu,
 			openBundleMenu,
 			saveBundleMenu,
@@ -473,7 +464,6 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			newLangMenu,
 			delMenu,
 			aboutMenu };
-		tbar2menu = _tbar2menu;
 	}
 
 	@Override
@@ -685,9 +675,6 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		}
 		if (e.target == aboutMenu) {
 			onAbout();
-		}
-		if (e.target == optionsMenu) {
-			onOptions();
 		}
 
 		if (e.target == loadXmlBundleMenu) {
@@ -915,16 +902,14 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		sbl2.setText(newKey);
 		adjustIndicator(tree.getNode(newKey));
 
-		String startValue = "";
+		String startValue;
 		wasSelectedKey = newKey;
-		if (wasSelectedKey != null) {
-			startValue = wasSelectedKey + ".";
-		}
+		startValue = wasSelectedKey + ".";
 		keyName.setText(startValue);
 		tree.repaint();
 	}
 
-	public String getValidKey() {
+	private String getValidKey() {
 		String key = keyName.getText();
 		if (key == null) {
 			return null;
@@ -954,7 +939,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		return null;
 	}
 
-	public void onInsertKey() {
+	private void onInsertKey() {
 		if (bundle.getBundle().getLangCount() == 0) {
 			return;
 		}
@@ -980,7 +965,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		syncToolbar();
 	}
 
-	public void onDeleteKey() {
+	private void onDeleteKey() {
 		String key = tree.getSelectedText();
 		if (key == null) {
 			return;
@@ -1005,7 +990,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		delDialog.show();
 	}
 
-	public void onClose() {
+	private void onClose() {
 		setTranslations();
 		if (isDirty) {
 			closeDialog.show();
@@ -1019,13 +1004,13 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		}
 	}
 
-	public void finish() {
+	private void finish() {
 		hide();
 		saveIni();
 		System.exit(0);
 	}
 
-	public void onSave() {
+	private void onSave() {
 		if (bundle.getBundle().getLangCount() == 0) {
 			return;
 		}
@@ -1044,7 +1029,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		isDirty = false;
 	}
 
-	public void clear() {
+	private void clear() {
 		setTitle(null);
 		if (keyName != null) {
 			keyName.setText("");
@@ -1310,7 +1295,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		curItemForReplace = bi;
 		curLangForReplace = li;
 		if (replacePrompt) {
-			if (replacePrompt && replaceAll) {
+			if (replaceAll) {
 				setTranslations();
 				tree.selectNode(curItemForReplace.getId());
 				tree.openToNode(curItemForReplace.getId());
@@ -1441,7 +1426,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		validate();
 	}
 
-	public void onNewBundle() {
+	private void onNewBundle() {
 		clear();
 		initControls();
 		bundle.getBundle().addLanguage("en");
@@ -1490,11 +1475,11 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		}
 	}
 
-	class Loader implements Runnable {
-		private String fileName;
-		private boolean part;
+	private class Loader implements Runnable {
+		private final String fileName;
+		private final boolean part;
 
-		Loader(String fileName, boolean part) {
+		private Loader(String fileName, boolean part) {
 			this.fileName = fileName;
 			this.part = part;
 		}
@@ -1525,7 +1510,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		}
 	}
 
-	public void readResources(String fileName, boolean part) {
+	private void readResources(String fileName, boolean part) {
 		File f = new File(fileName);
 		if (!f.canRead()) {
 			errDialog.setText(fileName + ":" + RC("no.file.found"));
@@ -1539,7 +1524,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 	}
 
 	private void initControls() {
-		commLab = new IELabel(RC("tools.translator.label.comments"));
+		IELabel commLab = new IELabel(RC("tools.translator.label.comments"));
 		constrain(textPanel, commLab, 0, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, 0.0, 0.0, 10, 3, 0, 15);
 
 		commField = new EmulatedTextField();
@@ -1631,7 +1616,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		return null;
 	}
 
-	private String lookupFileForStore(String mask, String fileName) {
+	private String lookupFileForStore(String fileName) {
 		FileDialog openFileDialog1 = new FileDialog(this, RC("tools.translator.label.saveastitle"), FileDialog.SAVE);
 		openFileDialog1.setDirectory(lastDirectory);
 		openFileDialog1.setFile(fileName);
@@ -1645,15 +1630,14 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		return filename;
 	}
 
-	public void onSaveAs() {
-		String mask = "*" + RES_EXTENSION;
+	private void onSaveAs() {
 		String fn = bundle.getBundle().getLanguage(0).getLangFile();
 		if (fn == null) {
 			fn = "autosaved";
 		}
 		fn += RES_EXTENSION;
 
-		String filename = lookupFileForStore(mask, fn);
+		String filename = lookupFileForStore(fn);
 		if (filename != null) {
 			try {
 				bundle.store(filename);
@@ -1718,13 +1702,12 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 
 	private void onGenCode() {
 		try {
-			String mask = "*.java";
 			String fn = (bundle.getBundle().getLangCount() == 0) || (bundle.getBundle().getLanguage(0).getLangFile() == null)
 				? "Sample"
 				: bundle.baseName(bundle.getBundle().getLanguage(0).getLangFile());
 			fn = fn.substring(0, 1).toUpperCase() + fn.substring(1);
 
-			String filename = lookupFileForStore(mask, fn + "ResourceMapped.java");
+			String filename = lookupFileForStore(fn + "ResourceMapped.java");
 			if (filename != null) {
 				SrcGenerator srcgen = new SrcGenerator(bundle.replace(filename, "\\", "/"));
 				srcgen.perform(bundle.getBundle());
@@ -1752,9 +1735,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 				bundle.getBundle().addLanguage("en");
 				String rlng = bundle.getBundle().getLanguage(0).getLangId();
 
-				Enumeration<String> en = ask.keys();
-				while (en.hasMoreElements()) {
-					String key = en.nextElement();
+				for (String key : ask.keySet()) {
 					BundleItem bi = bundle.getBundle().addKey(key);
 					bi.setTranslation(rlng, ask.get(key));
 				}
@@ -1901,13 +1882,10 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		removePickList();
 		String path = System.getProperty("user.home") + "/.jrc-editor.conf";
 		try {
-			InputIniFile ini = new InputIniFile(new FileInputStream(path));
+			InputIniFile ini = new InputIniFile(path);
 			Hashtable<String, String> tbl = ini.getTable();
-			ini.close();
 
-			Enumeration<String> e = tbl.keys();
-			while (e.hasMoreElements()) {
-				String key = e.nextElement();
+			for (String key : tbl.keySet()) {
 				String val = tbl.get(key);
 				if (!key.startsWith("picklist.")) {
 					continue;
@@ -2013,7 +1991,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		return ask;
 	}
 
-	public void onOpen(boolean part) {
+	private void onOpen(boolean part) {
 		String mask = "*" + RES_EXTENSION + ";" + "*" + INI_EXTENSION;
 		String filename = lookupFileForLoad(mask);
 		if (filename != null) {
@@ -2024,18 +2002,17 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		}
 	}
 
-	public void onSaveXml(boolean part) {
+	private void onSaveXml(boolean part) {
 		String[] parts = part ? getLangSet() : null;
 		if (part && ((parts == null) || (parts.length < 2))) {
 			return;
 		}
-		String mask = "*.xml";
 		String fn = bundle.getBundle().getLanguage(0).getLangFile();
 		if (fn == null) {
 			fn = "autosaved";
 		}
 
-		String filename = lookupFileForStore(mask, bundle.baseName(fn) + ".xml");
+		String filename = lookupFileForStore(bundle.baseName(fn) + ".xml");
 		if (filename != null) {
 			try {
 				DataOutputStream out = new DataOutputStream(new FileOutputStream(filename));
@@ -2065,19 +2042,18 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		}
 	}
 
-	public void onSaveUtf(boolean part) {
+	private void onSaveUtf(boolean part) {
 		String[] parts = part ? getLangSet() : null;
 		if (part && ((parts == null) || (parts.length < 2))) {
 			return;
 		}
 
-		String mask = "*.txt";
 		String fn = bundle.getBundle().getLanguage(0).getLangFile();
 		if (fn == null) {
 			fn = "autosaved";
 		}
 
-		String filename = lookupFileForStore(mask, bundle.baseName(fn) + ".txt");
+		String filename = lookupFileForStore(bundle.baseName(fn) + ".txt");
 		if (filename != null) {
 			try {
 				DataOutputStream out = new DataOutputStream(new FileOutputStream(filename));
@@ -2136,9 +2112,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 	}
 
 	private void fillTable(Hashtable<String, String> tbl) {
-		Enumeration<String> en = tbl.keys();
-		while (en.hasMoreElements()) {
-			String k = en.nextElement();
+		for (String k : tbl.keySet()) {
 			StringTokenizer st = new StringTokenizer(k, "!");
 			String key = st.nextToken();
 			if (!st.hasMoreTokens()) {
@@ -2156,7 +2130,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		bundle.getBundle().resort();
 	}
 
-	public void onLoadXml(boolean part) {
+	private void onLoadXml(boolean part) {
 		String mask = "*.xml";
 		String filename = lookupFileForLoad(mask);
 		if (filename != null) {
@@ -2181,7 +2155,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		}
 	}
 
-	public void onLoadUtf(boolean part) {
+	private void onLoadUtf(boolean part) {
 		String mask = "*.txt";
 		String filename = lookupFileForLoad(mask);
 		if (filename != null) {
@@ -2219,7 +2193,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 	}
 
 	private void moveFocus() {
-		Window wnd = null;
+		Window wnd;
 		Component p = this;
 		while ((p != null) && !(p instanceof Window)) {
 			p = p.getParent();
@@ -2294,7 +2268,7 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 		removeLeafs(key.substring(0, j1));
 	}
 
-	void onRenameKey() {
+	private void onRenameKey() {
 		String oldKeyName = keyName.getText();
 		if (oldKeyName.endsWith(".")) {
 			oldKeyName = oldKeyName.substring(0, oldKeyName.length() - 1);
@@ -2377,9 +2351,9 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			bundle.getBundle().addLanguage("en");
 			try {
 				ZipFile zip = new ZipFile(filename);
-				Enumeration en = zip.entries();
+				Enumeration<? extends ZipEntry> en = zip.entries();
 				while (en.hasMoreElements()) {
-					ZipEntry ze = (ZipEntry) en.nextElement();
+					ZipEntry ze = en.nextElement();
 					if (ze.getName().endsWith(".properties")) {
 						String lang = bundle.determineLanguage(ze.getName());
 						InputStream in = zip.getInputStream(ze);
@@ -2412,9 +2386,6 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			hideTranslated(tn.child, hide);
 			tn = tn.sibling;
 		}
-	}
-
-	private void onOptions() {
 	}
 
 	private void constrain(Container c, Component p, int x, int y, int width, int height, int anchor, int fill, double weightx,
@@ -2475,10 +2446,10 @@ public class Translator extends Frame implements TranslatorConstants, java.awt.e
 			return match_mask(s, sp + 1, t, tp + 1, matchCase);
 		}
 		if (!matchCase && (Character.toLowerCase(s[sp]) == Character.toLowerCase(t[tp]))) {
-			return match_mask(s, sp + 1, t, tp + 1, matchCase);
+			return match_mask(s, sp + 1, t, tp + 1, false);
 		}
 		if (matchCase && (s[sp] == t[tp])) {
-			return match_mask(s, sp + 1, t, tp + 1, matchCase);
+			return match_mask(s, sp + 1, t, tp + 1, true);
 		}
 
 		if ((s[sp] != '?') && (s[sp] != '*')) {

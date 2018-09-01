@@ -21,8 +21,8 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 class BundleItem {
-	private String identifier;
-	private Hashtable<String, String> translations;
+	private final String identifier;
+	private final Hashtable<String, String> translations;
 	private String comment;
 
 	BundleItem(String id) {

@@ -18,7 +18,6 @@
 package org.zaval.awt;
 
 import java.awt.Canvas;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.Font;
@@ -27,31 +26,14 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 
 public class ResultField extends Canvas {
-	TextAlignArea alignArea = new TextAlignArea();
-	boolean is3D = false;
-
-	public ResultField(String t) {
-		setText(t);
-	}
+	private final TextAlignArea alignArea = new TextAlignArea();
 
 	public ResultField() {
 		alignArea.setInsets(new Insets(0, 2, 0, 0));
 	}
 
-	public void set3D(boolean b) {
-		if (b == is3D) {
-			return;
-		}
-		is3D = b;
-		repaint();
-	}
-
 	public TextAlignArea getAlignArea() {
 		return alignArea;
-	}
-
-	public String getText() {
-		return alignArea.getText();
 	}
 
 	public void setText(String text) {
@@ -83,20 +65,6 @@ public class ResultField extends Canvas {
 		if (alignArea.getFontMetrics() == null) {
 			alignArea.setFontMetrics(getFontMetrics(getFont()));
 		}
-
-		if (is3D) {
-			Dimension d = size();
-			g.setColor(Color.white);
-			g.drawLine(d.width - 1, 0, d.width - 1, d.height - 1);
-			g.drawLine(0, d.height - 1, d.width - 1, d.height - 1);
-
-			g.setColor(Color.gray);
-			g.drawLine(0, 0, d.width - 1, 0);
-			g.drawLine(0, 0, 0, d.height - 1);
-
-			g.clipRect(2, 2, d.width - 3, d.height - 3);
-		}
-
 		alignArea.draw(g, getForeground());
 	}
 

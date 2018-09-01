@@ -24,18 +24,14 @@ import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.LayoutManager;
 import java.awt.Panel;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Scrollbar;
 
 public class SimpleScrollPanel extends Panel implements LayoutManager {
-	private Scrollbar hor;
-	private Scrollbar ver;
-	private Component comp;
-	private Panel panel;
-	private Dimension auf = null;
-
-	public static final int IS_NEED_SCROLL = 646478;
+	private final Scrollbar hor;
+	private final Scrollbar ver;
+	private final Component comp;
+	private final Panel panel;
 
 	public Component getScrollableObject() {
 		return comp;
@@ -126,10 +122,6 @@ public class SimpleScrollPanel extends Panel implements LayoutManager {
 		comp.repaint();
 	}
 
-	public Point location(int xx, int yy) {
-		return new Point(0, 0);
-	}
-
 	@Override
 	public void addLayoutComponent(String name, Component comp) {
 	}
@@ -141,18 +133,12 @@ public class SimpleScrollPanel extends Panel implements LayoutManager {
 	@Override
 	public Dimension preferredLayoutSize(Container parent) {
 		Dimension zet = comp.preferredSize();
-//   return zet;
 		if ((zet.width == 0) || (zet.height == 0)) {
 			zet = comp.size();
 		}
 		zet.width += ver.preferredSize().width;
 		zet.height += hor.preferredSize().height;
-		if (auf == null) {
-			return zet;
-		}
-		else {
-			return auf;
-		}
+		return zet;
 	}
 
 	@Override
@@ -163,17 +149,7 @@ public class SimpleScrollPanel extends Panel implements LayoutManager {
 		}
 		zet.width += ver.preferredSize().width;
 		zet.height += hor.preferredSize().height;
-		if (auf == null) {
-			return zet;
-		}
-		return oops(auf, zet);
-	}
-
-	private Dimension oops(Dimension a, Dimension b) // min(a,b)
-	{
-		int w = Math.min(a.width, b.width);
-		int h = Math.min(a.height, b.height);
-		return new Dimension(w, h);
+		return zet;
 	}
 
 	@Override
@@ -190,10 +166,6 @@ public class SimpleScrollPanel extends Panel implements LayoutManager {
 		checkForSVH();
 	}
 
-	public void setMaxSize(Dimension auf) {
-		this.auf = auf;
-	}
-
 	private void checkForSVH() {
 		Dimension x = comp.preferredSize();
 		if ((x.width == 0) || (x.height == 0)) {
@@ -205,8 +177,8 @@ public class SimpleScrollPanel extends Panel implements LayoutManager {
 		int wx = r.width;
 		int wy = r.height;
 
-		boolean seth = false;
-		boolean setv = false;
+		boolean seth;
+		boolean setv;
 
 		seth = (x.width > wx) || ((x.height > wy) && (x.width > (wx - ver_w)));
 		setv = (x.height > wy) || ((x.width > wx) && (x.height > (wy - hor_h)));

@@ -24,12 +24,11 @@ import java.awt.Event;
 import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Panel;
-import java.awt.Point;
 import java.io.Serializable;
 import java.util.Vector;
 
 public class Toolbar extends Panel implements LayoutManager {
-	private Vector<Serializable> v = new Vector<>();
+	private final Vector<Serializable> v = new Vector<>();
 
 	public Toolbar() {
 		super();
@@ -52,10 +51,6 @@ public class Toolbar extends Panel implements LayoutManager {
 			return true;
 		}
 		return false;
-	}
-
-	public Point location(int xx, int yy) {
-		return new Point(0, 0);
 	}
 
 	@Override
@@ -109,21 +104,6 @@ public class Toolbar extends Panel implements LayoutManager {
 			c.move(x + p_i.left, y + p_i.top);
 			x += w /* + 1 */;
 		}
-	}
-
-	public void setObjectsSize(Dimension d) {
-		int j;
-		for (j = 0; j < v.size(); ++j) {
-			Component c = (Component) v.elementAt(j);
-			if (c instanceof SpeedButton) {
-				SpeedButton cc = (SpeedButton) c;
-				cc.setImageSize(d);
-			}
-		}
-	}
-
-	public int count() {
-		return v.size();
 	}
 
 	public void setEnabled(int j, boolean state) {

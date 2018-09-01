@@ -17,16 +17,13 @@
 
 package org.zaval.util;
 
-import java.util.Hashtable;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class SafeResourceBundle {
-	protected ResourceBundle rb = null;
+	private ResourceBundle rb = null;
 
-	public static final String FAILURE_STRING = "?????";
-	public static final String START_VAR = "[%";
-	public static final String FINISH_VAR = "%]";
+	private static final String FAILURE_STRING = "?????";
 
 	public SafeResourceBundle(String resName, Locale loc) {
 		try {
@@ -60,52 +57,5 @@ public class SafeResourceBundle {
 			return res;
 		}
 		return FAILURE_STRING;
-	}
-
-	public String getString(String k, Hashtable ht) {
-		String templ = getString(k);
-		StringBuilder res = new StringBuilder();
-		int ind, ind2;
-		do {
-			ind = templ.indexOf(START_VAR);
-			if (ind < 0) {
-				res.append(templ);
-			}
-			else {
-				res.append(templ.substring(0, ind));
-				ind2 = templ.indexOf(FINISH_VAR, ind);
-				if (ind2 >= 0) {
-					String repl = (String) ht.get(templ.substring(ind + 2, ind2));
-					if (repl == null) {
-						repl = "";
-					}
-					res.append(repl);
-					templ = templ.substring(ind2 + 2);
-				}
-				else {
-					res.append(START_VAR);
-					templ = templ.substring(ind + 2);
-				}
-			}
-		} while (ind >= 0);
-		return res.toString();
-	}
-
-	public static Locale parseSuffix(String suffix) {
-		if ((suffix == null) || (suffix.length() == 0)) {
-			return null;
-		}
-		int undInd = suffix.indexOf('_');
-		String sl = suffix;
-		String sc = "";
-		if (undInd > 0) {
-			sl = suffix.substring(0, undInd);
-			sc = suffix.substring(undInd + 1);
-		}
-		return new Locale(sl, sc);
-	}
-
-	public SafeResourceBundle(String resName, String locale) {
-		this(resName, parseSuffix(locale));
 	}
 }

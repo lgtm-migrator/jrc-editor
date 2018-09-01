@@ -17,20 +17,20 @@
 
 package org.zaval.io;
 
-import java.io.DataInputStream;
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Vector;
 
 public class IniFile {
-	private Vector<String> keys = new Vector<>();
-	private Vector<Object> vals = new Vector<>();
+	private final Vector<String> keys = new Vector<>();
+	private final Vector<Object> vals = new Vector<>();
 	private boolean dirty = false;
 
-	private File file = null;
+	private final File file;
 
 	public IniFile(String name) throws IOException {
 		file = new File(name);
@@ -53,93 +53,65 @@ public class IniFile {
 		pr.close();
 	}
 
-	public void removeKey(String s) throws IOException {
-		int i = keys.indexOf(s);
-		if (i < 0) {
-			return;
-		}
-		keys.removeElementAt(i);
-		vals.removeElementAt(i);
-		dirty = true;
-		saveFile();
-	}
-
 	private void loadFile() throws IOException {
 		char ch = ' ';
-		String line = null;
-		DataInputStream in = new DataInputStream(new FileInputStream(file));
+		String line;
+		try (BufferedReader in = new BufferedReader(new FileReader(file))) {
 
-		// [ \t]* ({symbol}+ '=' [ \t]* {symbol}*
+			// [ \t]* ({symbol}+ '=' [ \t]* {symbol}*
 
-		while ((line = in.readLine()) != null) {
-			int j = 0, k = line.length(), i;
-			if (k <= 0) {
-				continue;
-			}
-			for (; j < k; ++j) {
-				ch = line.charAt(j);
-				if ((ch != '\t') && (ch != ' ')) {
-					break;
+			while ((line = in.readLine()) != null) {
+				int j = 0, k = line.length(), i;
+				if (k <= 0) {
+					continue;
 				}
-			}
-			if ((ch == '#') || (ch == '\n') || (ch == '\r')) {
-				continue;
-			}
-			for (i = j; j < k; ++j) {
-				ch = line.charAt(j);
-				if ((ch == '\t') || (ch == ' ') || (ch == '\n') || (ch == '\r') || (ch == '=') || (ch == '#')) {
-					break;
+				for (; j < k; ++j) {
+					ch = line.charAt(j);
+					if ((ch != '\t') && (ch != ' ')) {
+						break;
+					}
 				}
-			}
-			if (j != i) {
-				keys.addElement(line.substring(i, j));
-			}
-			for (; j < k; ++j) {
-				ch = line.charAt(j);
-				if ((ch == '=') || (ch == '\n') || (ch == '\r') || (ch == '#')) {
-					break;
+				if ((ch == '#') || (ch == '\n') || (ch == '\r')) {
+					continue;
 				}
-			}
-			if ((ch == '\n') || (ch == '\r') || (ch == '#')) {
-				vals.addElement("");
-				continue;
-			}
-			for (++j; j < k; ++j) {
-				ch = line.charAt(j);
-				if ((ch != ' ') && (ch != '\t')) {
-					break;
+				for (i = j; j < k; ++j) {
+					ch = line.charAt(j);
+					if ((ch == '\t') || (ch == ' ') || (ch == '\n') || (ch == '\r') || (ch == '=') || (ch == '#')) {
+						break;
+					}
 				}
-			}
-			if ((ch == '\n') || (ch == '\r') || (ch == '#')) {
-				vals.addElement("");
-				continue;
-			}
-			for (i = j; j < k; ++j) {
-				ch = line.charAt(j);
+				if (j != i) {
+					keys.addElement(line.substring(i, j));
+				}
+				for (; j < k; ++j) {
+					ch = line.charAt(j);
+					if ((ch == '=') || (ch == '\n') || (ch == '\r') || (ch == '#')) {
+						break;
+					}
+				}
 				if ((ch == '\n') || (ch == '\r') || (ch == '#')) {
-					break;
+					vals.addElement("");
+					continue;
 				}
+				for (++j; j < k; ++j) {
+					ch = line.charAt(j);
+					if ((ch != ' ') && (ch != '\t')) {
+						break;
+					}
+				}
+				if ((ch == '\n') || (ch == '\r') || (ch == '#')) {
+					vals.addElement("");
+					continue;
+				}
+				for (i = j; j < k; ++j) {
+					ch = line.charAt(j);
+					if ((ch == '\n') || (ch == '\r') || (ch == '#')) {
+						break;
+					}
+				}
+				vals.addElement(j != i ? line.substring(i, j).trim() : "");
 			}
-			vals.addElement(j != i ? line.substring(i, j).trim() : "");
 		}
-		in.close();
-		in = null;
-	}
-
-	public synchronized String getString(String key) throws IOException {
-		int j = keys.indexOf(key);
-		if (j < 0) {
-			return "UNDEFINED";
-		}
-		return (String) vals.elementAt(j);
-	}
-
-	public int getInt(String key) throws IOException {
-		return Integer.parseInt(getString(key));
-	}
-
-	public boolean getBoolean(String key) throws IOException {
-		return getString(key).compareTo("True") == 0;
 	}
 
 	public synchronized void putString(String key, String value) throws IOException {
@@ -155,14 +127,6 @@ public class IniFile {
 		saveFile();
 	}
 
-	public void putInt(String key, int value) throws IOException {
-		putString(key, Integer.toString(value));
-	}
-
-	public void putBoolean(String key, boolean value) throws IOException {
-		putString(key, value ? "True" : "False");
-	}
-
 	public synchronized void close() throws IOException {
 		saveFile();
 	}
@@ -172,60 +136,10 @@ public class IniFile {
 		StringBuilder sb = new StringBuilder();
 		sb.append("[IniFile = ").append(file.toString()).append("]={");
 		for (int j = 0; j < keys.size(); ++j) {
-			sb.append("\n\t" + keys.elementAt(j) + "=" + vals.elementAt(j));
+			sb.append("\n\t").append(keys.elementAt(j)).append("=").append(vals.elementAt(j));
 		}
 		sb.append("}");
 		return sb.toString();
 	}
 
-	public static String getValue(String iniName, String name) {
-		IniFile ini = null;
-		name = name.trim();
-		try {
-			ini = new IniFile(iniName);
-
-			String value = ini.getString(name);
-			if ((value == null) || (value.length() == 0) || value.equals("UNDEFINED")) {
-				return null;
-			}
-			else {
-				return value;
-			}
-		}
-		catch (IOException e) {
-			System.out.println("Loader getValue():" + e);
-			return null;
-		}
-		finally {
-			try {
-				ini.close();
-			}
-			catch (IOException ee) {
-				System.out.println("Loader start():" + ee);
-			}
-		}
-	}
-
-	public static int setValue(String iniName, String name, String value) {
-		IniFile ini = null;
-		name = name.trim();
-		value = value.trim();
-		try {
-			ini = new IniFile(iniName);
-			ini.putString(name, value);
-		}
-		catch (IOException e) {
-			System.out.println("Loader setValue():" + e);
-			return -1;
-		}
-		finally {
-			try {
-				ini.close();
-			}
-			catch (IOException ee) {
-				System.out.println("Loader start():" + ee);
-			}
-		}
-		return 0;
-	}
 }

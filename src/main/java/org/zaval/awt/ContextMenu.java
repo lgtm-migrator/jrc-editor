@@ -24,57 +24,26 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Menu;
-import java.awt.MenuComponent;
 import java.awt.MenuItem;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.util.Hashtable;
 
 public class ContextMenu extends Menu {
-	Rectangle size = null;
-	int htext = 0;
-	int stap = 0;
-	int vdist = 0;
-	int hdist = 0;
-	int msize = 0;
-	int act_option = 0;
-	int prev_option = 0;
-	int index = -1;
-	boolean act = false;
-	Color col_mark = new Color(128);
-	Hashtable<String, String> types = new Hashtable<>();
+	private Rectangle size = null;
+	private int htext = 0;
+	private int stap = 0;
+	private int vdist = 0;
+	private int hdist = 0;
+	private int msize = 0;
+	private int act_option = 0;
+	private int prev_option = 0;
+	private final Color col_mark = new Color(128);
+	private final Hashtable<String, String> types = new Hashtable<>();
 
 	public ContextMenu(String name) {
 		super(name);
 		this.setFont(new Font("Dialog", Font.PLAIN, 12));
-	}
-
-	public ContextMenu(String name, int x, int y) {
-		this(name);
-		size.x = x;
-		size.y = y;
-	}
-
-	public boolean isActive() {
-		return act;
-	}
-
-	public void setActive(boolean a_act) {
-		act = a_act;
-	}
-
-	public void addCheckit(MenuItem mi, boolean state) {
-		this.add(mi);
-		if (state) {
-			types.put(mi.getLabel(), "1");
-		}
-		else {
-			types.put(mi.getLabel(), "0");
-		}
-	}
-
-	public void addCheckit(String name, boolean state) {
-		this.addCheckit(new MenuItem(name), state);
 	}
 
 	@Override
@@ -83,19 +52,9 @@ public class ContextMenu extends Menu {
 	}
 
 	@Override
-	public void addSeparator() {
-		super.addSeparator();
-	}
-
-	@Override
 	public void remove(int index) {
 		size.height -= stap;
 		super.remove(index);
-	}
-
-	@Override
-	public void remove(MenuComponent mc) {
-		super.remove(mc);
 	}
 
 	@Override
@@ -111,23 +70,15 @@ public class ContextMenu extends Menu {
 		return ret_mi;
 	}
 
-	public void recalc() {
+	private void recalc() {
 		recalc(getFont());
-	}
-
-	public Dimension getSize() {
-		return new Dimension(size.width, size.height);
 	}
 
 	public Rectangle getBounds() {
 		return new Rectangle(size.x, size.y, size.width, size.height);
 	}
 
-	public Dimension preferredSize() {
-		return new Dimension(size.width + (2 * hdist), size.height + (2 * vdist));
-	}
-
-	public void recalc(Font fnt) {
+	private void recalc(Font fnt) {
 		FontMetrics fm = Toolkit.getDefaultToolkit().getFontMetrics(fnt);
 		hdist = fm.stringWidth("IIIII");
 		htext = fm.getMaxAscent() + fm.getMaxDescent() + fm.getLeading();
@@ -167,16 +118,6 @@ public class ContextMenu extends Menu {
 		gr.drawLine(x1, y, x2, y);
 	}
 
-	public Rectangle getRedrawArea() {
-		int dy = size.y + vdist + vdist;
-		if (prev_option > act_option) {
-			return new Rectangle(size.x, dy + (act_option * stap), size.width, 2 * msize);
-		}
-		else {
-			return new Rectangle(size.x, dy + (prev_option * stap), size.width, 2 * msize);
-		}
-	}
-
 	private void correctPos() {
 		if (getParent() == null) {
 			return;
@@ -204,9 +145,9 @@ public class ContextMenu extends Menu {
 		}
 	}
 
-	public boolean paint(Graphics gr) {
+	void paint(Graphics gr) {
 		if (!isEnabled()) {
-			return false;
+			return;
 		}
 		correctPos();
 
@@ -229,10 +170,9 @@ public class ContextMenu extends Menu {
 		for (int i = 0; i < count; i++) {
 			drawOption(gr, i);
 		}
-		return true;
 	}
 
-	private void drawCheckit(Graphics gr, int index, String name, int x, int y) {
+	private void drawCheckit(Graphics gr, String name, int x, int y) {
 		String state = types.get(name);
 		if (state != null) {
 			getParent();
@@ -265,7 +205,7 @@ public class ContextMenu extends Menu {
 			else {
 				gr.setColor(Color.white);
 			}
-			drawCheckit(gr, index, name, size.x, size.y + add);
+			drawCheckit(gr, name, size.x, size.y + add);
 			gr.drawString(name, x, y + add);
 		}
 		else {
@@ -276,14 +216,14 @@ public class ContextMenu extends Menu {
 			if (index != act_option) {
 				gr.setColor(Color.darkGray);
 			}
-			drawCheckit(gr, index, name, size.x, size.y + add);
+			drawCheckit(gr, name, size.x, size.y + add);
 		}
 
 	}
 
-	public boolean paintPart(Graphics gr) {
+	void paintPart(Graphics gr) {
 		if (!isEnabled()) {
-			return false;
+			return;
 		}
 		correctPos();
 
@@ -296,20 +236,14 @@ public class ContextMenu extends Menu {
 		gr.setColor(col_mark);
 		gr.fillRect(size.x + 3, size.y + vdist + (act_option * stap), size.width - 6, msize);
 		drawOption(gr, act_option);
-		return true;
 	}
 
-	public boolean paint(Graphics gr, int x, int y) {
-		setPos(x, y);
-		return paint(gr);
-	}
-
-	public void setPos(int x, int y) {
+	void setPos(int x, int y) {
 		size.x = x;
 		size.y = y;
 	}
 
-	public void pressKey(Event evt) {
+	private void pressKey(Event evt) {
 		int num = countItems();
 		boolean flag = true;
 		if (num == 0) {
@@ -328,7 +262,7 @@ public class ContextMenu extends Menu {
 		}
 	}
 
-	public boolean isCheckit(int act) {
+	private boolean isCheckit(int act) {
 		MenuItem mi = getItem(act);
 		if (mi == null) {
 			return false;
@@ -336,7 +270,7 @@ public class ContextMenu extends Menu {
 		return types.get(mi.getLabel()) != null;
 	}
 
-	public void invCheckit(int act) {
+	private void invCheckit(int act) {
 		if (!isCheckit(act)) {
 			return;
 		}
@@ -349,7 +283,7 @@ public class ContextMenu extends Menu {
 		}
 	}
 
-	public void pressEnter() {
+	private void pressEnter() {
 		MenuItem mi = getItem(act_option);
 		if (mi.isEnabled()) {
 			invCheckit(act_option);
@@ -357,7 +291,7 @@ public class ContextMenu extends Menu {
 		}
 	}
 
-	public void pressExit() {
+	private void pressExit() {
 		sendEvent(ContextMenuBar.EV_MENU_EXIT);
 	}
 
@@ -411,7 +345,7 @@ public class ContextMenu extends Menu {
 		return false;
 	}
 
-	public void pressMouse(Event evt) {
+	private void pressMouse(Event evt) {
 		int num = countItems();
 		boolean flag = true;
 		if ((num == 0) || (!this.inside(evt.x, evt.y))) {
@@ -436,11 +370,11 @@ public class ContextMenu extends Menu {
 		}
 	}
 
-	public boolean inside(int x, int y) {
+	private boolean inside(int x, int y) {
 		return (x <= (size.x + size.width)) && (x >= size.x) && (y <= (size.y + size.height)) && (y >= size.y);
 	}
 
-	public boolean handleEvent(Event evt) {
+	boolean handleEvent(Event evt) {
 		switch (evt.id) {
 			case Event.MOUSE_EXIT:
 				pressExit();

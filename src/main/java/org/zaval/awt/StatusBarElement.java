@@ -26,12 +26,12 @@ import java.awt.Insets;
 import java.awt.Panel;
 
 public class StatusBarElement extends Panel {
-	private int percent = -1;
+	private final int percent;
 	private int type = 1;
-	private Insets ins = new Insets(1, 3, 1, 3);
-	private Dimension pref = null;
+	private final Insets ins = new Insets(1, 3, 1, 3);
+	private final Dimension pref;
 
-	public StatusBarElement(Component c, int p, Dimension pref) {
+	StatusBarElement(Component c, int p, Dimension pref) {
 		setLayout(new BorderLayout(1, 0));
 		if (c != null) {
 			add("Center", c);

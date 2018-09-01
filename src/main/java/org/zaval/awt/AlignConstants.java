@@ -26,18 +26,6 @@ public interface AlignConstants {
 	int JUSTIFY = 0x20;
 
 	int TLEFT = LEFT | TOP;
-	int TRIGHT = RIGHT | TOP;
-	int BLEFT = LEFT | BOTTOM;
-	int BRIGHT = RIGHT | BOTTOM;
 	int CENTER = 0;
 
-	String STR_LEFT = "left";
-	String STR_RIGHT = "right";
-	String STR_TOP = "top";
-	String STR_BOTTOM = "bottom";
-	String STR_TLEFT = "topLeft";
-	String STR_TRIGHT = "topRight";
-	String STR_BLEFT = "bottomLeft";
-	String STR_BRIGHT = "bottomRight";
-	String STR_CENTER = "center";
 }

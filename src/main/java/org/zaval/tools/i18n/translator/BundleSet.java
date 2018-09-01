@@ -24,9 +24,9 @@ import java.util.Locale;
 import java.util.Vector;
 
 class BundleSet implements TranslatorConstants {
-	private Vector<BundleItem> items;
-	private Vector<LangItem> lng;
-	private Hashtable<String, BundleItem> nameCache;
+	private final Vector<BundleItem> items;
+	private final Vector<LangItem> lng;
+	private final Hashtable<String, BundleItem> nameCache;
 
 	BundleSet() {
 		items = new Vector<>();
@@ -34,7 +34,7 @@ class BundleSet implements TranslatorConstants {
 		nameCache = new Hashtable<>();
 	}
 
-	void addLanguage(String slng, String desc) {
+	private void addLanguage(String slng, String desc) {
 		if (getLanguage(slng) != null) {
 			return;
 		}
@@ -65,25 +65,6 @@ class BundleSet implements TranslatorConstants {
 			}
 		}
 		return -1;
-	}
-
-	LangItem[] getLanguageByDescription(String lng) {
-		int j, k = getLangCount();
-		Vector<LangItem> ask = new Vector<>();
-		for (j = 0; j < k; ++j) {
-			LangItem lx = getLanguage(j);
-			if (lx.getLangDescription().equals(lng)) {
-				ask.addElement(lx);
-			}
-		}
-		if (ask.size() == 0) {
-			return null;
-		}
-		LangItem[] li = new LangItem[k = ask.size()];
-		for (j = 0; j < k; ++j) {
-			li[j] = ask.elementAt(j);
-		}
-		return li;
 	}
 
 	int getItemCount() {
@@ -184,9 +165,7 @@ class BundleSet implements TranslatorConstants {
 		if (val == null) {
 			return null;
 		}
-		int capacity = key.length() + val.length() + 2;
-		String sb = key + '=' + val;
-		return sb;
+		return key + '=' + val;
 	}
 
 	Vector<String> store(String lng) {
@@ -235,16 +214,18 @@ class BundleSet implements TranslatorConstants {
 	}
 
 	public void resort() {
-		items.sort(new Comparator<BundleItem>() {
-			@Override
-			public int compare(BundleItem o1, BundleItem o2) {
-				return ((BundleItem) o1).getId().compareTo(((BundleItem) o2).getId());
-			}
+		items.sort(new BundleItemComparator());
+	}
 
-			@Override
-			public boolean equals(Object obj) {
-				return this == obj;
-			}
-		});
+	private static class BundleItemComparator implements Comparator<BundleItem> {
+		@Override
+		public int compare(BundleItem o1, BundleItem o2) {
+			return o1.getId().compareTo(o2.getId());
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			return this == obj;
+		}
 	}
 }

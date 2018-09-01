@@ -18,22 +18,21 @@
 package org.zaval.tools.i18n.translator;
 
 import java.awt.Component;
-import java.awt.Rectangle;
 import java.awt.TextArea;
 import java.awt.im.InputSubset;
 import java.util.Locale;
 
 import org.zaval.awt.EmulatedTextArea;
 
-public class TextAreaWrap {
+class TextAreaWrap {
 	private EmulatedTextArea tf1 = null;
 	private TextArea tf2 = null;
 	private int flavor;
 
-	public static final int NATIVE = 1;
-	public static final int PJAVA = 2;
+	private static final int NATIVE = 1;
+	private static final int PJAVA = 2;
 
-	static Character.Subset[] usedInputs = {
+	private static final Character.Subset[] usedInputs = {
 		Character.UnicodeBlock.ARABIC,
 		Character.UnicodeBlock.ARMENIAN,
 		Character.UnicodeBlock.BASIC_LATIN,
@@ -93,18 +92,13 @@ public class TextAreaWrap {
 		initControls();
 	}
 
-	public TextAreaWrap(int flavor) {
-		this.flavor = flavor;
-		initControls();
-	}
-
 	private void initControls() {
 		if (flavor == NATIVE) {
 			tf2 = new TextArea("", 3, 20, TextArea.SCROLLBARS_NONE);
 			tf2.enableInputMethods(true);
 		}
 		else {
-			tf1 = new EmulatedTextArea(true, false, 3, 20);
+			tf1 = new EmulatedTextArea(true, false);
 		}
 	}
 
@@ -152,21 +146,4 @@ public class TextAreaWrap {
 		}
 	}
 
-	public void selectAll() {
-		if (flavor == NATIVE) {
-			tf2.selectAll();
-		}
-		else {
-			tf1.selectAll();
-		}
-	}
-
-	public Rectangle getCursorShape() {
-		if (flavor == NATIVE) {
-			return null;
-		}
-		else {
-			return tf1.getCursorShape();
-		}
-	}
 }

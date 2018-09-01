@@ -27,9 +27,9 @@ import java.util.StringTokenizer;
 
 public class IELabel extends Canvas {
 	public static final int LEFT = 0;
-	public static final int CENTER = 1;
-	public static final int RIGHT = 2;
-	public static final int FIT = 3;
+	private static final int CENTER = 1;
+	private static final int RIGHT = 2;
+	private static final int FIT = 3;
 
 	private int wsize = 0;
 	private int hsize = 0;
@@ -37,7 +37,7 @@ public class IELabel extends Canvas {
 	private int ascent;
 
 	private String name;
-	private int align;
+	private final int align;
 
 	public IELabel() {
 		align = LEFT;
@@ -52,18 +52,6 @@ public class IELabel extends Canvas {
 	public IELabel(String name, int align) {
 		this.align = align;
 		this.name = name;
-	}
-
-	public int getAlignment() {
-		return align;
-	}
-
-	public String getText() {
-		return name;
-	}
-
-	public void setAlignment(int al) {
-		align = al;
 	}
 
 	public void setText(String s) {
@@ -132,7 +120,7 @@ public class IELabel extends Canvas {
 		int spc = (max - comml) / words.length;
 		int spcd = (max - comml) % words.length;
 
-		int k = spcd, v = 0;
+		int k = spcd, v;
 		for (j = 0; j < words.length; ++j) {
 			gr.drawString(words[j], xs, ys);
 			v = k / words.length;

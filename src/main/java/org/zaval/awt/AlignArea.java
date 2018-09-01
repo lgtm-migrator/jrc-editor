@@ -21,13 +21,7 @@ import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Rectangle;
 
-public class AlignArea extends Align {
-	public static final int INSIDE = 1;
-	public static final int OUTSIDE = 2;
-
-	private int mode = INSIDE;
-	private int sx = 0;
-	private int sy = 0;
+class AlignArea extends Align {
 	private Dimension size = new Dimension(0, 0);
 	private Insets insets = new Insets(0, 0, 0, 0);
 	private boolean isValid = false;
@@ -58,24 +52,11 @@ public class AlignArea extends Align {
 		}
 	}
 
-	public Dimension getSize() {
+	Dimension getSize() {
 		if (size == null) {
 			return null;
 		}
 		return new Dimension(size.width, size.height);
-	}
-
-	public void setSizeAlignObj(Dimension d) {
-		if ((sx == d.width) && (sy == d.height)) {
-			return;
-		}
-		invalidate();
-		sx = d.width;
-		sy = d.height;
-	}
-
-	public Dimension getSizeAlignObj() {
-		return new Dimension(sx, sy);
 	}
 
 	public void setInsets(Insets i) {
@@ -96,18 +77,6 @@ public class AlignArea extends Align {
 		return insets;
 	}
 
-	public void setMode(int m) {
-		if (mode == m) {
-			return;
-		}
-		invalidate();
-		mode = m;
-	}
-
-	public int getMode() {
-		return mode;
-	}
-
 	public Rectangle getAlignRectangle() {
 		if (isValid()) {
 			if (rect == null) {
@@ -122,8 +91,10 @@ public class AlignArea extends Align {
 		s.width -= (insets.left + insets.right);
 		s.height -= (insets.top + insets.bottom);
 
-		int wx = getWidth(sx, size);
-		int wy = getHeight(sy, size);
+		int sx = 0;
+		int wx = getWidth(sx);
+		int sy = 0;
+		int wy = getHeight(sy);
 		int xx = size.width - wx;
 		int yy = size.height - wy;
 		int a = getAlign();
@@ -148,23 +119,19 @@ public class AlignArea extends Align {
 		return r;
 	}
 
-	public boolean isBelongArea(int x, int y) {
-		return isBelongArea(this, x, y);
-	}
-
-	protected int getWidth(int s, Dimension size) {
+	int getWidth(int s) {
 		return s;
 	}
 
-	protected int getHeight(int s, Dimension size) {
+	int getHeight(int s) {
 		return s;
 	}
 
-	protected void validate() {
+	private void validate() {
 		isValid = true;
 	}
 
-	protected void recalc() {
+	void recalc() {
 	}
 
 	public void invalidate() {
@@ -173,20 +140,5 @@ public class AlignArea extends Align {
 
 	public boolean isValid() {
 		return isValid;
-	}
-
-	public static boolean isBelongArea(AlignArea a, int x, int y) {
-		Rectangle r = a.getAlignRectangle();
-		if (r == null) {
-			return false;
-		}
-
-		switch (a.getMode()) {
-			case AlignArea.INSIDE:
-				return r.inside(x, y);
-			case AlignArea.OUTSIDE:
-				return !r.inside(x, y);
-		}
-		return false;
 	}
 }

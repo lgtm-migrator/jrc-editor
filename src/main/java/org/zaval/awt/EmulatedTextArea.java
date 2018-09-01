@@ -18,68 +18,44 @@
 package org.zaval.awt;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Insets;
-import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
-//import org.zaval.awt.ScrollPanel;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
 public class EmulatedTextArea extends EmulatedTextField implements ScrollObject {
-	boolean wordWrap = false;
-	int[] lineStart = new int[LINE_INCR];
-	Vector<String> lineText = new Vector<>();
-	int maxTextWidth = 0;
-	int rowsNumber = 0; // = 0 - preferredSize.height is determined by the actual number of rows
-	int prefWidth = 0; // = 0 - preferredSize.width is determined by it if it is assigned a positive value
-	int upRowNum = 0;
-	int baseTextIndent = 0;
-	int viewWidth = 0;
-	int viewHeight = 0;
-	Image internImg = null;
-	int textWidth = 0;
-	int textHeight = 0;
-	int lastVisLine = 0;
-	boolean addLineFeed = true;
-	boolean noFontMetric = false;
+	private boolean wordWrap = false;
+	private int[] lineStart = new int[LINE_INCR];
+	private final Vector<String> lineText = new Vector<>();
+	private int maxTextWidth = 0;
+	private int upRowNum = 0;
+	private int baseTextIndent = 0;
+	private int viewWidth = 0;
+	private int viewHeight = 0;
+	private Image internImg = null;
+	private int textHeight = 0;
+	private int lastVisLine = 0;
+	private boolean addLineFeed = true;
+	private boolean noFontMetric = false;
 
-	public static final int LINE_INCR = 20;
+	private static final int LINE_INCR = 20;
 
-	public EmulatedTextArea() {
+	private EmulatedTextArea() {
 		super();
 		lineText.addElement("");
 	}
 
-	public EmulatedTextArea(boolean ww, boolean lf, int rN, int pW) {
+	public EmulatedTextArea(boolean ww, boolean lf) {
 		this();
 		wordWrap = ww;
-		rowsNumber = rN;
-		prefWidth = pW;
 		addLineFeed = lf;
-	}
-
-	public void setLineFeed(boolean b) {
-		addLineFeed = b;
-	}
-
-	public void setWordWrap(boolean b) {
-		wordWrap = b;
-	}
-
-	public void setPrefWidth(int p) {
-		prefWidth = p;
-	}
-
-	public void setRowsNumber(int n) {
-		rowsNumber = n;
 	}
 
 	@Override
@@ -92,8 +68,8 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 	public void focusGained(FocusEvent e) {
 		int wasCP = cursorPos;
 		super.focusGained(e);
-		selPos = 0;
-		selWidth = 0;
+		setSelPos(0);
+		setSelWidth(0);
 		cursorPos = wasCP;
 	}
 
@@ -216,25 +192,25 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 	}
 
 	@Override
-	protected void drawBlock(Graphics g) {
+	void drawBlock(Graphics g) {
 		if (!isSelected()) {
 			return;
 		}
 		FontMetrics fm = getFontMetrics(getFont());
-		int l1 = lineFromPos(selPos);
-		int l2 = lineFromPos(selPos + selWidth);
+		int l1 = lineFromPos(getSelPos());
+		int l2 = lineFromPos(getSelPos() + getSelWidth());
 		for (int i = l1; i <= l2; i++) {
 			String s = lineText.elementAt(i);
 			int beg = 0;
 			int begPos = 0;
 			if (i == l1) {
-				begPos = selPos - lineStart[i];
+				begPos = getSelPos() - lineStart[i];
 				beg = fm.stringWidth(s.substring(0, begPos));
 			}
 			int end = fm.stringWidth(s);
 			int endPos = s.length();
 			if (i == l2) {
-				endPos = (selPos + selWidth) - lineStart[i];
+				endPos = (getSelPos() + getSelWidth()) - lineStart[i];
 				end = fm.stringWidth(s.substring(0, endPos));
 			}
 			g.setColor(Color.blue);
@@ -246,7 +222,7 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 	}
 
 	@Override
-	protected void drawText(Graphics g) {
+	void drawText(Graphics g) {
 		size();
 		g.setColor(getForeground());
 		for (int i = upRowNum; i < lineText.size(); i++) {
@@ -256,7 +232,7 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 
 	@Override
 	public Dimension preferredSize() {
-		int w = 0, h = 0;
+		int w = 0, h;
 		int rows = 1;
 
 		Font f = getFont();
@@ -285,22 +261,7 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 			w = Math.max(w, m.stringWidth(s));
 		}
 		Insets i = insets();
-		Dimension ask = new Dimension(i.left + i.right + w, i.top + i.bottom + h);
-		return ask;
-	}
-
-	@Override
-	public Point getSOLocation() {
-		return new Point(-shift.x, upRowNum * textSize.height);
-	}
-
-	@Override
-	public void setSOLocation(int x, int y) {
-		shift.x = -x;
-		if (textSize.height > 0) {
-			upRowNum = y / textSize.height;
-		}
-		repaint();
+		return new Dimension(i.left + i.right + w, i.top + i.bottom + h);
 	}
 
 	@Override
@@ -308,12 +269,7 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 		return new Dimension(maxTextWidth + insets.left + insets.right, (lineText.size() * textSize.height) + insets.top + insets.bottom);
 	}
 
-	@Override
-	public Component getScrollComponent() {
-		return this;
-	}
-
-	protected void setLineStart(int pos, int value) {
+	private void setLineStart(int pos, int value) {
 		if (pos >= lineStart.length) {
 			int[] nls = new int[((pos / LINE_INCR) + 1) * LINE_INCR];
 			System.arraycopy(lineStart, 0, nls, 0, lineStart.length);
@@ -322,7 +278,7 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 		lineStart[pos] = value;
 	}
 
-	protected int indexOfBlank(String s, int i) {
+	private int indexOfBlank(String s, int i) {
 		int i1 = s.indexOf(' ', i);
 		if (i1 < 0) {
 			i1 = s.length() - 1;
@@ -334,12 +290,12 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 		return Math.min(i1, i2);
 	}
 
-	protected void recalcLines(int position) {
+	private void recalcLines(int position) {
 		int rowNum = lineFromPos(position);
 		lineText.size();
 		Dimension d = size();
 		Insets i = insets();
-		textWidth = d.width - i.left - i.right;
+		int textWidth = d.width - i.left - i.right;
 		textHeight = d.height - i.top - i.bottom;
 		if ((textWidth <= 0) || (textHeight <= 0)) {
 			return;
@@ -417,11 +373,11 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 	}
 
 	@Override
-	protected boolean seek(int shift, boolean b) {
+	boolean seek(int shift, boolean b) {
 		return super.seek(adjustPos(cursorPos + shift, shift > 0) - cursorPos, b);
 	}
 
-	protected int adjustPos(int pos, boolean incr) {
+	private int adjustPos(int pos, boolean incr) {
 		int l = lineFromPos(pos);
 		int sl = lineText.elementAt(l).length();
 		if ((l < (lineText.size() - 1)) && ((pos - lineStart[l]) > sl)) {
@@ -436,7 +392,7 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 	}
 
 	@Override
-	protected boolean recalc() {
+	boolean recalc() {
 		int wasShiftX = shift.x;
 		if (noFontMetric) {
 			recalcLines(0);
@@ -474,7 +430,7 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 		return res;
 	}
 
-	protected int getLinePos(int ln, FontMetrics fm, int pix) {
+	private int getLinePos(int ln, FontMetrics fm, int pix) {
 		if (ln < 0) {
 			ln = 0;
 		}
@@ -500,14 +456,14 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 		return getLinePos(((y - insets.top) / fm.getHeight()) + upRowNum, fm, x - insets.left - shift.x);
 	}
 
-	protected int vertPosShift(int currPos, int vertShift) {
+	private int vertPosShift(int currPos, int vertShift) {
 		int currLine = lineFromPos(currPos);
 		FontMetrics fm = getFontMetrics(getFont());
 		int pixW = fm.stringWidth(lineText.elementAt(currLine).substring(0, currPos - lineStart[currLine]));
 		return getLinePos(currLine + vertShift, fm, pixW);
 	}
 
-	protected int lineFromPos(int pos) {
+	private int lineFromPos(int pos) {
 		for (int i = lineText.size() - 1; i >= 0; i--) {
 			if (lineStart[i] <= pos) {
 				return i;

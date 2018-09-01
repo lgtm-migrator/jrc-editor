@@ -23,9 +23,9 @@ import java.awt.Graphics;
 import java.awt.Image;
 
 public class StaticImage extends Canvas {
-	protected Image image;
-	protected int width = 0;
-	protected int height = 0;
+	private Image image;
+	private int width;
+	private int height;
 
 	public StaticImage(Image img) {
 		width = img.getWidth(this);
@@ -33,18 +33,14 @@ public class StaticImage extends Canvas {
 		setImage(img);
 	}
 
-	public StaticImage(Image img, int w, int h) {
-		setImage(img, w, h);
-	}
-
-	public void setImage(Image img, int width, int height) {
+	private void setImage(Image img, int width, int height) {
 		this.image = img;
 		this.width = width;
 		this.height = height;
 		repaint();
 	}
 
-	public void setImage(Image img) {
+	private void setImage(Image img) {
 		setImage(img, width, height);
 	}
 

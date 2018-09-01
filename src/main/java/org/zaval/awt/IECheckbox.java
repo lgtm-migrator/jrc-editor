@@ -21,21 +21,11 @@ import java.awt.Color;
 import java.awt.Graphics;
 
 public class IECheckbox extends BaseCheckbox {
-	public IECheckbox() {
-	}
 
 	public IECheckbox(String label) {
-		this(label, false);
-	}
-
-	public IECheckbox(String label, boolean state) {
-		this(label, LEFT, state);
-	}
-
-	public IECheckbox(String label, int align, boolean state) {
 		setLabel(label);
-		setState(state);
-		setAlign(align);
+		setState(false);
+		setAlign();
 	}
 
 	@Override

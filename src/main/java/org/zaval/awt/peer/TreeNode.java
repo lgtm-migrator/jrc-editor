@@ -23,24 +23,24 @@ import java.util.Hashtable;
 import org.zaval.awt.ImageResolver;
 
 public class TreeNode {
-	public ImageResolver imgres = null;
+	private ImageResolver imgres = null;
 
 	public TreeNode sibling;
 	public TreeNode child;
 	public TreeNode parent;
-	public String text;
-	public String nameCollImage = null;
-	public String nameExpImage = null;
-	public Image collapsedImage = null;
-	public Image expandedImage = null;
+	public final String text;
+	private String nameCollImage;
+	private String nameExpImage;
+	private Image collapsedImage = null;
+	private Image expandedImage = null;
 	public int depth = -1;
-	public boolean isExpanded = false;
+	private boolean isExpanded = false;
 	public int numberOfChildren;
-	public int contextMenu = -1;
-	public Hashtable<String, Object> property = null;
+	private int contextMenu = -1;
+	private final Hashtable<String, Object> property;
 	public boolean hidden = false;
 	public String caption;
-	public Image indicator;
+	private Image indicator;
 
 	//constructors
 
@@ -59,14 +59,6 @@ public class TreeNode {
 		this.child = null;
 		this.nameCollImage = nameCollImage;
 		this.nameExpImage = nameExpImage;
-
-		if ((nameCollImage != null) && (imgres != null)) {
-			this.collapsedImage = imgres.getImage(nameCollImage);
-		}
-
-		if ((nameExpImage != null) && (imgres != null)) {
-			this.expandedImage = imgres.getImage(nameCollImage);
-		}
 
 		numberOfChildren = 0;
 		caption = null;
@@ -121,13 +113,6 @@ public class TreeNode {
 		return collapsedImage;
 	}
 
-	public String getNameImage() {
-		if (getImage() != null) {
-			return ((isExpanded && (expandedImage != null)) ? nameExpImage : nameCollImage);
-		}
-		return null;
-	}
-
 	private void loadImages() {
 		if (imgres == null) {
 			return;
@@ -158,10 +143,6 @@ public class TreeNode {
 		return text;
 	}
 
-	public void setText(String s) {
-		text = s;
-	}
-
 	public void setContextMenu(int index) {
 		contextMenu = index;
 	}
@@ -170,7 +151,7 @@ public class TreeNode {
 		return contextMenu;
 	}
 
-	public Object getProperty(String name) {
+	private Object getProperty(String name) {
 		return property.get(name);
 	}
 
@@ -178,24 +159,12 @@ public class TreeNode {
 		return (String) getProperty(name);
 	}
 
-	public int getIntProperty(String name) {
-		return Integer.parseInt((String) getProperty(name));
-	}
-
-	public void setProperty(String name, Object value) {
+	private void setProperty(String name, Object value) {
 		property.put(name, value);
 	}
 
 	public void setStringProperty(String name, String value) {
 		setProperty(name, value);
-	}
-
-	public void setIntProperty(String name, int value) {
-		setProperty(name, "" + value);
-	}
-
-	public int getNumberOfChildren() {
-		return numberOfChildren;
 	}
 
 	public void setHide(boolean b) {
@@ -204,22 +173,6 @@ public class TreeNode {
 
 	public boolean getHide() {
 		return hidden;
-	}
-
-	public String getCaption() {
-		return caption == null ? text : caption;
-	}
-
-	public void setCaption(String c) {
-		caption = c;
-	}
-
-	public void setCollapsedImage(Image image) {
-		this.collapsedImage = image;
-	}
-
-	public void setExpandedImage(Image image) {
-		this.expandedImage = image;
 	}
 
 	public void setIndicator(String name) {

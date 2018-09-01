@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 public class TextAlignArea extends AlignArea {
-	public static final int STRING_GAP = 0;
+	private static final int STRING_GAP = 0;
 
 	private String text;
 	private String[] strs = new String[0];
@@ -39,7 +39,7 @@ public class TextAlignArea extends AlignArea {
 	}
 
 	@Override
-	protected int getWidth(int s, Dimension size) {
+	protected int getWidth(int s) {
 		if ((fontMetrics == null) || (text == null)) {
 			return -1;
 		}
@@ -59,7 +59,7 @@ public class TextAlignArea extends AlignArea {
 	}
 
 	@Override
-	protected int getHeight(int s, Dimension size) {
+	protected int getHeight(int s) {
 		if ((fontMetrics == null) || (text == null)) {
 			return -1;
 		}
@@ -94,7 +94,7 @@ public class TextAlignArea extends AlignArea {
 	}
 
 	public void setText(String t) {
-		if ((t != null) && (text != null) && t.equals(text)) {
+		if ((t != null) && t.equals(text)) {
 			return;
 		}
 		text = t;
@@ -109,7 +109,7 @@ public class TextAlignArea extends AlignArea {
 		return fontMetrics;
 	}
 
-	public void draw(Graphics g, Color col) {
+	void draw(Graphics g, Color col) {
 		draw(g, 0, 0, col);
 	}
 
@@ -144,7 +144,7 @@ public class TextAlignArea extends AlignArea {
 		}
 	}
 
-	public void draw(Graphics g, int offx, int offy, Color col) {
+	void draw(Graphics g, int offx, int offy, Color col) {
 		Dimension d = getSize();
 		Insets ins = getInsets();
 		Rectangle r = getAlignRectangle();
@@ -182,7 +182,7 @@ public class TextAlignArea extends AlignArea {
 		}
 	}
 
-	public static void next(String s, String[] res) {
+	private static void next(String s, String[] res) {
 		int index = s.indexOf(' ');
 		if (index < 0) {
 			res[0] = s;
@@ -217,7 +217,7 @@ public class TextAlignArea extends AlignArea {
 				int c = 0;
 
 				for (;;) {
-					String token = null;
+					String token;
 					next(ss, ps);
 
 					if (ps[1] != null) {

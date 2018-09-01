@@ -18,7 +18,6 @@
 package org.zaval.awt;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.Graphics;
@@ -27,16 +26,15 @@ import java.awt.Panel;
 import java.awt.Rectangle;
 
 public class BorderedPanel extends Panel {
-	public static final int NONE = 0;
-	public static final int RAISED = 1;
-	public static final int SUNKEN = 2;
-	public static final int ETCHED = 3;
+	private static final int NONE = 0;
+	private static final int RAISED = 1;
+	private static final int SUNKEN = 2;
+	private static final int ETCHED = 3;
 	public static final int RAISED2 = 4;
 
-	protected int type = RAISED;
-	protected int hideMode = 0;
-	protected Insets insets = new Insets(2, 2, 2, 2);
-	protected static Color[] colors = { Color.white, Color.gray };
+	private final int type;
+	private final Insets insets = new Insets(2, 2, 2, 2);
+	private static final Color[] colors = { Color.white, Color.gray };
 
 	public BorderedPanel() {
 		this(ETCHED);
@@ -44,21 +42,6 @@ public class BorderedPanel extends Panel {
 
 	public BorderedPanel(int type) {
 		this.type = type;
-	}
-
-	public void setType(int t) {
-		if (type == t) {
-			return;
-		}
-		type = t;
-		repaint();
-	}
-
-	public void setHideMode(int m) {
-		if (hideMode == m) {
-			return;
-		}
-		hideMode = m;
 	}
 
 	@Override
@@ -82,14 +65,14 @@ public class BorderedPanel extends Panel {
 		int x2 = d.width - 1;
 		int y2 = d.height - 1;
 
-		leftLine(g, x, y, x2, y2);
-		rightLine(g, x, y, x2, y2);
+		leftLine(g, x, y, y2);
+		rightLine(g, y, x2, y2);
 
-		topLine(g, x, y, x2, y2);
-		bottomLine(g, x, y, x2, y2);
+		topLine(g, x, y, x2);
+		bottomLine(g, x, x2, y2);
 	}
 
-	public void leftLine(Graphics g, int x, int y, int x2, int y2) {
+	private void leftLine(Graphics g, int x, int y, int y2) {
 		g.setColor(colors[1]);
 		switch (type) {
 			case ETCHED: {
@@ -119,7 +102,7 @@ public class BorderedPanel extends Panel {
 		}
 	}
 
-	public void rightLine(Graphics g, int x, int y, int x2, int y2) {
+	private void rightLine(Graphics g, int y, int x2, int y2) {
 		g.setColor(colors[1]);
 		switch (type) {
 			case ETCHED: {
@@ -148,7 +131,7 @@ public class BorderedPanel extends Panel {
 		}
 	}
 
-	public void topLine(Graphics g, int x, int y, int x2, int y2) {
+	private void topLine(Graphics g, int x, int y, int x2) {
 		g.setColor(colors[1]);
 		switch (type) {
 			case ETCHED: {
@@ -177,7 +160,7 @@ public class BorderedPanel extends Panel {
 		}
 	}
 
-	public void bottomLine(Graphics g, int x, int y, int x2, int y2) {
+	private void bottomLine(Graphics g, int x, int x2, int y2) {
 		g.setColor(colors[1]);
 		switch (type) {
 			case ETCHED: {
@@ -204,57 +187,6 @@ public class BorderedPanel extends Panel {
 				g.setColor(colors[1]);
 				g.drawLine(x + 1, y2, x2, y2); // Bottomleft to bottomright
 				break;
-		}
-	}
-
-	int prevMode = -1;
-
-	@Override
-	public void hide() {
-		if (hideMode == 0) {
-			super.hide();
-		}
-		else {
-			if (type == NONE) {
-				return;
-			}
-			prevMode = type;
-			setType(NONE);
-		}
-	}
-
-	@Override
-	public boolean isVisible() {
-		if (hideMode == 0) {
-			return super.isVisible();
-		}
-		return type != NONE;
-	}
-
-	@Override
-	public void show() {
-		if (hideMode == 0) {
-			super.show();
-		}
-		else {
-			if (!super.isVisible()) {
-				super.show();
-			}
-			if (prevMode < 0) {
-				return;
-			}
-			setType(prevMode);
-			prevMode = -1;
-			try {
-				super.hide();
-				super.show();
-				((Component) this).invalidate();
-				((Component) this).validate();
-				repaint();
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}
 		}
 	}
 

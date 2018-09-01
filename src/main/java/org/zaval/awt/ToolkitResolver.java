@@ -23,7 +23,7 @@ import java.awt.MediaTracker;
 import java.awt.Toolkit;
 
 public class ToolkitResolver implements ImageResolver {
-	private Toolkit kit;
+	private final Toolkit kit;
 
 	public ToolkitResolver() {
 		kit = Toolkit.getDefaultToolkit();

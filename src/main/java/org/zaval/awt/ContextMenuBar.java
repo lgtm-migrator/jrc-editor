@@ -21,37 +21,20 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.MenuBar;
-import java.awt.MenuComponent;
 import java.awt.Rectangle;
 
-import org.zaval.awt.event.Listener;
-import org.zaval.awt.event.ListenerSupport;
-
 public class ContextMenuBar extends MenuBar {
-	public final static int EV_MENU_REDRAW = 0xFFF0;
-	public final static int EV_MENU_EXIT = EV_MENU_REDRAW + 1;
-	public final static int EV_MENU_ENTER = EV_MENU_REDRAW + 2;
-	public final static int EV_MENU_REDRAWALL = EV_MENU_REDRAW + 3;
+	final static int EV_MENU_REDRAW = 0xFFF0;
+	final static int EV_MENU_EXIT = EV_MENU_REDRAW + 1;
+	final static int EV_MENU_ENTER = EV_MENU_REDRAW + 2;
+	final static int EV_MENU_REDRAWALL = EV_MENU_REDRAW + 3;
 
-	public Container parent = null;
-	ContextMenu act_menu = null;
-	boolean first = true;
-	ListenerSupport support = new ListenerSupport();
+	private Container parent;
+	private ContextMenu act_menu = null;
+	private boolean first = true;
 
 	public ContextMenuBar(Container a_parent) {
 		parent = a_parent;
-	}
-
-	public ContextMenuBar() {
-		super();
-	}
-
-	public void addListener(Listener l) {
-		support.addListener(l);
-	}
-
-	public void removeListener(Listener l) {
-		support.removeListener(l);
 	}
 
 	public void setParent(Container a_parent) {
@@ -67,33 +50,17 @@ public class ContextMenuBar extends MenuBar {
 		}
 	}
 
-	public void add(ContextMenu cm) {
-		cm.index = countMenus();
-		super.add(cm);
-	}
-
-	@Override
-	public void remove(int index) {
-		super.remove(index);
-	}
-
-	@Override
-	public void remove(MenuComponent mc) {
-		super.remove(mc);
-	}
-
-	public boolean init(int index, int x, int y) {
+	void init(int index, int x, int y) {
 		act_menu = get(index);
 		if ((act_menu == null) || (!act_menu.isEnabled())) {
 			act_menu = null;
-			return false;
+			return;
 		}
 		act_menu.setPos(x, y);
 		first = true;
-		return true;
 	}
 
-	public void paint(Graphics gr) {
+	void paint(Graphics gr) {
 		if (act_menu == null) {
 			return;
 		}
@@ -106,27 +73,15 @@ public class ContextMenuBar extends MenuBar {
 		}
 	}
 
-	public boolean isRedraw() {
-		return first;
-	}
-
 	public boolean isActive() {
 		return (parent != null) && (act_menu != null);
 	}
 
-	public ContextMenu get(int index) {
+	private ContextMenu get(int index) {
 		return (ContextMenu) super.getMenu(index);
 	}
 
-	public void disable(int index) {
-		get(index).disable();
-	}
-
-	public void enable(int index) {
-		get(index).enable();
-	}
-
-	public void repaint() {
+	private void repaint() {
 		if (parent == null) {
 			return;
 		}
@@ -135,7 +90,7 @@ public class ContextMenuBar extends MenuBar {
 		gr.dispose();
 	}
 
-	public void repaintAll() {
+	private void repaintAll() {
 		first = true;
 		if ((act_menu != null) && (parent != null)) {
 			Rectangle r = act_menu.getBounds();
@@ -144,7 +99,7 @@ public class ContextMenuBar extends MenuBar {
 		repaint();
 	}
 
-	public void sendEvent(java.awt.Event evt) {
+	void sendEvent(java.awt.Event evt) {
 		if ((parent == null) || (act_menu == null)) {
 			return;
 		}
@@ -167,19 +122,12 @@ public class ContextMenuBar extends MenuBar {
 				repaintAll();
 				act_menu = null;
 				evt.id = java.awt.Event.ACTION_EVENT;
-				if (support.size() > 0) {
-					org.zaval.awt.event.Event e = new org.zaval.awt.event.Event(this, EV_MENU_ENTER);
-					e.put("event", evt.toString());
-					support.perform(e);
-				}
-				else {
-					parent.postEvent(evt);
-				}
+				parent.postEvent(evt);
 			}
 		}
 	}
 
-	public boolean handleEvent(java.awt.Event evt) {
+	boolean handleEvent(java.awt.Event evt) {
 		if ((act_menu == null) || (!act_menu.isEnabled())) {
 			return false;
 		}

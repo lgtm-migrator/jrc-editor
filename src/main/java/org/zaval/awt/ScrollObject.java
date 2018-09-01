@@ -17,16 +17,8 @@
 
 package org.zaval.awt;
 
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Point;
 
-public interface ScrollObject {
-	Point getSOLocation();
-
-	void setSOLocation(int x, int y);
-
+interface ScrollObject {
 	Dimension getSOSize();
-
-	Component getScrollComponent();
 }

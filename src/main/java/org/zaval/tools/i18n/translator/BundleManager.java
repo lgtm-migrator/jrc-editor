@@ -17,19 +17,20 @@
 
 package org.zaval.tools.i18n.translator;
 
-import java.io.DataInputStream;
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
 class BundleManager implements TranslatorConstants {
-	private BundleSet set;
+	private final BundleSet set;
 
 	BundleManager() {
 		set = new BundleSet();
@@ -48,7 +49,7 @@ class BundleManager implements TranslatorConstants {
 		return set;
 	}
 
-	String dirName(String fn) {
+	private String dirName(String fn) {
 		fn = replace(fn, "\\", "/");
 		int ind = fn.lastIndexOf('/');
 		return ind >= 0 ? fn.substring(0, ind + 1) : "./";
@@ -152,7 +153,6 @@ class BundleManager implements TranslatorConstants {
 				lastComment = line.substring(1);
 				continue;
 			}
-			line.indexOf('#');
 
 			StringTokenizer st = new StringTokenizer(line, "=", true); // key = value
 			if (st.countTokens() < 2) {
@@ -176,38 +176,30 @@ class BundleManager implements TranslatorConstants {
 		set.resort();
 	}
 
-	void setComment(String key, String comment) {
-		BundleItem bi = set.getItem(key);
-		if (bi == null) {
-			return;
-		}
-		bi.setComment(comment);
-	}
-
 	private Vector<String> getLines(String fileName) throws IOException {
 		Vector<String> res = new Vector<>();
 		if (fileName.endsWith(RES_EXTENSION)) {
-			DataInputStream in = new DataInputStream(new FileInputStream(fileName));
-			String line = null;
-			while ((line = in.readLine()) != null) {
-				for (;;) {
-					line = line.trim();
-					if (line.endsWith("\\")) {
-						String line2 = in.readLine();
-						if (line2 != null) {
-							line = line.substring(0, line.length() - 1) + line2;
+			try (BufferedReader in = new BufferedReader(new FileReader(fileName))) {
+				String line;
+				while ((line = in.readLine()) != null) {
+					for (;;) {
+						line = line.trim();
+						if (line.endsWith("\\")) {
+							String line2 = in.readLine();
+							if (line2 != null) {
+								line = line.substring(0, line.length() - 1) + line2;
+							}
+							else {
+								break;
+							}
 						}
 						else {
 							break;
 						}
 					}
-					else {
-						break;
-					}
+					res.addElement(fromEscape(line));
 				}
-				res.addElement(fromEscape(line));
 			}
-			in.close();
 		}
 		else {
 			RandomAccessFile in = new RandomAccessFile(fileName, "r");
@@ -240,27 +232,27 @@ class BundleManager implements TranslatorConstants {
 
 	private Vector<String> getLines(InputStream xin) throws IOException {
 		Vector<String> res = new Vector<>();
-		DataInputStream in = new DataInputStream(xin);
-		String line = null;
-		while ((line = in.readLine()) != null) {
-			for (;;) {
-				line = line.trim();
-				if (line.endsWith("\\")) {
-					String line2 = in.readLine();
-					if (line2 != null) {
-						line = line.substring(0, line.length() - 1) + line2;
+		try (BufferedReader in = new BufferedReader(new InputStreamReader(xin))) {
+			String line;
+			while ((line = in.readLine()) != null) {
+				for (;;) {
+					line = line.trim();
+					if (line.endsWith("\\")) {
+						String line2 = in.readLine();
+						if (line2 != null) {
+							line = line.substring(0, line.length() - 1) + line2;
+						}
+						else {
+							break;
+						}
 					}
 					else {
 						break;
 					}
 				}
-				else {
-					break;
-				}
+				res.addElement(fromEscape(line));
 			}
-			res.addElement(fromEscape(line));
 		}
-		in.close();
 		return res;
 	}
 
@@ -268,16 +260,15 @@ class BundleManager implements TranslatorConstants {
 		StringBuilder res = new StringBuilder();
 		for (int i = 0; i < s.length(); i++) {
 			char ch = s.charAt(i);
-			int val = ch;
 			if (ch == '\r') {
 				continue;
 			}
-			if ((val >= 0) && (val < 128) && (ch != '\n') && (ch != '\\')) {
+			if (((int) ch >= 0) && ((int) ch < 128) && (ch != '\n') && (ch != '\\')) {
 				res.append(ch);
 			}
 			else {
 				res.append("\\u");
-				String hex = Integer.toHexString(val);
+				String hex = Integer.toHexString((int) ch);
 				for (int j = 0; j < (4 - hex.length()); j++) {
 					res.append("0");
 				}
@@ -353,7 +344,7 @@ class BundleManager implements TranslatorConstants {
 		}
 	}
 
-	void store(String lng, String fn) throws IOException {
+	private void store(String lng, String fn) throws IOException {
 		LangItem lang = set.getLanguage(lng);
 		if (fn == null) {
 			fn = lang.getLangFile();

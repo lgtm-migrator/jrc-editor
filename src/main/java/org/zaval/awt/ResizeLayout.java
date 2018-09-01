@@ -22,7 +22,6 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.LayoutManager;
 import java.awt.Panel;
-import java.awt.Point;
 import java.awt.Rectangle;
 
 public class ResizeLayout implements LayoutManager {
@@ -31,11 +30,7 @@ public class ResizeLayout implements LayoutManager {
 	public ResizeLayout() {
 	}
 
-	public Point location(int xx, int yy) {
-		return new Point(xx < fix ? 0 : 2, 0);
-	}
-
-	public void setSeparator(int sef, Container parent) {
+	void setSeparator(int sef, Container parent) {
 		fix = sef;
 		layoutAll(parent);
 	}

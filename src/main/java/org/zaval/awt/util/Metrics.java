@@ -20,22 +20,10 @@ package org.zaval.awt.util;
 public abstract class Metrics {
 	private boolean isValid = false;
 
-	public void invalidate() {
+	protected void invalidate() {
 		if (isValid) {
 			isValid = false;
 		}
 	}
 
-	public void validate() {
-		if (!isValid) {
-			recalc();
-			isValid = true;
-		}
-	}
-
-	public boolean isValid() {
-		return isValid;
-	}
-
-	public abstract void recalc();
 }

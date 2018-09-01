@@ -37,38 +37,19 @@ public class SpeedButton extends Canvas {
 
 	private int w, h, state = FREE;
 
-	public void setImageSize(Dimension d) {
-		w = d.width;
-		h = d.height;
-	}
-
-	public SpeedButton(Image src, int border, int light, ButtonImageFilter filt) {
+	public SpeedButton(Image src) {
+		int border = -5;
+		int light = 30;
+		ButtonImageFilter filt = new BoxButtonFilter();
 		w = src.getWidth(this);
 		h = src.getHeight(this);
-		if (border < 0) {
-			border = -border;
-			border = (w * border) / 100;
-			if (border < 2) {
-				border = 2;
-			}
+		border = -border;
+		border = (w * border) / 100;
+		if (border < 2) {
+			border = 2;
 		}
 		init(src, getFilter(src, filt, light, border, false), getFilter(src, filt, -light, border, true),
 			getFilter(src, filt, -Math.abs(light), 0, false));
-	}
-
-	public SpeedButton(Image src, Image up, Image down, Image dis) {
-		if (src == null) {
-			w = h = 0;
-		}
-		else {
-			w = src.getWidth(this);
-			h = src.getHeight(this);
-		}
-		init(src, up, down, dis);
-	}
-
-	public SpeedButton(Image src) {
-		this(src, -5, 30, new BoxButtonFilter());
 	}
 
 	private void init(Image src, Image up, Image down, Image dis) {
@@ -78,7 +59,7 @@ public class SpeedButton extends Canvas {
 		downImg = down;
 	}
 
-	public Image getFilter(Image src, ButtonImageFilter filt, int light, int border, boolean b) {
+	private Image getFilter(Image src, ButtonImageFilter filt, int light, int border, boolean b) {
 		filt = (ButtonImageFilter) filt.clone();
 		filt.setup(light, border, w, h, b);
 
@@ -87,11 +68,7 @@ public class SpeedButton extends Canvas {
 		return createImage(ip);
 	}
 
-	public int getState() {
-		return state;
-	}
-
-	public void setState(int s) {
+	private void setState(int s) {
 		state = s;
 		repaint();
 	}

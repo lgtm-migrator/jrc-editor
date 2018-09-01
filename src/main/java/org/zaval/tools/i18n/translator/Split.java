@@ -28,7 +28,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 
-public class Split {
+public class Split { // NO_UCD (unused code)
 	private BundleManager bundle = new BundleManager();
 
 	private Split(String srcName) {
@@ -59,7 +59,7 @@ public class Split {
 		}
 	}
 
-	public void readResources(String fileName, boolean part) throws Exception {
+	private void readResources(String fileName, boolean part) throws Exception {
 		try {
 			BundleManager bundle2 = new BundleManager(fileName);
 			join(bundle2, part);
@@ -70,11 +70,10 @@ public class Split {
 		}
 	}
 
-	public void onSaveAs(String fileName) {
-		String filename = fileName;
-		if (filename != null) {
+	private void onSaveAs(String fileName) {
+		if (fileName != null) {
 			try {
-				bundle.store(filename);
+				bundle.store(fileName);
 			}
 			catch (Exception e) {
 				infoException(fileName, e);
@@ -88,9 +87,8 @@ public class Split {
 
 	private void onGenCode(String fileName) {
 		try {
-			String filename = fileName;
-			if (filename != null) {
-				SrcGenerator srcgen = new SrcGenerator(bundle.replace(filename, "\\", "/"));
+			if (fileName != null) {
+				SrcGenerator srcgen = new SrcGenerator(bundle.replace(fileName, "\\", "/"));
 				srcgen.perform(bundle.getBundle());
 			}
 		}
@@ -100,29 +98,25 @@ public class Split {
 	}
 
 	private void onParseCode(String fileName) throws Exception {
-		String filename = fileName;
 		if (fileName != null) {
-			filename = bundle.replace(filename, "\\", "/");
-			JavaParser parser = new JavaParser(new FileInputStream(filename));
+			fileName = bundle.replace(fileName, "\\", "/");
+			JavaParser parser = new JavaParser(new FileInputStream(fileName));
 			Hashtable<String, String> ask = parser.parse();
 
 			bundle.getBundle().addLanguage("en");
 			String rlng = bundle.getBundle().getLanguage(0).getLangId();
 
-			Enumeration<String> en = ask.keys();
-			while (en.hasMoreElements()) {
-				String key = en.nextElement();
+			for (String key : ask.keySet()) {
 				bundle.getBundle().addKey(key);
 				bundle.getBundle().updateValue(key, rlng, ask.get(key));
 			}
 		}
 	}
 
-	public void onSaveXml(String fileName, String[] parts) {
-		String filename = fileName;
-		if (filename != null) {
+	private void onSaveXml(String fileName, String[] parts) {
+		if (fileName != null) {
 			try {
-				DataOutputStream out = new DataOutputStream(new FileOutputStream(filename));
+				DataOutputStream out = new DataOutputStream(new FileOutputStream(fileName));
 				BundleSet set = bundle.getBundle();
 				int items = set.getItemCount();
 				out.writeChar((char) 0xFEFF);
@@ -149,11 +143,10 @@ public class Split {
 		}
 	}
 
-	public void onSaveUtf(String fileName, String[] parts) {
-		String filename = fileName;
-		if (filename != null) {
+	private void onSaveUtf(String fileName, String[] parts) {
+		if (fileName != null) {
 			try {
-				DataOutputStream out = new DataOutputStream(new FileOutputStream(filename));
+				DataOutputStream out = new DataOutputStream(new FileOutputStream(fileName));
 				BundleSet set = bundle.getBundle();
 				int items = set.getItemCount();
 				out.writeChar((char) 0xFEFF);
@@ -193,25 +186,23 @@ public class Split {
 	 */
 	private String getBody(String file) throws IOException {
 		char ch;
-		DataInputStream in = new DataInputStream(new FileInputStream(file));
-		StringBuilder buf = new StringBuilder(in.available());
-
-		try {
-			in.readChar(); // skip UCS16 marker FEFF
-			for (;;) {
-				ch = in.readChar();
-				buf.append(ch);
+		try (DataInputStream in = new DataInputStream(new FileInputStream(file))) {
+			StringBuilder buf = new StringBuilder(in.available());
+			try {
+				in.readChar(); // skip UCS16 marker FEFF
+				for (;;) {
+					ch = in.readChar();
+					buf.append(ch);
+				}
 			}
+			catch (EOFException eof) {
+			}
+			return buf.toString();
 		}
-		catch (EOFException eof) {
-		}
-		return buf.toString();
 	}
 
 	private void fillTable(Hashtable<String, String> tbl) {
-		Enumeration<String> en = tbl.keys();
-		while (en.hasMoreElements()) {
-			String k = en.nextElement();
+		for (String k : tbl.keySet()) {
 			StringTokenizer st = new StringTokenizer(k, "!");
 			String key = st.nextToken();
 			if (!st.hasMoreTokens()) {
@@ -228,22 +219,20 @@ public class Split {
 		}
 	}
 
-	public void onLoadXml(String fileName) throws Exception {
-		String filename = fileName;
-		if (filename != null) {
+	private void onLoadXml(String fileName) throws Exception {
+		if (fileName != null) {
 			bundle.getBundle().addLanguage("en");
 
-			XmlReader xml = new XmlReader(getBody(filename));
+			XmlReader xml = new XmlReader(getBody(fileName));
 			Hashtable<String, String> tbl = xml.getTable();
 			fillTable(tbl);
 		}
 	}
 
-	public void onLoadUtf(String fileName) throws Exception {
-		String filename = fileName;
-		if (filename != null) {
+	private void onLoadUtf(String fileName) throws Exception {
+		if (fileName != null) {
 			bundle.getBundle().addLanguage("en");
-			UtfParser parser = new UtfParser(new StringReader(getBody(filename)));
+			UtfParser parser = new UtfParser(new StringReader(getBody(fileName)));
 			Hashtable<String, String> tbl = parser.parse();
 			fillTable(tbl);
 		}

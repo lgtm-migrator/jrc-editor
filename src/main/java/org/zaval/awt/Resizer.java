@@ -194,7 +194,7 @@ public class Resizer extends Canvas {
 		while ((f != null) && !(f instanceof Frame)) {
 			f = f.getParent();
 		}
-		if (f instanceof Frame) {
+		if (f != null) {
 			((Frame) f).setCursor(c);
 		}
 	}
@@ -292,7 +292,4 @@ public class Resizer extends Canvas {
 		return super.mouseDrag(ev, x, y);
 	}
 
-	public static void debug(String s) {
-		System.out.println(s);
-	}
 }
