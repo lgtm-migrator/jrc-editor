@@ -33,7 +33,8 @@ import java.awt.Label;
 import java.awt.LayoutManager;
 import java.awt.Panel;
 import java.awt.Toolkit;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.zaval.awt.EmulatedTextField;
 import org.zaval.awt.IELabel;
@@ -59,8 +60,8 @@ public class EditDialog extends Dialog implements java.awt.event.AWTEventListene
 		p.add(cancel);
 
 		constrain(this, label, 0, 0, 1, 1, GridBagConstraints.NONE, GridBagConstraints.WEST, 0.0, 0.0, 5, 5, 5, 5);
-		constrain(this, edit = new EmulatedTextField(20), 1, 0, 4, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST, 1.0, 0.0, 5,
-			5, 5, 5);
+		edit = new EmulatedTextField(20);
+		constrain(this, edit, 1, 0, 4, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST, 1.0, 0.0, 5, 5, 5, 5);
 		constrain(this, p, 0, 10, 2, 1, GridBagConstraints.NONE, GridBagConstraints.EAST, 1.0, 0.0, 5, 5, 5, 5);
 
 		listener = l;
@@ -175,13 +176,13 @@ public class EditDialog extends Dialog implements java.awt.event.AWTEventListene
 		return moveFocus(owner);
 	}
 
-	private void optimize(Vector<Component> v) {
+	private void optimize(List<Component> v) {
 		int j, k = v.size();
 		for (j = 0; j < k; ++j) {
-			Component c = v.elementAt(j);
+			Component c = v.get(j);
 			if (c instanceof Button) {
-				v.removeElementAt(j);
-				v.addElement(c);
+				v.remove(j);
+				v.add(c);
 				--k;
 				--j;
 			}
@@ -191,12 +192,12 @@ public class EditDialog extends Dialog implements java.awt.event.AWTEventListene
 	private boolean moveFocus(Component c) {
 		int j, k;
 		boolean ask = false;
-		Vector<Component> v = new Vector<>();
+		List<Component> v = new ArrayList<>();
 
 		linearize(this, v);
 		optimize(v);
 		for (k = v.size(), j = 0; j < k; ++j) {
-			if (c == v.elementAt(j)) {
+			if (c == v.get(j)) {
 				break;
 			}
 		}
@@ -207,11 +208,11 @@ public class EditDialog extends Dialog implements java.awt.event.AWTEventListene
 			ask = true;
 			j = -1; // see below +1
 		}
-		v.elementAt(j + 1).requestFocus();
+		v.get(j + 1).requestFocus();
 		return ask;
 	}
 
-	private void linearize(Container cc, Vector<Component> v) {
+	private void linearize(Container cc, List<Component> v) {
 		int j, k = cc.getComponentCount();
 		for (j = 0; j < k; ++j) {
 			Component c = cc.getComponent(j);
@@ -225,7 +226,7 @@ public class EditDialog extends Dialog implements java.awt.event.AWTEventListene
 				linearize((Container) c, v);
 			}
 			else {
-				v.addElement(c);
+				v.add(c);
 			}
 		}
 	}

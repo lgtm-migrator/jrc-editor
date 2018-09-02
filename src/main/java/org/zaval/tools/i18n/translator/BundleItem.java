@@ -17,17 +17,17 @@
 
 package org.zaval.tools.i18n.translator;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 class BundleItem {
 	private final String identifier;
-	private final Hashtable<String, String> translations;
+	private final Map<String, String> translations = new HashMap<>();
 	private String comment;
 
 	BundleItem(String id) {
 		identifier = id;
-		translations = new Hashtable<>();
 	}
 
 	String getId() {
@@ -50,7 +50,7 @@ class BundleItem {
 		translations.put(lng, txt);
 	}
 
-	Enumeration<String> getLanguages() {
-		return translations.keys();
+	Set<String> getLanguages() {
+		return translations.keySet();
 	}
 }

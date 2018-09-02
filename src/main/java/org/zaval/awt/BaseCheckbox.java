@@ -33,13 +33,13 @@ abstract class BaseCheckbox extends Canvas {
 	private final Dimension sqSize = new Dimension(12, 12);
 	private final int textInset = 3;
 
-	boolean state = false;
-	private boolean hasFocus = false;
-	private boolean isCalc = false;
+	boolean state;
+	private boolean hasFocus;
+	private boolean isCalc;
 	boolean mouse_down;
 
 	private int align = LEFT;
-	int posY = 0, posX = 0;
+	int posY, posX;
 	private Rectangle textArea = new Rectangle();
 	private final Rectangle eventBox = new Rectangle();
 	private final TextAlignArea alignArea = new TextAlignArea();

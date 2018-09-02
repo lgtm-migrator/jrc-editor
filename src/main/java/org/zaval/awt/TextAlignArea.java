@@ -23,16 +23,17 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
-import java.util.Vector;
 
 public class TextAlignArea extends AlignArea {
 	private static final int STRING_GAP = 0;
 
 	private String text;
 	private String[] strs = new String[0];
-	private FontMetrics fontMetrics = null;
-	private boolean isMulti = false;
+	private FontMetrics fontMetrics;
+	private boolean isMulti;
 
 	public TextAlignArea() {
 		setAlign(AlignConstants.LEFT);
@@ -200,18 +201,16 @@ public class TextAlignArea extends AlignArea {
 	public static String[] breakString(String t, FontMetrics fm, int width) {
 		if (t != null) {
 			StringTokenizer st = new StringTokenizer(t, "\n");
-			Vector<String> vv = new Vector<>();
+			List<String> vv = new ArrayList<>();
 
 			while (st.hasMoreTokens()) {
-				vv.addElement(st.nextToken());
+				vv.add(st.nextToken());
 			}
 
-			Vector<String> vvv = new Vector<>();
+			List<String> vvv = new ArrayList<>();
 			String[] ps = new String[2];
 
-			for (int i = 0; i < vv.size(); i++) {
-				String ss = vv.elementAt(i);
-
+			for (String ss : vv) {
 				StringBuilder tk = new StringBuilder();
 				int tw = 0;
 				int c = 0;
@@ -231,12 +230,12 @@ public class TextAlignArea extends AlignArea {
 					int len = fm.stringWidth(token);
 					if ((tw + len) > width) {
 						if (tk.length() > 0) {
-							vvv.addElement(tk.toString());
+							vvv.add(tk.toString());
 							tk = new StringBuilder(token);
 							tw = len;
 						}
 						else {
-							vvv.addElement(token);
+							vvv.add(token);
 							tk = new StringBuilder();
 							tw = 0;
 						}
@@ -253,14 +252,14 @@ public class TextAlignArea extends AlignArea {
 				}
 
 				if (c > 0) {
-					vvv.addElement(tk.toString());
+					vvv.add(tk.toString());
 				}
 
 			}
 
 			String[] strs = new String[vvv.size()];
 			for (int i = 0; i < vvv.size(); i++) {
-				strs[i] = vvv.elementAt(i);
+				strs[i] = vvv.get(i);
 			}
 			return strs;
 		}

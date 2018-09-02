@@ -78,12 +78,17 @@ class SearchDialog extends EditDialog {
 
 		cg1 = new IERadioButton[2];
 		cg2 = new IERadioButton[3];
-		cg1[0] = inKeys = new IERadioButton("", false);
-		cg1[1] = inVals = new IERadioButton("", true);
+		inKeys = new IERadioButton("", false);
+		cg1[0] = inKeys;
+		inVals = new IERadioButton("", true);
+		cg1[1] = inVals;
 
-		cg2[0] = regex = new IERadioButton("", false);
-		cg2[1] = mask = new IERadioButton("", false);
-		cg2[2] = exact = new IERadioButton("", true);
+		regex = new IERadioButton("", false);
+		cg2[0] = regex;
+		mask = new IERadioButton("", false);
+		cg2[1] = mask;
+		exact = new IERadioButton("", true);
+		cg2[2] = exact;
 
 		cases = new IECheckbox("");
 		cases.setState(true);

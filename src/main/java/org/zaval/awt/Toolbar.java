@@ -25,10 +25,11 @@ import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Panel;
 import java.io.Serializable;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Toolbar extends Panel implements LayoutManager {
-	private final Vector<Serializable> v = new Vector<>();
+	private final List<Serializable> v = new ArrayList<>();
 
 	public Toolbar() {
 		super();
@@ -38,9 +39,9 @@ public class Toolbar extends Panel implements LayoutManager {
 	public void add(int id, Component button) {
 		add(button);
 		while (v.size() <= id) {
-			v.addElement("");
+			v.add("");
 		}
-		v.setElementAt(button, id);
+		v.set(id, button);
 	}
 
 	@Override
@@ -107,7 +108,7 @@ public class Toolbar extends Panel implements LayoutManager {
 	}
 
 	public void setEnabled(int j, boolean state) {
-		Component c = (Component) v.elementAt(j);
+		Component c = (Component) v.get(j);
 		if (state) {
 			c.enable();
 		}

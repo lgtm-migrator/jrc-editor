@@ -47,15 +47,8 @@ public class BoxButtonFilter extends ButtonImageFilter {
 		int wb = width - border;
 
 		if ((x >= border) && (y >= border) && (y <= hb) && (x <= wb)) {
-			if (pressed) {
-				brighter = false;
-				percent = defpercent >> 1;
-			}
-			else {
-				brighter = true;
-				percent = defpercent >> 1;
-				//  return rgb & 0xFFFFFFFF;
-			}
+			brighter = !pressed;
+			percent = defpercent >> 1;
 		}
 		else if ((x < border) && (y < (height - x))) {
 			brighter = !pressed;

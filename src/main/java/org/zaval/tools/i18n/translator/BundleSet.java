@@ -17,29 +17,24 @@
 
 package org.zaval.tools.i18n.translator;
 
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
-import java.util.Vector;
+import java.util.Map;
 
 class BundleSet implements TranslatorConstants {
-	private final Vector<BundleItem> items;
-	private final Vector<LangItem> lng;
-	private final Hashtable<String, BundleItem> nameCache;
-
-	BundleSet() {
-		items = new Vector<>();
-		lng = new Vector<>();
-		nameCache = new Hashtable<>();
-	}
+	private final List<BundleItem> items = new ArrayList<>();
+	private final List<LangItem> lng = new ArrayList<>();
+	private final Map<String, BundleItem> nameCache = new HashMap<>();
 
 	private void addLanguage(String slng, String desc) {
 		if (getLanguage(slng) != null) {
 			return;
 		}
 		LangItem newl = new LangItem(slng, desc);
-		lng.addElement(newl);
+		lng.add(newl);
 		correctFileName(newl);
 	}
 
@@ -48,7 +43,7 @@ class BundleSet implements TranslatorConstants {
 	}
 
 	LangItem getLanguage(int idx) {
-		return lng.elementAt(idx);
+		return lng.get(idx);
 	}
 
 	LangItem getLanguage(String lng) {
@@ -72,7 +67,7 @@ class BundleSet implements TranslatorConstants {
 	}
 
 	BundleItem getItem(int idx) {
-		return items.elementAt(idx);
+		return items.get(idx);
 	}
 
 	BundleItem getItem(String key) {
@@ -93,7 +88,8 @@ class BundleSet implements TranslatorConstants {
 	BundleItem addKey(String key) {
 		BundleItem ask = getItem(key);
 		if (ask == null) {
-			items.addElement(ask = new BundleItem(key));
+			ask = new BundleItem(key);
+			items.add(ask);
 			nameCache.put(key, ask);
 		}
 		return ask;
@@ -102,20 +98,20 @@ class BundleSet implements TranslatorConstants {
 	void removeKey(String key) {
 		int j = getItemIndex(key);
 		if (j >= 0) {
-			items.removeElementAt(j);
+			items.remove(j);
 		}
 		nameCache.remove(key);
 	}
 
-	Enumeration<BundleItem> getKeysBeginningWith(String key) {
-		Vector<BundleItem> v = new Vector<>();
+	List<BundleItem> getKeysBeginningWith(String key) {
+		List<BundleItem> v = new ArrayList<>();
 		for (int j = 0; j < getItemCount(); ++j) {
 			BundleItem bi = getItem(j);
 			if (bi.getId().startsWith(key)) {
-				v.addElement(bi);
+				v.add(bi);
 			}
 		}
-		return v.elements();
+		return v;
 	}
 
 	void removeKeysBeginningWith(String key) {
@@ -168,24 +164,19 @@ class BundleSet implements TranslatorConstants {
 		return key + '=' + val;
 	}
 
-	Vector<String> store(String lng) {
+	List<String> store(String lng) {
 		getLanguage(lng);
-		Vector<String> lines = new Vector<>();
-		lines.addElement("# Java Resource Bundle");
-		lines.addElement("# Modified by Zaval JRC Editor (C) Zaval CE Group");
-		lines.addElement("# http://www.zaval.org/products/jrc-editor/");
-		lines.addElement("#");
-		lines.addElement("");
+		List<String> lines = new ArrayList<>();
 
 		for (int j = 0; j < getItemCount(); ++j) {
 			BundleItem bi = getItem(j);
 			if (bi.getComment() != null) {
-				lines.addElement("#" + bi.getComment());
+				lines.add("#" + bi.getComment());
 			}
 			if (bi.getTranslation(lng) == null) {
 				continue;
 			}
-			lines.addElement(makeLine(bi.getId(), bi.getTranslation(lng)));
+			lines.add(makeLine(bi.getId(), bi.getTranslation(lng)));
 		}
 		return lines;
 	}

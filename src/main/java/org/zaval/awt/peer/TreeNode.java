@@ -18,12 +18,13 @@
 package org.zaval.awt.peer;
 
 import java.awt.Image;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.zaval.awt.ImageResolver;
 
 public class TreeNode {
-	private ImageResolver imgres = null;
+	private ImageResolver imgres;
 
 	public TreeNode sibling;
 	public TreeNode child;
@@ -31,18 +32,16 @@ public class TreeNode {
 	public final String text;
 	private String nameCollImage;
 	private String nameExpImage;
-	private Image collapsedImage = null;
-	private Image expandedImage = null;
+	private Image collapsedImage;
+	private Image expandedImage;
 	public int depth = -1;
-	private boolean isExpanded = false;
+	private boolean isExpanded;
 	public int numberOfChildren;
 	private int contextMenu = -1;
-	private final Hashtable<String, Object> property;
-	public boolean hidden = false;
+	private final Map<String, Object> property = new HashMap<>();
+	public boolean hidden;
 	public String caption;
 	private Image indicator;
-
-	//constructors
 
 	public void setResolver(ImageResolver imgres) {
 		this.imgres = imgres;
@@ -53,7 +52,6 @@ public class TreeNode {
 	}
 
 	public TreeNode(String text, String nameCollImage, String nameExpImage) {
-		property = new Hashtable<>();
 		this.text = text;
 		this.sibling = null;
 		this.child = null;

@@ -24,8 +24,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 public class Split { // NO_UCD (unused code)
@@ -46,9 +45,7 @@ public class Split { // NO_UCD (unused code)
 			for (int i = 0; i < items; ++i) {
 				BundleItem bi = set.getItem(i);
 				bundle.getBundle().addKey(bi.getId());
-				Enumeration<String> en = bi.getLanguages();
-				while (en.hasMoreElements()) {
-					String lang = en.nextElement();
+				for (String lang : bi.getLanguages()) {
 					bundle.getBundle().addLanguage(lang);
 					bundle.getBundle().updateValue(bi.getId(), lang, bi.getTranslation(lang));
 				}
@@ -101,7 +98,7 @@ public class Split { // NO_UCD (unused code)
 		if (fileName != null) {
 			fileName = bundle.replace(fileName, "\\", "/");
 			JavaParser parser = new JavaParser(new FileInputStream(fileName));
-			Hashtable<String, String> ask = parser.parse();
+			Map<String, String> ask = parser.parse();
 
 			bundle.getBundle().addLanguage("en");
 			String rlng = bundle.getBundle().getLanguage(0).getLangId();
@@ -123,10 +120,8 @@ public class Split { // NO_UCD (unused code)
 					out.writeChars("<xml>\n");
 					for (int i = 0; i < items; ++i) {
 						BundleItem bi = set.getItem(i);
-						Enumeration<String> en = bi.getLanguages();
 						out.writeChars("\t<key name=\"" + bi.getId() + "\">\n");
-						while (en.hasMoreElements()) {
-							String lang = en.nextElement();
+						for (String lang : bi.getLanguages()) {
 							if (!inArray(parts, lang)) {
 								continue;
 							}
@@ -153,10 +148,8 @@ public class Split { // NO_UCD (unused code)
 					out.writeChars("#JRC Editor 2.0: do not modify this line\r\n\r\n");
 					for (int i = 0; i < items; ++i) {
 						BundleItem bi = set.getItem(i);
-						Enumeration<String> en = bi.getLanguages();
 						out.writeChars("KEY=\"" + bi.getId() + "\":\r\n");
-						while (en.hasMoreElements()) {
-							String lang = en.nextElement();
+						for (String lang : bi.getLanguages()) {
 							if (!inArray(parts, lang)) {
 								continue;
 							}
@@ -201,7 +194,7 @@ public class Split { // NO_UCD (unused code)
 		}
 	}
 
-	private void fillTable(Hashtable<String, String> tbl) {
+	private void fillTable(Map<String, String> tbl) {
 		for (String k : tbl.keySet()) {
 			StringTokenizer st = new StringTokenizer(k, "!");
 			String key = st.nextToken();
@@ -224,8 +217,7 @@ public class Split { // NO_UCD (unused code)
 			bundle.getBundle().addLanguage("en");
 
 			XmlReader xml = new XmlReader(getBody(fileName));
-			Hashtable<String, String> tbl = xml.getTable();
-			fillTable(tbl);
+			fillTable(xml.flatten());
 		}
 	}
 
@@ -233,7 +225,7 @@ public class Split { // NO_UCD (unused code)
 		if (fileName != null) {
 			bundle.getBundle().addLanguage("en");
 			UtfParser parser = new UtfParser(new StringReader(getBody(fileName)));
-			Hashtable<String, String> tbl = parser.parse();
+			Map<String, String> tbl = parser.parse();
 			fillTable(tbl);
 		}
 	}

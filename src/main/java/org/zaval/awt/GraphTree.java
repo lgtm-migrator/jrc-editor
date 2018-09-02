@@ -24,7 +24,7 @@ import java.awt.MenuItem;
 import org.zaval.awt.peer.TreeNode;
 
 public class GraphTree extends SymTree {
-	private ContextMenuBar menubar = null;
+	private ContextMenuBar menubar;
 
 	public GraphTree() {
 		super();
@@ -50,7 +50,7 @@ public class GraphTree extends SymTree {
 		}
 	}
 
-	private int isRightKey = 0;
+	private int isRightKey;
 
 	@Override
 	public boolean mouseDown(Event evt, int x, int y) {

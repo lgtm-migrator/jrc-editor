@@ -25,19 +25,21 @@ import java.awt.Event;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Rectangle;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Resizer extends Canvas {
 	private int startx;
 	private int oldrg;
 
-	private boolean drag = false;
-	private boolean state = false;
+	private boolean drag;
+	private boolean state;
 	private boolean _enable;
 
 	public Resizer() {
 		super();
-		startx = oldrg = 0;
+		startx = 0;
+		oldrg = 0;
 		_enable = isEnabled();
 	}
 
@@ -56,10 +58,12 @@ public class Resizer extends Canvas {
 		if (_enable == e) {
 			return;
 		}
-		super.enable(_enable = e);
+		_enable = e;
+		super.enable(_enable);
 		if (!_enable) {
 			drag = false;
-			startx = oldrg = 0;
+			startx = 0;
+			oldrg = 0;
 		}
 		repaint();
 	}
@@ -172,19 +176,19 @@ public class Resizer extends Canvas {
 
 	private static Component getComponentAtFix(Container top, int x, int y) {
 		Component[] c = top.getComponents();
-		Vector<Component> v = new Vector<>();
+		List<Component> v = new ArrayList<>();
 		for (Component aC : c) {
 			if (!aC.isVisible()) {
 				continue;
 			}
 			Rectangle b = aC.bounds();
 			if (b.inside(x, y)) {
-				v.addElement(aC);
+				v.add(aC);
 			}
 		}
 
 		if (v.size() > 0) {
-			return v.elementAt(0);
+			return v.get(0);
 		}
 		return null;
 	}
@@ -217,7 +221,8 @@ public class Resizer extends Canvas {
 
 		rl.setSeparator(pos, getParent());
 
-		oldrg = startx = 0;
+		oldrg = 0;
+		startx = 0;
 	}
 
 	@Override
@@ -250,7 +255,8 @@ public class Resizer extends Canvas {
 			}
 			startx = x;
 			oldrg = x;
-			state = drag = true;
+			state = true;
+			drag = true;
 			paintLine(getParent(), (oldrg + bounds().x) - startx);
 			setCursor0(Frame.E_RESIZE_CURSOR);
 			return true;
@@ -264,7 +270,8 @@ public class Resizer extends Canvas {
 			if (state) {
 				paintLine(getParent(), (oldrg + bounds().x) - startx);
 				resizeme(x);
-				state = drag = false;
+				state = false;
+				drag = false;
 			}
 			return true;
 		}

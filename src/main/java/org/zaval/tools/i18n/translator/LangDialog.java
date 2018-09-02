@@ -47,8 +47,8 @@ class LangDialog extends Dialog {
 
 		label = new IELabel("List of languages");
 		constrain(this, label, 0, 0, 1, 1, GridBagConstraints.NONE, GridBagConstraints.WEST, 0.0, 0.0, 5, 5, 5, 5);
-		constrain(this, edit = new java.awt.List(10, true), 0, 1, 4, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST, 1.0, 0.0, 5,
-			5, 5, 5);
+		edit = new java.awt.List(10, true);
+		constrain(this, edit, 0, 1, 4, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST, 1.0, 0.0, 5, 5, 5, 5);
 
 		ok = new Button("Ok");
 		cancel = new Button("Cancel");

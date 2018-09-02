@@ -23,7 +23,7 @@ import org.zaval.awt.IELabel;
 
 class LangState {
 	TextAreaWrap tf;
-	boolean hidden = false;
+	boolean hidden;
 	IELabel label;
 	String name;
 	CheckboxMenuItem box;

@@ -23,12 +23,13 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 public class IniFile {
-	private final Vector<String> keys = new Vector<>();
-	private final Vector<Object> vals = new Vector<>();
-	private boolean dirty = false;
+	private final List<String> keys = new ArrayList<>();
+	private final List<Object> vals = new ArrayList<>();
+	private boolean dirty;
 
 	private final File file;
 
@@ -46,9 +47,9 @@ public class IniFile {
 		dirty = false;
 		try (PrintStream pr = new PrintStream(new FileOutputStream(file))) {
 			for (int j = 0; j < keys.size(); ++j) {
-				pr.print(keys.elementAt(j));
+				pr.print(keys.get(j));
 				pr.print("=");
-				pr.println(vals.elementAt(j));
+				pr.println(vals.get(j));
 			}
 		}
 	}
@@ -81,7 +82,7 @@ public class IniFile {
 					}
 				}
 				if (j != i) {
-					keys.addElement(line.substring(i, j));
+					keys.add(line.substring(i, j));
 				}
 				for (; j < k; ++j) {
 					ch = line.charAt(j);
@@ -90,7 +91,7 @@ public class IniFile {
 					}
 				}
 				if ((ch == '\n') || (ch == '\r') || (ch == '#')) {
-					vals.addElement("");
+					vals.add("");
 					continue;
 				}
 				for (++j; j < k; ++j) {
@@ -100,7 +101,7 @@ public class IniFile {
 					}
 				}
 				if ((ch == '\n') || (ch == '\r') || (ch == '#')) {
-					vals.addElement("");
+					vals.add("");
 					continue;
 				}
 				for (i = j; j < k; ++j) {
@@ -109,7 +110,7 @@ public class IniFile {
 						break;
 					}
 				}
-				vals.addElement(j != i ? line.substring(i, j).trim() : "");
+				vals.add(j != i ? line.substring(i, j).trim() : "");
 			}
 		}
 	}
@@ -117,11 +118,11 @@ public class IniFile {
 	public synchronized void putString(String key, String value) throws IOException {
 		int j = keys.indexOf(key);
 		if (j < 0) {
-			keys.addElement(key);
-			vals.addElement(value);
+			keys.add(key);
+			vals.add(value);
 		}
 		else {
-			vals.setElementAt(value, j);
+			vals.set(j, value);
 		}
 		dirty = true;
 		saveFile();
@@ -136,7 +137,7 @@ public class IniFile {
 		StringBuilder sb = new StringBuilder();
 		sb.append("[IniFile = ").append(file.toString()).append("]={");
 		for (int j = 0; j < keys.size(); ++j) {
-			sb.append("\n\t").append(keys.elementAt(j)).append("=").append(vals.elementAt(j));
+			sb.append("\n\t").append(keys.get(j)).append("=").append(vals.get(j));
 		}
 		sb.append("}");
 		return sb.toString();

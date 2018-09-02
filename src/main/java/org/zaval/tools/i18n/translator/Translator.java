@@ -55,7 +55,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.StringReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -87,19 +94,19 @@ import org.zaval.io.InputIniFile;
 import org.zaval.util.SafeResourceBundle;
 
 class Translator extends Frame implements TranslatorConstants, java.awt.event.AWTEventListener {
-	private MessageBox2 closeDialog = null;
-	private MessageBox2 delDialog = null;
-	private MessageBox2 errDialog = null;
-	private MessageBox2 repDialog = null;
+	private MessageBox2 closeDialog;
+	private MessageBox2 delDialog;
+	private MessageBox2 errDialog;
+	private MessageBox2 repDialog;
 
-	private EmulatedTextField keyName = null;
-	private Button keyInsertButton = null;
-	private Button keyDeleteButton = null;
-	private Button dropComment = null;
-	private IELabel keynLab = null;
-	private GraphTree tree = null;
-	private Panel textPanel = null;
-	private Vector<LangState> langStates = new Vector<>();
+	private EmulatedTextField keyName;
+	private Button keyInsertButton;
+	private Button keyDeleteButton;
+	private Button dropComment;
+	private IELabel keynLab;
+	private GraphTree tree;
+	private Panel textPanel;
+	private List<LangState> langStates = new ArrayList<>();
 	private String lastDirectory = ".";
 
 	// Options
@@ -128,13 +135,13 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 	// Context menus
 	private MenuItem ctNewMenu, ctNodeExpandMenu, ctNodeCollapseMenu, ctNodeDeleteMenu, ctNodeRenameMenu;
 
-	private EmulatedTextField commField = null;
+	private EmulatedTextField commField;
 	private IELabel sbl1, sbl2;
 
-	private ToolkitResolver imgres = null;
+	private ToolkitResolver imgres;
 	private boolean exitInitiated = true;
-	private boolean isDirty = false;
-	private String wasSelectedKey = null;
+	private boolean isDirty;
+	private String wasSelectedKey;
 	private String SYS_DIR;
 	private BundleManager bundle = new BundleManager();
 	private final Panel pane = new Panel();
@@ -151,24 +158,24 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 	private MenuItem[] tbar2menu;
 
 	private static final int MAX_PICK_LENGTH = 40;
-	private Vector<String> pickList = new Vector<>(8);
-	private int nullsCount = 0;
-	private int notCompletedCount = 0;
+	private List<String> pickList = new ArrayList<>(8);
+	private int nullsCount;
+	private int notCompletedCount;
 
 	// search
-	private String searchCriteria = null;
-	private String lastKeyFound = null;
-	private boolean searchRegex = false;
+	private String searchCriteria;
+	private String lastKeyFound;
+	private boolean searchRegex;
 	private boolean searchData = true;
-	private boolean searchMask = false;
+	private boolean searchMask;
 	private boolean searchCase = true;
 	private boolean replacePrompt = true;
-	private boolean replaceAll = false;
-	private String replaceTo = null;
-	private BundleItem curItemForReplace = null;
-	private LangItem curLangForReplace = null;
+	private boolean replaceAll;
+	private String replaceTo;
+	private BundleItem curItemForReplace;
+	private LangItem curLangForReplace;
 
-	private final Vector<Component> tabOrder = new Vector<>();
+	private final List<Component> tabOrder = new ArrayList<>();
 
 	public Translator(String s, SafeResourceBundle res) {
 		init(s, res);
@@ -230,8 +237,10 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 		setIconImage(imgres.getImage(SYS_DIR + "jrc-editor.gif"));
 
 		StatusBar panel3 = new StatusBar/*Panel*/();
-		panel3.add(new StatusBarElement(sbl1 = new IELabel(), 20));
-		panel3.add(new StatusBarElement(sbl2 = new IELabel(), 80));
+		sbl1 = new IELabel();
+		panel3.add(new StatusBarElement(sbl1, 20));
+		sbl2 = new IELabel();
+		panel3.add(new StatusBarElement(sbl2, 80));
 		StatusBarElement se = new StatusBarStubbElement(new Panel(), 0, new Dimension(22, 19));
 		se.setLayout(new FlowLayout(FlowLayout.LEFT, 1, 2));
 		se.setType(0);
@@ -244,15 +253,21 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 		ContextMenuBar mbar = new ContextMenuBar(this);
 
 		ContextMenu _ctNewMenu = new ContextMenu("");
-		_ctNewMenu.add(ctNewMenu = new MenuItem(RC("tools.translator.menu.insert")));
+		ctNewMenu = new MenuItem(RC("tools.translator.menu.insert"));
+		_ctNewMenu.add(ctNewMenu);
 		mbar.add(_ctNewMenu);
 
 		ContextMenu _ctNodeMenu = new ContextMenu("");
-		_ctNodeMenu.add(ctNewMenu = new MenuItem(RC("tools.translator.menu.insert")));
-		_ctNodeMenu.add(ctNodeExpandMenu = new MenuItem(RC("tools.translator.menu.expand")));
-		_ctNodeMenu.add(ctNodeCollapseMenu = new MenuItem(RC("tools.translator.menu.collapse")));
-		_ctNodeMenu.add(ctNodeDeleteMenu = new MenuItem(RC("tools.translator.menu.delete")));
-		_ctNodeMenu.add(ctNodeRenameMenu = new MenuItem(RC("tools.translator.menu.rename")));
+		ctNewMenu = new MenuItem(RC("tools.translator.menu.insert"));
+		_ctNodeMenu.add(ctNewMenu);
+		ctNodeExpandMenu = new MenuItem(RC("tools.translator.menu.expand"));
+		_ctNodeMenu.add(ctNodeExpandMenu);
+		ctNodeCollapseMenu = new MenuItem(RC("tools.translator.menu.collapse"));
+		_ctNodeMenu.add(ctNodeCollapseMenu);
+		ctNodeDeleteMenu = new MenuItem(RC("tools.translator.menu.delete"));
+		_ctNodeMenu.add(ctNodeDeleteMenu);
+		ctNodeRenameMenu = new MenuItem(RC("tools.translator.menu.rename"));
+		_ctNodeMenu.add(ctNodeRenameMenu);
 		mbar.add(_ctNodeMenu);
 		tree.setMenuBar(mbar);
 
@@ -816,8 +831,7 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 
 		if (e.target instanceof MenuItem) {
 			String lbl = ((MenuItem) e.target).getLabel();
-			for (int j = 0; j < pickList.size(); ++j) {
-				String path = pickList.elementAt(j);
+			for (String path : pickList) {
 				String patz = stretchPath(path);
 				if (patz.equals(lbl)) {
 					clear();
@@ -1048,7 +1062,7 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 		validate();
 		isDirty = false;
 		bundle = new BundleManager();
-		langStates = new Vector<>();
+		langStates = new ArrayList<>();
 
 		closeMenu.disable();
 		saveBundleMenu.disable();
@@ -1058,7 +1072,7 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 	}
 
 	private LangState getLangState(int idx) {
-		return langStates.elementAt(idx);
+		return langStates.get(idx);
 	}
 
 	private int getVisLangCount() {
@@ -1438,7 +1452,7 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 		isDirty = false;
 	}
 
-	private SafeResourceBundle rcTable = null;
+	private SafeResourceBundle rcTable;
 
 	private String RC(String key) {
 		return rcTable.getString(key);
@@ -1461,9 +1475,7 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 			for (int i = 0; i < items; ++i) {
 				BundleItem bi = set.getItem(i);
 				BundleItem bi2 = bundle.getBundle().addKey(bi.getId());
-				Enumeration<String> en = bi.getLanguages();
-				while (en.hasMoreElements()) {
-					String lang = en.nextElement();
+				for (String lang : bi.getLanguages()) {
 					bundle.getBundle().addLanguage(lang);
 					bi2.setTranslation(lang, bi.getTranslation(lang));
 				}
@@ -1562,7 +1574,7 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 			}
 		});
 
-		langStates.addElement(ls);
+		langStates.add(ls);
 		langMenu.add(ls.box);
 
 		constrain(textPanel, ls.label, 0, i + 2, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 10, 3, 0, 3);
@@ -1725,7 +1737,7 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 			if (filename != null) {
 				filename = bundle.replace(filename, "\\", "/");
 				JavaParser parser = new JavaParser(new FileInputStream(filename));
-				Hashtable<String, String> ask = parser.parse();
+				Map<String, String> ask = parser.parse();
 				if (ask.size() == 0) {
 					ask.put("empty", "");
 				}
@@ -1838,8 +1850,8 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 	}
 
 	private void linkPickList() {
-		for (int j = 0; j < pickList.size(); ++j) {
-			String patz = stretchPath(pickList.elementAt(j));
+		for (String aPickList : pickList) {
+			String patz = stretchPath(aPickList);
 			MenuItem item = new MenuItem(patz);
 			fileMenu.add(item);
 		}
@@ -1855,14 +1867,14 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 		}
 
 		int j;
-		String s1 = stretchPath(pickList.elementAt(0));
+		String s1 = stretchPath(pickList.get(0));
 		for (j = 0; j < fileMenu.countItems(); ++j) {
 			String patz = fileMenu.getItem(j).getLabel();
 			if (patz.equals(s1)) {
 				break;
 			}
 		}
-		pickList = new Vector<>();
+		pickList = new ArrayList<>();
 		if (j >= fileMenu.countItems()) {
 			return;
 		}
@@ -1883,7 +1895,7 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 		String path = System.getProperty("user.home") + "/.jrc-editor.conf";
 		try {
 			InputIniFile ini = new InputIniFile(path);
-			Hashtable<String, String> tbl = ini.getTable();
+			Map<String, String> tbl = ini.getItems();
 
 			for (String key : tbl.keySet()) {
 				String val = tbl.get(key);
@@ -1894,9 +1906,9 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 					key = key.substring(key.indexOf('.') + 1);
 					int pickLevel = Integer.parseInt(key);
 					while (pickList.size() <= pickLevel) {
-						pickList.addElement(null);
+						pickList.add(null);
 					}
-					pickList.setElementAt(val, pickLevel);
+					pickList.set(pickLevel, val);
 				}
 				catch (Exception error) {
 					error.printStackTrace();
@@ -1919,9 +1931,9 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 		}
 
 		for (int j = 0; j < pickList.size(); ++j) {
-			Object obj = pickList.elementAt(j);
+			Object obj = pickList.get(j);
 			if (obj == null) {
-				pickList.removeElementAt(j);
+				pickList.remove(j);
 				--j;
 			}
 		}
@@ -1934,16 +1946,16 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 			return;
 		}
 		for (; j < pickList.size(); ++j) {
-			String v1 = pickList.elementAt(j);
+			String v1 = pickList.get(j);
 			if (v1.equals(name)) {
-				pickList.removeElementAt(j);
+				pickList.remove(j);
 				--j;
 			}
 		}
 
-		pickList.insertElementAt(name, 0);
+		pickList.add(0, name);
 		while (pickList.size() >= 8) {
-			pickList.removeElementAt(7);
+			pickList.remove(7);
 		}
 		saveIni();
 	}
@@ -1953,7 +1965,7 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 			String path = System.getProperty("user.home") + "/.jrc-editor.conf";
 			IniFile ini = new IniFile(path);
 			for (int j = 0; j < pickList.size(); ++j) {
-				ini.putString("picklist." + j, pickList.elementAt(j));
+				ini.putString("picklist." + j, pickList.get(j));
 			}
 
 			ini.putString("keepLastDir", keepLastDir ? "Y" : "N");
@@ -2022,10 +2034,8 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 					out.writeChars("<xml>\n");
 					for (int i = 0; i < items; ++i) {
 						BundleItem bi = set.getItem(i);
-						Enumeration<String> en = bi.getLanguages();
 						out.writeChars("\t<key name=\"" + bi.getId() + "\">\n");
-						while (en.hasMoreElements()) {
-							String lang = en.nextElement();
+						for (String lang : bi.getLanguages()) {
 							if (part && !inArray(parts, lang)) {
 								continue;
 							}
@@ -2063,10 +2073,8 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 					out.writeChars("#JRC Editor: do not modify this line\r\n\r\n");
 					for (int i = 0; i < items; ++i) {
 						BundleItem bi = set.getItem(i);
-						Enumeration<String> en = bi.getLanguages();
 						out.writeChars("KEY=\"" + bi.getId() + "\":\r\n");
-						while (en.hasMoreElements()) {
-							String lang = en.nextElement();
+						for (String lang : bi.getLanguages()) {
 							if (part && !inArray(parts, lang)) {
 								continue;
 							}
@@ -2101,16 +2109,17 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 
 			try {
 				in.readChar(); // skip UCS16 marker FEFF
-				for (; ; ) {
+				for (;;) {
 					buf.append(in.readChar());
 				}
-			} catch (EOFException eof) {
+			}
+			catch (EOFException eof) {
 			}
 		}
 		return buf.toString();
 	}
 
-	private void fillTable(Hashtable<String, String> tbl) {
+	private void fillTable(Map<String, String> tbl) {
 		for (String k : tbl.keySet()) {
 			StringTokenizer st = new StringTokenizer(k, "!");
 			String key = st.nextToken();
@@ -2143,8 +2152,7 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 
 			try {
 				XmlReader xml = new XmlReader(getBody(filename));
-				Hashtable<String, String> tbl = xml.getTable();
-				fillTable(tbl);
+				fillTable(xml.flatten());
 			}
 			catch (Exception e) {
 				infoException(e);
@@ -2167,7 +2175,7 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 			bundle.getBundle().addLanguage("en");
 			try {
 				UtfParser parser = new UtfParser(new StringReader(getBody(filename)));
-				Hashtable<String, String> tbl = parser.parse();
+				Map<String, String> tbl = parser.parse();
 				fillTable(tbl);
 			}
 			catch (Exception e) {
@@ -2206,7 +2214,7 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 		int idx = tabOrder.indexOf(focused);
 		if (idx >= 0) {
 			if ((idx + 1) < tabOrder.size()) {
-				Component c = tabOrder.elementAt(idx + 1);
+				Component c = tabOrder.get(idx + 1);
 				c.requestFocus();
 				return;
 			}
@@ -2288,16 +2296,15 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 		}
 
 		BundleItem biOldAlone = bundle.getBundle().getItem(oldKeyName);
-		Enumeration<BundleItem> en = bundle.getBundle().getKeysBeginningWith(oldKeyName);
-		while (en.hasMoreElements()) {
-			BundleItem biOld = en.nextElement();
-
+		List<BundleItem> en = bundle.getBundle().getKeysBeginningWith(oldKeyName);
+		Map<String, String> oldValues = new HashMap<>();
+		for (BundleItem biOld : en) {
+			oldValues.clear();
 			String newKey = newKeyName;
 			if (biOldAlone == null) {
 				newKey = newKeyName + biOld.getId().substring(oldKeyName.length());
 			}
 
-			Hashtable<String, String> oldValues = new Hashtable<>();
 			int k = bundle.getBundle().getLangCount();
 			BundleItem biNew = bundle.getBundle().getItem(newKey);
 			if (biNew != null) {

@@ -81,8 +81,10 @@ class ReplaceDialog extends EditDialog {
 		super(f, s, b, l);
 
 		cg2 = new IERadioButton[2];
-		cg2[0] = regex = new IERadioButton("", false);
-		cg2[1] = exact = new IERadioButton("", true);
+		regex = new IERadioButton("", false);
+		cg2[0] = regex;
+		exact = new IERadioButton("", true);
+		cg2[1] = exact;
 		cases = new IECheckbox("");
 		cases.setState(true);
 		prompt = new IECheckbox("");

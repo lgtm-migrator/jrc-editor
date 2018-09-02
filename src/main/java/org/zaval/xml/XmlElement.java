@@ -24,17 +24,18 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class XmlElement {
 
-	private final Hashtable<String, String> attributes;
-	private final Vector<XmlElement> children;
+	private final Map<String, String> attributes;
+	private final List<XmlElement> children;
 	private String name;
 	private String contents;
-	private final Hashtable<String, char[]> entities;
+	private final Map<String, char[]> entities;
 
 	private final boolean ignoreCase;
 	private final boolean ignoreWhitespace;
@@ -43,17 +44,16 @@ public class XmlElement {
 	private int parserLineNr;
 
 	public XmlElement() {
-		this(new Hashtable<>(), false, true, true);
+		this(new HashMap<>(), false, true, true);
 	}
 
-	private XmlElement(Hashtable<String, char[]> entities, boolean skipLeadingWhitespace, boolean fillBasicConversionTable,
-		boolean ignoreCase) {
+	private XmlElement(Map<String, char[]> entities, boolean skipLeadingWhitespace, boolean fillBasicConversionTable, boolean ignoreCase) {
 		this.ignoreWhitespace = skipLeadingWhitespace;
 		this.ignoreCase = ignoreCase;
 		this.name = null;
 		this.contents = "";
-		this.attributes = new Hashtable<>();
-		this.children = new Vector<>();
+		this.attributes = new HashMap<>();
+		this.children = new ArrayList<>();
 		this.entities = entities;
 		if (fillBasicConversionTable) {
 			this.entities.put("amp", new char[] { '&' });
@@ -65,7 +65,7 @@ public class XmlElement {
 	}
 
 	private void addChild(XmlElement child) {
-		this.children.addElement(child);
+		this.children.add(child);
 	}
 
 	private void setAttribute(String name, Object value) {
@@ -75,8 +75,8 @@ public class XmlElement {
 		this.attributes.put(name, value.toString());
 	}
 
-	public Enumeration<XmlElement> enumerateChildren() {
-		return this.children.elements();
+	public List<XmlElement> children() {
+		return this.children;
 	}
 
 	public String getContent() {
@@ -172,20 +172,19 @@ public class XmlElement {
 			writer.print(this.name);
 			writer.write('>');
 		}
-		else if (this.children.isEmpty()) {
-			writer.print('/');
-			writer.print('>');
-		}
 		else {
-			writer.print('>');
-			Enumeration<XmlElement> e = this.enumerateChildren();
-			while (e.hasMoreElements()) {
-				XmlElement child = e.nextElement();
-				child.write(writer);
+			if (this.children.isEmpty()) {
+				writer.print('/');
 			}
-			writer.print('<');
-			writer.print('/');
-			writer.print(this.name);
+			else {
+				writer.print('>');
+				for (XmlElement child : this.children()) {
+					child.write(writer);
+				}
+				writer.print('<');
+				writer.print('/');
+				writer.print(this.name);
+			}
 			writer.print('>');
 		}
 	}
@@ -230,11 +229,11 @@ public class XmlElement {
 					writer.write(';');
 					break;
 				default:
-					if (((int) ch < 32) || ((int) ch > 126)) {
+					if ((ch < 32) || (ch > 126)) {
 						writer.write('&');
 						writer.write('#');
 						writer.write('x');
-						writer.print(Integer.toString((int) ch, 16));
+						writer.print(Integer.toString(ch, 16));
 						writer.write(';');
 					}
 					else {

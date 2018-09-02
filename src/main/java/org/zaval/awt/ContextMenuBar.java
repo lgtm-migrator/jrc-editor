@@ -30,7 +30,7 @@ public class ContextMenuBar extends MenuBar {
 	final static int EV_MENU_REDRAWALL = EV_MENU_REDRAW + 3;
 
 	private Container parent;
-	private ContextMenu act_menu = null;
+	private ContextMenu act_menu;
 	private boolean first = true;
 
 	public ContextMenuBar(Container a_parent) {

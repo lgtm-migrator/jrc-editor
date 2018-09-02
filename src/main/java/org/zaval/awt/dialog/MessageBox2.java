@@ -33,7 +33,8 @@ import java.awt.LayoutManager;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.zaval.awt.AlignConstants;
 import org.zaval.awt.ResultField;
@@ -41,12 +42,12 @@ import org.zaval.awt.StaticImage;
 import org.zaval.awt.TextAlignArea;
 
 public class MessageBox2 extends Dialog implements LayoutManager {
-	private StaticImage icon = null;
-	private Vector<Button> buttons = null;
+	private StaticImage icon;
+	private List<Button> buttons;
 	private final ResultField text;
-	private Color storedColor = null;
+	private Color storedColor;
 
-	private final Vector<Component> listeners = new Vector<>();
+	private final List<Component> listeners = new ArrayList<>();
 
 	private static final int INDENT = 10;
 	private static final int ICON_TEXT_GAP = 5;
@@ -94,7 +95,7 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 			icon.setBackground(c);
 		}
 		for (int i = 0; (buttons != null) && (i < buttons.size()); i++) {
-			buttons.elementAt(i).setBackground(c);
+			buttons.get(i).setBackground(c);
 		}
 		super.setBackground(c);
 	}
@@ -108,20 +109,20 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 		if (icon != null) {
 			icon.setForeground(c);
 		}
-		for (int i = 0; i < buttons.size(); i++) {
-			buttons.elementAt(i).setForeground(c);
+		for (Button button : buttons) {
+			button.setForeground(c);
 		}
 	}
 
-	private void setButtons(Vector<Button> b) {
+	private void setButtons(List<Button> b) {
 		if (buttons != null) {
-			for (int i = 0; i < buttons.size(); i++) {
-				remove(buttons.elementAt(i));
+			for (Button button : buttons) {
+				remove(button);
 			}
 		}
 		buttons = b;
-		for (int i = 0; i < buttons.size(); i++) {
-			add(buttons.elementAt(i));
+		for (Button button : buttons) {
+			add(button);
 		}
 		invalidate();
 		validate();
@@ -129,17 +130,17 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 
 	public void setButtons(String[] sa) {
 		int j;
-		Vector<Button> z = new Vector<>(sa.length);
+		List<Button> z = new ArrayList<>(sa.length);
 		for (j = 0; j < sa.length; ++j) {
 			Button b = new Button(sa[j]);
-			z.addElement(b);
+			z.add(b);
 		}
 		setButtons(z);
 	}
 
 	public void setButtons(String one) {
-		Vector<Button> z = new Vector<>();
-		z.addElement(new Button(one));
+		List<Button> z = new ArrayList<>();
+		z.add(new Button(one));
 		setButtons(z);
 	}
 
@@ -159,7 +160,7 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 	}
 
 	public void addListener(Component ls) {
-		listeners.addElement(ls);
+		listeners.add(ls);
 	}
 
 	@Override
@@ -219,7 +220,7 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 	}
 
 	private Button getButton(int z) {
-		return buttons.elementAt(z);
+		return buttons.get(z);
 	}
 
 	private Dimension getButtonsSize() {
@@ -228,7 +229,6 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 		}
 		int h = 23, w = 48; // minimum height and width
 		for (int i = 0; i < buttons.size(); i++) {
-			getButton(i);
 			Dimension d = getButton(i).preferredSize();
 			h = Math.max(d.height, h);
 			w = Math.max(d.width, w);

@@ -31,8 +31,8 @@ public class IELabel extends Canvas {
 	private static final int RIGHT = 2;
 	private static final int FIT = 3;
 
-	private int wsize = 0;
-	private int hsize = 0;
+	private int wsize;
+	private int hsize;
 
 	private int ascent;
 

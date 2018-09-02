@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 class SrcGenerator {
-	private PrintStream out;
-	private String filename;
+	private final PrintStream out;
+	private final String filename;
 
 	SrcGenerator(String filename) throws IOException {
 		FileOutputStream fop = new FileOutputStream(filename);

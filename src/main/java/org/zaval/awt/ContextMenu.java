@@ -27,19 +27,20 @@ import java.awt.Menu;
 import java.awt.MenuItem;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ContextMenu extends Menu {
-	private Rectangle size = null;
-	private int htext = 0;
-	private int stap = 0;
-	private int vdist = 0;
-	private int hdist = 0;
-	private int msize = 0;
-	private int act_option = 0;
-	private int prev_option = 0;
+	private Rectangle size;
+	private int htext;
+	private int stap;
+	private int vdist;
+	private int hdist;
+	private int msize;
+	private int act_option;
+	private int prev_option;
 	private final Color col_mark = new Color(128);
-	private final Hashtable<String, String> types = new Hashtable<>();
+	private final Map<String, String> types = new HashMap<>();
 
 	public ContextMenu(String name) {
 		super(name);
@@ -304,18 +305,14 @@ public class ContextMenu extends Menu {
 		for (int i = 0; i < num; i++) {
 			if (act_option < (num - 1)) {
 				act_option++;
-				if (getItem(act_option).getLabel().equals("-")) {
-					continue;
-				}
-				return true;
 			}
 			else {
 				act_option = 0;
-				if (getItem(act_option).getLabel().equals("-")) {
-					continue;
-				}
-				return true;
 			}
+			if (getItem(act_option).getLabel().equals("-")) {
+				continue;
+			}
+			return true;
 		}
 		return false;
 	}
@@ -329,18 +326,14 @@ public class ContextMenu extends Menu {
 		for (int i = 0; i < num; i++) {
 			if (act_option > 0) {
 				act_option--;
-				if (getItem(act_option).getLabel().equals("-")) {
-					continue;
-				}
-				return true;
 			}
 			else {
 				act_option = (num - 1);
-				if (getItem(act_option).getLabel().equals("-")) {
-					continue;
-				}
-				return true;
 			}
+			if (getItem(act_option).getLabel().equals("-")) {
+				continue;
+			}
+			return true;
 		}
 		return false;
 	}

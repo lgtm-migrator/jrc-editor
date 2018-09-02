@@ -17,8 +17,10 @@
 
 package org.zaval.awt;
 
-import java.util.Hashtable;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.zaval.awt.peer.TreeNode;
 
@@ -28,17 +30,17 @@ public class LevelTree {
 	private static final int NEXT = CHILD + 1;
 	private static final int LAST = CHILD + 2;
 
-	Vector<TreeNode> e = new Vector<>(); // e is vector of existing nodes
-	Vector<TreeNode> v = new Vector<>(); // v is vector of viewable nodes
+	List<TreeNode> e = new ArrayList<>(); // e is vector of existing nodes
+	List<TreeNode> v = new ArrayList<>(); // v is vector of viewable nodes
 	private TreeNode rootNode; // root node of tree
 	private ImageResolver imgres; // To autosetup
 
 	private int count; // Number of nodes in the tree
-	private int viewCount = 0;// Number of viewable nodes in the tree (A node is viewable if all of its parents are expanded.)
+	private int viewCount;// Number of viewable nodes in the tree (A node is viewable if all of its parents are expanded.)
 
 	private final String delim = ".";
 
-	private Hashtable<String, TreeNode> nameCache = new Hashtable<>();
+	private final Map<String, TreeNode> nameCache = new HashMap<>();
 
 	public LevelTree() {
 		count = 0;
@@ -89,7 +91,7 @@ public class LevelTree {
 			return true;
 		}
 		for (int i = 0; i < count; i++) {
-			if (node == e.elementAt(i)) {
+			if (node == e.get(i)) {
 				return true;
 			}
 		}
@@ -105,7 +107,7 @@ public class LevelTree {
 			return nameCache.get(name);
 		}
 		for (int i = 0; i < count; i++) {
-			TreeNode tn = e.elementAt(i);
+			TreeNode tn = e.get(i);
 			if (name.equals(tn.text)) {
 				return tn;
 			}
@@ -142,7 +144,7 @@ public class LevelTree {
 			rootNode = newNode;
 			rootNode.setDepth(0);
 			rootNode.setStringProperty("PATH", "");
-			e.addElement(rootNode);
+			e.add(rootNode);
 			count = 1;
 		}
 		else {
@@ -161,7 +163,7 @@ public class LevelTree {
 				prop += delim;
 			}
 			newNode.setStringProperty("PATH", prop + newNode.text);
-			e.addElement(newNode);
+			e.add(newNode);
 			count++;
 		}
 		else {
@@ -190,7 +192,7 @@ public class LevelTree {
 		tempNode.sibling = newNode;
 		newNode.parent = tempNode.parent;
 		newNode.setDepth(tempNode.getDepth());
-		e.addElement(newNode);
+		e.add(newNode);
 		count++;
 		setResolver(newNode, imgres);
 	}
@@ -257,8 +259,8 @@ public class LevelTree {
 
 	private void recount() {
 		count = 0;
-		e = new Vector<>();
-		nameCache = new Hashtable<>();
+		e = new ArrayList<>();
+		nameCache.clear();
 
 		if (rootNode != null) {
 			rootNode.depth = 0;
@@ -268,7 +270,7 @@ public class LevelTree {
 
 	private void traverse(TreeNode node) {
 		count++;
-		e.addElement(node);
+		e.add(node);
 		nameCache.put(node.text, node);
 
 		if (node.child != null) {
@@ -285,7 +287,7 @@ public class LevelTree {
 		// Traverses tree to put nodes into vector v
 		// for internal processing. Depths of nodes are set,
 		// and viewCount and viewWidest is set.
-		v = new Vector<>(count);
+		v = new ArrayList<>(count);
 
 		if (count < 1) {
 			viewCount = 0;
@@ -303,7 +305,7 @@ public class LevelTree {
 		nameCache.put(node.text, node);
 
 		if (!node.hidden) {
-			v.addElement(node);
+			v.add(node);
 			if (node.isExpanded()) {
 				if (node.child != null) {
 					node.child.depth = node.depth + 1;
@@ -330,7 +332,7 @@ public class LevelTree {
 		}
 		int i;
 		for (i = 0; i < e.size(); ++i) {
-			TreeNode c = e.elementAt(i);
+			TreeNode c = e.get(i);
 			c.setResolver(imgres);
 		}
 	}
@@ -340,8 +342,7 @@ public class LevelTree {
 		if (e == null) {
 			return;
 		}
-		for (int i = 0; i < e.size(); i++) {
-			TreeNode tn = e.elementAt(i);
+		for (TreeNode tn : e) {
 			tn.expand();
 		}
 	}
@@ -351,8 +352,7 @@ public class LevelTree {
 		if (e == null) {
 			return;
 		}
-		for (int i = 0; i < e.size(); i++) {
-			TreeNode tn = e.elementAt(i);
+		for (TreeNode tn : e) {
 			tn.collapse();
 		}
 	}

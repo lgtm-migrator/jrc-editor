@@ -21,7 +21,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class SafeResourceBundle {
-	private ResourceBundle rb = null;
+	private ResourceBundle rb;
 
 	private static final String FAILURE_STRING = "?????";
 

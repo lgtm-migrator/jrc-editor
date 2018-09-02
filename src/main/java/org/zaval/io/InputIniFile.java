@@ -20,14 +20,15 @@ package org.zaval.io;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 public class InputIniFile {
-	private final Hashtable<String, String> hash = new Hashtable<>();
-	private String postponed = null;
+	private final Map<String, String> hash = new HashMap<>();
+	private String postponed;
 
-	public Hashtable<String, String> getTable() {
+	public Map<String, String> getItems() {
 		return hash;
 	}
 

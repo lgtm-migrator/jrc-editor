@@ -19,8 +19,8 @@ package org.zaval.tools.i18n.translator;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.zaval.xml.XmlElement;
 import org.zaval.xml.XmlParseException;
@@ -33,17 +33,15 @@ class XmlReader {
 		xml.parse(new StringReader(body));
 	}
 
-	public Hashtable<String, String> getTable() {
-		Hashtable<String, String> ask = new Hashtable<>();
-		Enumeration<XmlElement> en = xml.enumerateChildren();
-		while (en.hasMoreElements()) {
-			XmlElement child = en.nextElement();
+	public Map<String, String> flatten() {
+		Map<String, String> ask = new HashMap<>();
+		for (XmlElement child : xml.children()) {
 			getTable(ask, child, "");
 		}
 		return ask;
 	}
 
-	private void getTable(Hashtable<String, String> place, XmlElement root, String prefix) {
+	private void getTable(Map<String, String> place, XmlElement root, String prefix) {
 		String xmap = (String) root.getAttribute("lang");
 		if (xmap == null) {
 			xmap = (String) root.getAttribute("name");
@@ -53,14 +51,11 @@ class XmlReader {
 		}
 		String name = prefix + xmap + "!";
 
-		Enumeration<XmlElement> en;
 		if (root.getContent() != null) {
 			place.put(prefix + xmap, root.getContent());
 		}
 
-		en = root.enumerateChildren();
-		while (en.hasMoreElements()) {
-			XmlElement child = en.nextElement();
+		for (XmlElement child : root.children()) {
 			getTable(place, child, name);
 		}
 	}

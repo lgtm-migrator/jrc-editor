@@ -24,7 +24,7 @@ import java.awt.Rectangle;
 class AlignArea extends Align {
 	private Dimension size = new Dimension(0, 0);
 	private Insets insets = new Insets(0, 0, 0, 0);
-	private boolean isValid = false;
+	private boolean isValid;
 	private Rectangle rect;
 
 	@Override

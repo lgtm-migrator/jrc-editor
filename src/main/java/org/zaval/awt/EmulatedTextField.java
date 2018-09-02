@@ -41,7 +41,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 public class EmulatedTextField extends Canvas implements KeyListener, MouseListener, FocusListener, ActionListener {
-	private static EmulatedTextField cursorOwner = null;
+	private static EmulatedTextField cursorOwner;
 
 	StringBuffer buffer = new StringBuffer();
 	final Insets insets = new Insets(2, 5, 2, 5);
@@ -51,10 +51,10 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 	private final Dimension cursorSize = new Dimension(0, 0);
 	final Point shift = new Point(0, 0);
 	private final Color cursorColor = Color.black;
-	int cursorPos = 0;
-	private int selPos = 0, selWidth = 0, startSel = 0;
+	int cursorPos;
+	private int selPos, selWidth, startSel;
 	private final PopupMenu menu;
-	private int minSize = 0;
+	private final int minSize;
 
 	public EmulatedTextField() {
 		this(0);
@@ -69,13 +69,16 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 		MenuItem mi1;
 		menu = new PopupMenu();
 		add(menu);
-		menu.add(mi1 = new MenuItem("Cut"));
+		mi1 = new MenuItem("Cut");
+		menu.add(mi1);
 		mi1.addActionListener(this);
 		mi1.setActionCommand("Cut");
-		menu.add(mi1 = new MenuItem("Copy"));
+		mi1 = new MenuItem("Copy");
+		menu.add(mi1);
 		mi1.addActionListener(this);
 		mi1.setActionCommand("Copy");
-		menu.add(mi1 = new MenuItem("Paste"));
+		mi1 = new MenuItem("Paste");
+		menu.add(mi1);
 		mi1.addActionListener(this);
 		mi1.setActionCommand("Paste");
 		menu.addActionListener(this);
@@ -441,7 +444,7 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 		repaintPart();
 	}
 
-	private long clickTime = 0;
+	private long clickTime;
 
 	@Override
 	public void mouseClicked(MouseEvent e) {

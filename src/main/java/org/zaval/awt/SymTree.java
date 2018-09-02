@@ -50,10 +50,10 @@ class SymTree extends Panel implements ScrollArea, ScrollObject {
 	private final ScrollController sm;
 
 	private Image im1; // offscreen image
-	private Graphics g1 = null; // offscreen graphics context
-	boolean noChoice = false;
+	private Graphics g1; // offscreen graphics context
+	boolean noChoice;
 
-	private int posx = 0, posy = 0;
+	private int posx, posy;
 	private final Dimension scrollInsets = new Dimension(10, 0);
 	private final LevelTree ltree;
 	private final ScrollLayout sl = new ScrollLayout();
@@ -64,8 +64,10 @@ class SymTree extends Panel implements ScrollArea, ScrollObject {
 	SymTree() {
 		super.setLayout(sl);
 
-		add("East", sbV = new Scrollbar(Scrollbar.VERTICAL));
-		add("South", sbH = new Scrollbar(Scrollbar.HORIZONTAL));
+		sbV = new Scrollbar(Scrollbar.VERTICAL);
+		add("East", sbV);
+		sbH = new Scrollbar(Scrollbar.HORIZONTAL);
+		add("South", sbH);
 		add("Stubb", new StubbComponent());
 
 		sbV.hide();
@@ -172,14 +174,14 @@ class SymTree extends Panel implements ScrollArea, ScrollObject {
 			}
 
 			if (index > 0) {
-				changeSelection(ltree.v.elementAt(index - 1), index - 1);
+				changeSelection(ltree.v.get(index - 1), index - 1);
 			}
 			else if (viewCount > 0) {
 				try {
-					changeSelection(ltree.v.elementAt(1), 1);
+					changeSelection(ltree.v.get(1), 1);
 				}
 				catch (Exception e) {
-					changeSelection(ltree.v.elementAt(0), 0);
+					changeSelection(ltree.v.get(0), 0);
 				}
 			}
 		}
@@ -273,7 +275,7 @@ class SymTree extends Panel implements ScrollArea, ScrollObject {
 		return (super.handleEvent(event));
 	}
 
-	private long time = 0;
+	private long time;
 
 	@Override
 	public boolean mouseUp(Event event, int x, int y) {
@@ -321,14 +323,14 @@ class SymTree extends Panel implements ScrollArea, ScrollObject {
 			case Event.UP:
 				if (index > 0) {
 					index--;
-					changeSelection(ltree.v.elementAt(index), index);
+					changeSelection(ltree.v.get(index), index);
 					sendActionEvent(event);
 				}
 				break;
 			case Event.DOWN:
 				if (index < (viewCount - 1)) {
 					index++;
-					changeSelection(ltree.v.elementAt(index), index);
+					changeSelection(ltree.v.get(index), index);
 					sendActionEvent(event);
 				}
 				break;
@@ -369,13 +371,13 @@ class SymTree extends Panel implements ScrollArea, ScrollObject {
 			}
 				break;
 			case Event.HOME: {
-				f = ltree.v.elementAt(0);
+				f = ltree.v.get(0);
 				changeSelection(f, 0);
 				sendActionEvent(event);
 			}
 				break;
 			case Event.END: {
-				f = ltree.v.elementAt(ltree.v.size() - 1);
+				f = ltree.v.get(ltree.v.size() - 1);
 				changeSelection(f, ltree.v.size() - 1);
 				sendActionEvent(event);
 			}
@@ -433,7 +435,7 @@ class SymTree extends Panel implements ScrollArea, ScrollObject {
 		}
 
 		for (int i = 0; (i <= index) && (i < ltree.v.size()); ++i) {
-			TreeNode tmpNode = ltree.v.elementAt(i);
+			TreeNode tmpNode = ltree.v.get(i);
 			if (tmpNode.getHide()) {
 				++index;
 			}
@@ -444,7 +446,7 @@ class SymTree extends Panel implements ScrollArea, ScrollObject {
 		}
 
 		TreeNode oldNode = selectedNode;
-		TreeNode newNode = ltree.v.elementAt(index);
+		TreeNode newNode = ltree.v.get(index);
 		int newDepth = newNode.getDepth();
 
 		// check click in place plus/minus
@@ -629,7 +631,7 @@ class SymTree extends Panel implements ScrollArea, ScrollObject {
 			TreeNode node = null;
 			// This block is better than synchronization for every call to LevelTree
 			try {
-				node = ltree.v.elementAt(i);
+				node = ltree.v.get(i);
 			}
 			catch (Exception e) {
 			}
@@ -713,7 +715,7 @@ class SymTree extends Panel implements ScrollArea, ScrollObject {
 	private int getMaxWidth() {
 		int max = 0;
 		for (int i = 0; i < ltree.v.size(); i++) {
-			TreeNode node = ltree.v.elementAt(i);
+			TreeNode node = ltree.v.get(i);
 			if (node.getHide()) {
 				continue;
 			}
@@ -753,11 +755,8 @@ class SymTree extends Panel implements ScrollArea, ScrollObject {
 		if (eraseBackground) {
 			g1.setColor(bg);
 			g1.fillRect(textOffset - 1, yPosition + 1, fm.stringWidth(text) + 4, cellSize - 1);
-			g1.setColor(fg);
 		}
-		else {
-			g1.setColor(fg);
-		}
+		g1.setColor(fg);
 
 		// position of font baseline from bottom of cell
 		int textBaseLine = 3;
@@ -978,7 +977,7 @@ class SymTree extends Panel implements ScrollArea, ScrollObject {
 		if (pg < 0) {
 			pg = 0;
 		}
-		changeSelection(ltree.v.elementAt(pg), pg);
+		changeSelection(ltree.v.get(pg), pg);
 		repaint();
 		vscroll(lines);
 	}

@@ -25,8 +25,8 @@ import java.util.Locale;
 import org.zaval.awt.EmulatedTextArea;
 
 class TextAreaWrap {
-	private EmulatedTextArea tf1 = null;
-	private TextArea tf2 = null;
+	private EmulatedTextArea tf1;
+	private TextArea tf2;
 	private int flavor;
 
 	private static final int NATIVE = 1;
@@ -86,7 +86,7 @@ class TextAreaWrap {
 	public TextAreaWrap() {
 		flavor = PJAVA;
 		String kind = System.getProperty("inputControls");
-		if ((kind != null) && kind.equals("native")) {
+		if ("native".equals(kind)) {
 			flavor = NATIVE;
 		}
 		initControls();
