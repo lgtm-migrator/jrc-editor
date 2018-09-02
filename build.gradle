@@ -4,6 +4,7 @@ plugins {
 	id 'eclipse'
 	id "com.diffplug.gradle.spotless" version "3.14.0"
 	id "ca.coglinc2.javacc" version "3.0.0"
+	id "org.sonarqube" version "2.6.2"
 }
 
 mainClassName = 'org.zaval.tools.i18n.translator.Main'
@@ -50,4 +51,10 @@ compileJavacc {
 wrapper {
 	gradleVersion = '4.10'
 	distributionType = Wrapper.DistributionType.ALL
+}
+
+tasks.sonarqube {
+	onlyIf {
+		(System.properties.'sonar.organization' && System.env.TRAVIS_PULL_REQUEST == 'false') || System.env.SCRUTINIZER
+	}
 }
