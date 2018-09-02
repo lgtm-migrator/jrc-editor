@@ -134,10 +134,11 @@ public class XmlElement {
 	@Override
 	public String toString() {
 		try {
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			this.write(new PrintStream(out));
-			out.flush();
-			return new String(out.toByteArray(), 0);
+			try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+				this.write(new PrintStream(out));
+				out.flush();
+				return new String(out.toByteArray(), 0);
+			}
 		}
 		catch (IOException e) {
 			// Java exception handling suxx

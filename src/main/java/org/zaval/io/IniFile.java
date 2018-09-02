@@ -44,13 +44,13 @@ public class IniFile {
 			return;
 		}
 		dirty = false;
-		PrintStream pr = new PrintStream(new FileOutputStream(file));
-		for (int j = 0; j < keys.size(); ++j) {
-			pr.print(keys.elementAt(j));
-			pr.print("=");
-			pr.println(vals.elementAt(j));
+		try (PrintStream pr = new PrintStream(new FileOutputStream(file))) {
+			for (int j = 0; j < keys.size(); ++j) {
+				pr.print(keys.elementAt(j));
+				pr.print("=");
+				pr.println(vals.elementAt(j));
+			}
 		}
-		pr.close();
 	}
 
 	private void loadFile() throws IOException {

@@ -202,30 +202,29 @@ class BundleManager implements TranslatorConstants {
 			}
 		}
 		else {
-			RandomAccessFile in = new RandomAccessFile(fileName, "r");
-			StringBuilder sb = new StringBuilder();
-			int factor1 = 1;
-			int factor2 = 256;
-			for (;;) {
-				if ((in.length() - in.getFilePointer()) == 0) {
-					break;
-				}
-				int i = (in.readUnsignedByte() * factor1) + (in.readUnsignedByte() * factor2);
-				if (i == 0xFFFE) {
-					factor1 = 256;
-					factor2 = 1;
-				}
-				if ((i != 0x0D) && (i != 0xFFFE) && (i != 0xFEFF) && (i != 0xFFFF)) {
-					if (i != 0x0A) {
-						sb.append((char) i);
+			try (RandomAccessFile in = new RandomAccessFile(fileName, "r")) {
+				StringBuilder sb = new StringBuilder();
+				int factor1 = 1;
+				int factor2 = 256;
+				for (; ; ) {
+					if ((in.length() - in.getFilePointer()) == 0) {
+						break;
 					}
-					else {
-						res.addElement(fromEscape(sb.toString()));
-						sb.setLength(0);
+					int i = (in.readUnsignedByte() * factor1) + (in.readUnsignedByte() * factor2);
+					if (i == 0xFFFE) {
+						factor1 = 256;
+						factor2 = 1;
+					}
+					if ((i != 0x0D) && (i != 0xFFFE) && (i != 0xFEFF) && (i != 0xFFFF)) {
+						if (i != 0x0A) {
+							sb.append((char) i);
+						} else {
+							res.addElement(fromEscape(sb.toString()));
+							sb.setLength(0);
+						}
 					}
 				}
 			}
-			in.close();
 		}
 		return res;
 	}
@@ -367,30 +366,30 @@ class BundleManager implements TranslatorConstants {
 
 		Vector<String> lines = set.store(lang.getLangId());
 		if (fn.endsWith(RES_EXTENSION)) {
-			PrintStream f = new PrintStream(new FileOutputStream(fn));
-			for (int j = 0; j < lines.size(); j++) {
-				f.print(toEscape(lines.elementAt(j)) + System.getProperty("line.separator"));
+			try (PrintStream f = new PrintStream(new FileOutputStream(fn))) {
+				for (int j = 0; j < lines.size(); j++) {
+					f.print(toEscape(lines.elementAt(j)) + System.getProperty("line.separator"));
+				}
 			}
-			f.close();
 		}
 		else {
-			FileOutputStream f = new FileOutputStream(fn);
-			f.write(0xFF);
-			f.write(0xFE);
-			for (int j = 0; j < lines.size(); j++) {
-				String s = lines.elementAt(j);
-				s = replace(s, "\n", toEscape("\n"));
-				for (int k = 0; k < s.length(); k++) {
-					char ch = s.charAt(k);
-					f.write((ch) & 255);
-					f.write((ch) >> 8);
+			try (FileOutputStream f = new FileOutputStream(fn)) {
+				f.write(0xFF);
+				f.write(0xFE);
+				for (int j = 0; j < lines.size(); j++) {
+					String s = lines.elementAt(j);
+					s = replace(s, "\n", toEscape("\n"));
+					for (int k = 0; k < s.length(); k++) {
+						char ch = s.charAt(k);
+						f.write((ch) & 255);
+						f.write((ch) >> 8);
+					}
+					f.write(0x0D);
+					f.write(0x00);
+					f.write(0x0A);
+					f.write(0x00);
 				}
-				f.write(0x0D);
-				f.write(0x00);
-				f.write(0x0A);
-				f.write(0x00);
 			}
-			f.close();
 		}
 	}
 }

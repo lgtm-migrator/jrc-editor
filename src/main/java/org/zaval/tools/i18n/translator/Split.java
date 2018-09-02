@@ -116,26 +116,26 @@ public class Split { // NO_UCD (unused code)
 	private void onSaveXml(String fileName, String[] parts) {
 		if (fileName != null) {
 			try {
-				DataOutputStream out = new DataOutputStream(new FileOutputStream(fileName));
-				BundleSet set = bundle.getBundle();
-				int items = set.getItemCount();
-				out.writeChar((char) 0xFEFF);
-				out.writeChars("<xml>\n");
-				for (int i = 0; i < items; ++i) {
-					BundleItem bi = set.getItem(i);
-					Enumeration<String> en = bi.getLanguages();
-					out.writeChars("\t<key name=\"" + bi.getId() + "\">\n");
-					while (en.hasMoreElements()) {
-						String lang = en.nextElement();
-						if (!inArray(parts, lang)) {
-							continue;
+				try (DataOutputStream out = new DataOutputStream(new FileOutputStream(fileName))) {
+					BundleSet set = bundle.getBundle();
+					int items = set.getItemCount();
+					out.writeChar((char) 0xFEFF);
+					out.writeChars("<xml>\n");
+					for (int i = 0; i < items; ++i) {
+						BundleItem bi = set.getItem(i);
+						Enumeration<String> en = bi.getLanguages();
+						out.writeChars("\t<key name=\"" + bi.getId() + "\">\n");
+						while (en.hasMoreElements()) {
+							String lang = en.nextElement();
+							if (!inArray(parts, lang)) {
+								continue;
+							}
+							out.writeChars("\t\t<value lang=\"" + lang + "\">" + bi.getTranslation(lang) + "</value>\n");
 						}
-						out.writeChars("\t\t<value lang=\"" + lang + "\">" + bi.getTranslation(lang) + "</value>\n");
+						out.writeChars("\t</key>\n");
 					}
-					out.writeChars("\t</key>\n");
+					out.writeChars("</xml>\n");
 				}
-				out.writeChars("</xml>\n");
-				out.close();
 			}
 			catch (Exception e) {
 				infoException(fileName, e);
@@ -146,25 +146,25 @@ public class Split { // NO_UCD (unused code)
 	private void onSaveUtf(String fileName, String[] parts) {
 		if (fileName != null) {
 			try {
-				DataOutputStream out = new DataOutputStream(new FileOutputStream(fileName));
-				BundleSet set = bundle.getBundle();
-				int items = set.getItemCount();
-				out.writeChar((char) 0xFEFF);
-				out.writeChars("#JRC Editor 2.0: do not modify this line\r\n\r\n");
-				for (int i = 0; i < items; ++i) {
-					BundleItem bi = set.getItem(i);
-					Enumeration<String> en = bi.getLanguages();
-					out.writeChars("KEY=\"" + bi.getId() + "\":\r\n");
-					while (en.hasMoreElements()) {
-						String lang = en.nextElement();
-						if (!inArray(parts, lang)) {
-							continue;
+				try (DataOutputStream out = new DataOutputStream(new FileOutputStream(fileName))) {
+					BundleSet set = bundle.getBundle();
+					int items = set.getItemCount();
+					out.writeChar((char) 0xFEFF);
+					out.writeChars("#JRC Editor 2.0: do not modify this line\r\n\r\n");
+					for (int i = 0; i < items; ++i) {
+						BundleItem bi = set.getItem(i);
+						Enumeration<String> en = bi.getLanguages();
+						out.writeChars("KEY=\"" + bi.getId() + "\":\r\n");
+						while (en.hasMoreElements()) {
+							String lang = en.nextElement();
+							if (!inArray(parts, lang)) {
+								continue;
+							}
+							out.writeChars("\t\"" + lang + "\"=\"" + bi.getTranslation(lang) + "\"\r\n");
 						}
-						out.writeChars("\t\"" + lang + "\"=\"" + bi.getTranslation(lang) + "\"\r\n");
+						out.writeChars("\r\n");
 					}
-					out.writeChars("\r\n");
 				}
-				out.close();
 			}
 			catch (Exception e) {
 				infoException(fileName, e);

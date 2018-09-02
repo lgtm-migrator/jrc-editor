@@ -2015,26 +2015,26 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 		String filename = lookupFileForStore(bundle.baseName(fn) + ".xml");
 		if (filename != null) {
 			try {
-				DataOutputStream out = new DataOutputStream(new FileOutputStream(filename));
-				BundleSet set = bundle.getBundle();
-				int items = set.getItemCount();
-				out.writeChar((char) 0xFEFF);
-				out.writeChars("<xml>\n");
-				for (int i = 0; i < items; ++i) {
-					BundleItem bi = set.getItem(i);
-					Enumeration<String> en = bi.getLanguages();
-					out.writeChars("\t<key name=\"" + bi.getId() + "\">\n");
-					while (en.hasMoreElements()) {
-						String lang = en.nextElement();
-						if (part && !inArray(parts, lang)) {
-							continue;
+				try (DataOutputStream out = new DataOutputStream(new FileOutputStream(filename))) {
+					BundleSet set = bundle.getBundle();
+					int items = set.getItemCount();
+					out.writeChar((char) 0xFEFF);
+					out.writeChars("<xml>\n");
+					for (int i = 0; i < items; ++i) {
+						BundleItem bi = set.getItem(i);
+						Enumeration<String> en = bi.getLanguages();
+						out.writeChars("\t<key name=\"" + bi.getId() + "\">\n");
+						while (en.hasMoreElements()) {
+							String lang = en.nextElement();
+							if (part && !inArray(parts, lang)) {
+								continue;
+							}
+							out.writeChars("\t\t<value lang=\"" + lang + "\">" + bi.getTranslation(lang) + "</value>\n");
 						}
-						out.writeChars("\t\t<value lang=\"" + lang + "\">" + bi.getTranslation(lang) + "</value>\n");
+						out.writeChars("\t</key>\n");
 					}
-					out.writeChars("\t</key>\n");
+					out.writeChars("</xml>\n");
 				}
-				out.writeChars("</xml>\n");
-				out.close();
 			}
 			catch (Exception e) {
 				infoException(e);
@@ -2056,25 +2056,25 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 		String filename = lookupFileForStore(bundle.baseName(fn) + ".txt");
 		if (filename != null) {
 			try {
-				DataOutputStream out = new DataOutputStream(new FileOutputStream(filename));
-				BundleSet set = bundle.getBundle();
-				int items = set.getItemCount();
-				out.writeChar((char) 0xFEFF);
-				out.writeChars("#JRC Editor: do not modify this line\r\n\r\n");
-				for (int i = 0; i < items; ++i) {
-					BundleItem bi = set.getItem(i);
-					Enumeration<String> en = bi.getLanguages();
-					out.writeChars("KEY=\"" + bi.getId() + "\":\r\n");
-					while (en.hasMoreElements()) {
-						String lang = en.nextElement();
-						if (part && !inArray(parts, lang)) {
-							continue;
+				try (DataOutputStream out = new DataOutputStream(new FileOutputStream(filename))) {
+					BundleSet set = bundle.getBundle();
+					int items = set.getItemCount();
+					out.writeChar((char) 0xFEFF);
+					out.writeChars("#JRC Editor: do not modify this line\r\n\r\n");
+					for (int i = 0; i < items; ++i) {
+						BundleItem bi = set.getItem(i);
+						Enumeration<String> en = bi.getLanguages();
+						out.writeChars("KEY=\"" + bi.getId() + "\":\r\n");
+						while (en.hasMoreElements()) {
+							String lang = en.nextElement();
+							if (part && !inArray(parts, lang)) {
+								continue;
+							}
+							out.writeChars("\t\"" + lang + "\"=\"" + bi.getTranslation(lang) + "\"\r\n");
 						}
-						out.writeChars("\t\"" + lang + "\"=\"" + bi.getTranslation(lang) + "\"\r\n");
+						out.writeChars("\r\n");
 					}
-					out.writeChars("\r\n");
 				}
-				out.close();
 			}
 			catch (Exception e) {
 				infoException(e);
@@ -2095,18 +2095,17 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 	 * Reading unicode (UCS16) file stream into memory
 	 */
 	private String getBody(String file) throws IOException {
-		char ch;
-		DataInputStream in = new DataInputStream(new FileInputStream(file));
-		StringBuilder buf = new StringBuilder(in.available());
+		StringBuilder buf = new StringBuilder();
+		try (DataInputStream in = new DataInputStream(new FileInputStream(file))) {
+			buf.ensureCapacity(in.available());
 
-		try {
-			in.readChar(); // skip UCS16 marker FEFF
-			for (;;) {
-				ch = in.readChar();
-				buf.append(ch);
+			try {
+				in.readChar(); // skip UCS16 marker FEFF
+				for (; ; ) {
+					buf.append(in.readChar());
+				}
+			} catch (EOFException eof) {
 			}
-		}
-		catch (EOFException eof) {
 		}
 		return buf.toString();
 	}
@@ -2350,20 +2349,21 @@ class Translator extends Frame implements TranslatorConstants, java.awt.event.AW
 			initControls();
 			bundle.getBundle().addLanguage("en");
 			try {
-				ZipFile zip = new ZipFile(filename);
-				Enumeration<? extends ZipEntry> en = zip.entries();
-				while (en.hasMoreElements()) {
-					ZipEntry ze = en.nextElement();
-					if (ze.getName().endsWith(".properties")) {
-						String lang = bundle.determineLanguage(ze.getName());
-						InputStream in = zip.getInputStream(ze);
-						bundle.appendResource(in, lang);
+				try (ZipFile zip = new ZipFile(filename)) {
+					Enumeration<? extends ZipEntry> en = zip.entries();
+					while (en.hasMoreElements()) {
+						ZipEntry ze = en.nextElement();
+						if (ze.getName().endsWith(".properties")) {
+							String lang = bundle.determineLanguage(ze.getName());
+							InputStream in = zip.getInputStream(ze);
+							bundle.appendResource(in, lang);
+						}
 					}
+					initData(false);
+					// Force new file name for storage
+					bundle.getBundle().getLanguage(0).setLangFile(null);
+					setTitle(filename);
 				}
-				initData(false);
-				// Force new file name for storage
-				bundle.getBundle().getLanguage(0).setLangFile(null);
-				setTitle(filename);
 			}
 			catch (Exception e) {
 				infoException(e);
