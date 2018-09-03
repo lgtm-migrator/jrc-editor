@@ -23,12 +23,13 @@ import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Panel;
+import java.util.Arrays;
 
 public class StatusBar extends Panel implements LayoutManager {
 	private static final int FULL = 1;
 
 	private final Insets insets = new Insets(2, 1, 0, -1);
-	private final int hgap = 2;
+	private static final int hgap = 2;
 
 	public StatusBar() {
 		setLayout(this);
@@ -68,9 +69,7 @@ public class StatusBar extends Panel implements LayoutManager {
 		int[] widths = getActualWidths(parent);
 		int height = getActualHeight(parent) + insets.top + insets.bottom;
 		int width = insets.left + insets.right + (hgap * (widths.length - 1));
-		for (int width2 : widths) {
-			width += width2;
-		}
+		width += Arrays.stream(widths).sum();
 		return new Dimension(width, height);
 	}
 
@@ -93,13 +92,14 @@ public class StatusBar extends Panel implements LayoutManager {
 	private int[] getActualWidths(Container parent) {
 		Dimension ds = parent.size();
 		Component[] cc = parent.getComponents();
-		int aw = 0, j;
 		int[] widths = new int[cc.length];
 		int xx = insets.left + (hgap * (cc.length - 1));
 
 		ds.width -= (insets.left + insets.right + (hgap * (cc.length - 1)));
 		ds.height -= (insets.top + insets.bottom);
 
+		int j;
+		int aw = 0;
 		for (j = 0; j < cc.length; ++j) {
 			Dimension d = cc[j].preferredSize();
 

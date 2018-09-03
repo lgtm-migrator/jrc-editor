@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import org.zaval.awt.peer.TreeNode;
 
@@ -38,7 +39,7 @@ public class LevelTree {
 	private int count; // Number of nodes in the tree
 	private int viewCount;// Number of viewable nodes in the tree (A node is viewable if all of its parents are expanded.)
 
-	private final String delim = ".";
+	private static final String delim = ".";
 
 	private final Map<String, TreeNode> nameCache = new HashMap<>();
 
@@ -90,12 +91,7 @@ public class LevelTree {
 		if (nameCache.get(node.text) != null) {
 			return true;
 		}
-		for (int i = 0; i < count; i++) {
-			if (node == e.get(i)) {
-				return true;
-			}
-		}
-		return false;
+		return IntStream.range(0, count).anyMatch(i -> node == e.get(i));
 	}
 
 // This functions will be added on caf
@@ -106,13 +102,7 @@ public class LevelTree {
 		if (nameCache.get(name) != null) {
 			return nameCache.get(name);
 		}
-		for (int i = 0; i < count; i++) {
-			TreeNode tn = e.get(i);
-			if (name.equals(tn.text)) {
-				return tn;
-			}
-		}
-		return null;
+		return IntStream.range(0, count).mapToObj(i -> e.get(i)).filter(tn -> name.equals(tn.text)).findFirst().orElse(null);
 	}
 
 	private void insertChild(String name, String addname) {
@@ -130,7 +120,7 @@ public class LevelTree {
 		if (addname == null) {
 			return;
 		}
-		if (getRootNode() == null) {
+		if (rootNode == null) {
 			append(new TreeNode("root"));
 		}
 		insertChild(rootNode.text, addname);
@@ -159,7 +149,7 @@ public class LevelTree {
 			newNode.parent = relativeNode;
 			newNode.setDepth(relativeNode.getDepth() + 1);
 			String prop = relativeNode.getStringProperty("PATH");
-			if (prop.length() > 0) {
+			if (!prop.isEmpty()) {
 				prop += delim;
 			}
 			newNode.setStringProperty("PATH", prop + newNode.text);
@@ -175,8 +165,7 @@ public class LevelTree {
 	}
 
 	private void addSibling(TreeNode newNode, TreeNode siblingNode) {
-		TreeNode tempNode;
-		tempNode = siblingNode;
+		TreeNode tempNode = siblingNode;
 
 		String s = siblingNode.getStringProperty("PATH");
 		int index = s.lastIndexOf(delim);
@@ -322,7 +311,7 @@ public class LevelTree {
 
 	public void setResolver(ImageResolver imgres) {
 		this.imgres = imgres;
-		TreeNode t = getRootNode();
+		TreeNode t = rootNode;
 		setResolver(t, imgres);
 	}
 
@@ -330,9 +319,7 @@ public class LevelTree {
 		if (t != null) {
 			t.setResolver(imgres);
 		}
-		int i;
-		for (i = 0; i < e.size(); ++i) {
-			TreeNode c = e.get(i);
+		for (TreeNode c : e) {
 			c.setResolver(imgres);
 		}
 	}
@@ -363,12 +350,12 @@ public class LevelTree {
 			return -1;
 		}
 		TreeNode next = parent.child;
-		int count = 0;
+		int childCount = 0;
 		while (next != null) {
-			count++;
+			childCount++;
 			next = next.sibling;
 		}
-		return count;
+		return childCount;
 	}
 
 	TreeNode[] enumChild(TreeNode tn) {

@@ -19,6 +19,7 @@ package org.zaval.awt;
 
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Event;
 import java.awt.Graphics;
 import java.awt.MenuBar;
 import java.awt.Rectangle;
@@ -99,7 +100,7 @@ public class ContextMenuBar extends MenuBar {
 		repaint();
 	}
 
-	void sendEvent(java.awt.Event evt) {
+	void sendEvent(Event evt) {
 		if ((parent == null) || (act_menu == null)) {
 			return;
 		}
@@ -121,13 +122,13 @@ public class ContextMenuBar extends MenuBar {
 			case ContextMenuBar.EV_MENU_ENTER: {
 				repaintAll();
 				act_menu = null;
-				evt.id = java.awt.Event.ACTION_EVENT;
+				evt.id = Event.ACTION_EVENT;
 				parent.postEvent(evt);
 			}
 		}
 	}
 
-	boolean handleEvent(java.awt.Event evt) {
+	boolean handleEvent(Event evt) {
 		if ((act_menu == null) || (!act_menu.isEnabled())) {
 			return false;
 		}

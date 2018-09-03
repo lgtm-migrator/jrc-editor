@@ -17,15 +17,14 @@
 
 package org.zaval.tools.i18n.translator;
 
-interface TranslatorConstants {
-	String RES_EXTENSION = ".properties";
-	String INI_EXTENSION = ".ini";
-	char KEY_SEPARATOR = '.';
-	char KEY_SEPARATOR_2 = '_';
+abstract class TranslatorConstants {
+	public static final String RES_EXTENSION = ".properties";
+	public static final String INI_EXTENSION = ".ini";
+	public static final char KEY_SEPARATOR = '.';
+	public static final char KEY_SEPARATOR_2 = '_';
 
-	int REMOVE_REQUIRED = 9991;
-	String OPEN_IMAGE = "BITMAP1.gif";
-	String CLOSE_IMAGE = "BITMAP2.gif";
-	String WARN_IMAGE = "incomplete.gif";
-
+	public static final int REMOVE_REQUIRED = 9991;
+	public static final String OPEN_IMAGE = "BITMAP1.gif";
+	public static final String CLOSE_IMAGE = "BITMAP2.gif";
+	public static final String WARN_IMAGE = "incomplete.gif";
 }

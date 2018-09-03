@@ -24,7 +24,7 @@ import java.awt.Event;
 import java.awt.Graphics;
 
 class StubbComponent extends Canvas {
-	private final int size = 16;
+	private static final int size = 16;
 
 	@Override
 	public Dimension preferredSize() {
@@ -47,8 +47,7 @@ class StubbComponent extends Canvas {
 
 		int stap = size / 3;
 		int x = stap;
-		int y = stap;
-		for (; x <= (d.width * 2); x += stap, y += stap) {
+		for (int y = stap; x <= (d.width * 2); x += stap, y += stap) {
 			g.setColor(Color.white);
 			g.drawLine(x, 0, 0, y);
 

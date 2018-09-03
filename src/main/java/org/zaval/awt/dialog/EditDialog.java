@@ -33,15 +33,18 @@ import java.awt.Label;
 import java.awt.LayoutManager;
 import java.awt.Panel;
 import java.awt.Toolkit;
+import java.awt.event.AWTEventListener;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.zaval.awt.EmulatedTextField;
 import org.zaval.awt.IELabel;
 
-public class EditDialog extends Dialog implements java.awt.event.AWTEventListener {
+public class EditDialog extends Dialog implements AWTEventListener {
 	private final EmulatedTextField edit;
-	private final Button ok, cancel;
+	private final Button ok;
+	private final Button cancel;
 	private boolean isApply;
 	private final Component listener;
 	private final IELabel label;
@@ -177,8 +180,8 @@ public class EditDialog extends Dialog implements java.awt.event.AWTEventListene
 	}
 
 	private void optimize(List<Component> v) {
-		int j, k = v.size();
-		for (j = 0; j < k; ++j) {
+		int k = v.size();
+		for (int j = 0; j < k; ++j) {
 			Component c = v.get(j);
 			if (c instanceof Button) {
 				v.remove(j);
@@ -190,12 +193,12 @@ public class EditDialog extends Dialog implements java.awt.event.AWTEventListene
 	}
 
 	private boolean moveFocus(Component c) {
-		int j, k;
-		boolean ask = false;
 		List<Component> v = new ArrayList<>();
 
 		linearize(this, v);
 		optimize(v);
+		int k;
+		int j;
 		for (k = v.size(), j = 0; j < k; ++j) {
 			if (c == v.get(j)) {
 				break;
@@ -204,6 +207,7 @@ public class EditDialog extends Dialog implements java.awt.event.AWTEventListene
 		if (j >= k) {
 			j = -1;
 		}
+		boolean ask = false;
 		if (j == (k - 1)) {
 			ask = true;
 			j = -1; // see below +1
@@ -213,8 +217,8 @@ public class EditDialog extends Dialog implements java.awt.event.AWTEventListene
 	}
 
 	private void linearize(Container cc, List<Component> v) {
-		int j, k = cc.getComponentCount();
-		for (j = 0; j < k; ++j) {
+		int k = cc.getComponentCount();
+		for (int j = 0; j < k; ++j) {
 			Component c = cc.getComponent(j);
 			if (c instanceof Label) {
 				// ignore
@@ -233,13 +237,13 @@ public class EditDialog extends Dialog implements java.awt.event.AWTEventListene
 
 	@Override
 	public void eventDispatched(AWTEvent event) {
-		if (event.getID() != java.awt.event.KeyEvent.KEY_TYPED) {
+		if (event.getID() != KeyEvent.KEY_TYPED) {
 			return;
 		}
-		if (!(event instanceof java.awt.event.KeyEvent)) {
+		if (!(event instanceof KeyEvent)) {
 			return;
 		}
-		java.awt.event.KeyEvent ke = (java.awt.event.KeyEvent) event;
+		KeyEvent ke = (KeyEvent) event;
 		if (ke.getKeyChar() != '\t') {
 			return;
 		}

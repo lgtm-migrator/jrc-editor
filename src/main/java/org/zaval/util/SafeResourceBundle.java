@@ -28,9 +28,9 @@ public class SafeResourceBundle {
 	public SafeResourceBundle(String resName, Locale loc) {
 		try {
 			if (loc == null) {
-				Locale saved = Locale.getDefault();
 				Locale.setDefault(new Locale("en", "US"));
 				rb = ResourceBundle.getBundle(resName);
+				Locale saved = Locale.getDefault();
 				Locale.setDefault(saved);
 			}
 			else {

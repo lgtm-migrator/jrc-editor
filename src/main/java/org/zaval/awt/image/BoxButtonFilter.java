@@ -18,7 +18,10 @@
 package org.zaval.awt.image;
 
 public class BoxButtonFilter extends ButtonImageFilter {
-	private int light, border, width, height;
+	private int light;
+	private int border;
+	private int width;
+	private int height;
 	private boolean pressed;
 
 	@Override
@@ -31,8 +34,8 @@ public class BoxButtonFilter extends ButtonImageFilter {
 	}
 
 	@Override
-	public Object clone() {
-		ButtonImageFilter b = new BoxButtonFilter();
+	public BoxButtonFilter clone() {
+		BoxButtonFilter b = new BoxButtonFilter();
 		b.setup(light, border, width, height, pressed);
 		return b;
 	}

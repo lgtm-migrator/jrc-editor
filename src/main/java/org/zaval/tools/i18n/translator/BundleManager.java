@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-class BundleManager implements TranslatorConstants {
+class BundleManager {
 	private final BundleSet set;
 
 	BundleManager() {
@@ -138,13 +138,13 @@ class BundleManager implements TranslatorConstants {
 	}
 
 	private void proceedLines(List<String> lines, String lang, String fullName) {
-		String lastComment = null;
 		fullName = fullName != null ? fullName : "tmp_" + lang;
 		set.addLanguage(lang);
 		set.getLanguage(lang).setLangFile(fullName);
+		String lastComment = null;
 		for (String line : lines) {
 			line = line.trim();
-			if (line.length() == 0) {
+			if (line.isEmpty()) {
 				continue;
 			}
 			if (line.startsWith("#")) {
@@ -176,7 +176,7 @@ class BundleManager implements TranslatorConstants {
 
 	private List<String> getLines(String fileName) throws IOException {
 		List<String> res = new ArrayList<>();
-		if (fileName.endsWith(RES_EXTENSION)) {
+		if (fileName.endsWith(TranslatorConstants.RES_EXTENSION)) {
 			try (BufferedReader in = new BufferedReader(new FileReader(fileName))) {
 				String line;
 				while ((line = in.readLine()) != null) {
@@ -203,8 +203,7 @@ class BundleManager implements TranslatorConstants {
 			try (RandomAccessFile in = new RandomAccessFile(fileName, "r")) {
 				StringBuilder sb = new StringBuilder();
 				int factor1 = 1;
-				int factor2 = 256;
-				for (;;) {
+				for (int factor2 = 256;;) {
 					if ((in.length() - in.getFilePointer()) == 0) {
 						break;
 					}
@@ -261,7 +260,7 @@ class BundleManager implements TranslatorConstants {
 			if (ch == '\r') {
 				continue;
 			}
-			if ((ch >= 0) && (ch < 128) && (ch != '\n') && (ch != '\\')) {
+			if ((ch < 128) && (ch != '\n') && (ch != '\\')) {
 				res.append(ch);
 			}
 			else {
@@ -315,12 +314,12 @@ class BundleManager implements TranslatorConstants {
 
 	String replace(String line, String from, String to) {
 		StringBuilder res = new StringBuilder(line.length());
-		String tmpstr;
-		int ind = -1, lastind = 0;
+		int ind = -1;
+		int lastind = 0;
 
 		while ((ind = line.indexOf(from, ind + 1)) != -1) {
 			if (lastind < ind) {
-				tmpstr = line.substring(lastind, ind);
+				String tmpstr = line.substring(lastind, ind);
 				res.append(tmpstr);
 			}
 			res.append(to);
@@ -335,8 +334,8 @@ class BundleManager implements TranslatorConstants {
 	}
 
 	void store(String fileName) throws IOException {
-		int j, k = set.getLangCount();
-		for (j = 0; j < k; ++j) {
+		int k = set.getLangCount();
+		for (int j = 0; j < k; ++j) {
 			LangItem lang = set.getLanguage(j);
 			store(lang.getLangId(), fileName);
 		}
@@ -353,7 +352,7 @@ class BundleManager implements TranslatorConstants {
 			if (set.getLanguage(0) != lang) {
 				tmpFn += "_" + lang.getLangId();
 			}
-			tmpFn += RES_EXTENSION;
+			tmpFn += TranslatorConstants.RES_EXTENSION;
 			fn = tmpFn;
 			lang.setLangFile(fn);
 		}
@@ -364,7 +363,7 @@ class BundleManager implements TranslatorConstants {
 		}
 
 		List<String> lines = set.store(lang.getLangId());
-		if (fn.endsWith(RES_EXTENSION)) {
+		if (fn.endsWith(TranslatorConstants.RES_EXTENSION)) {
 			try (PrintStream f = new PrintStream(new FileOutputStream(fn))) {
 				for (String line : lines) {
 					f.print(toEscape(line) + System.getProperty("line.separator"));

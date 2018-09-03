@@ -29,14 +29,16 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.LayoutManager;
+import java.awt.List;
 import java.awt.Panel;
 import java.awt.Toolkit;
 
 import org.zaval.awt.IELabel;
 
 class LangDialog extends Dialog {
-	private final java.awt.List edit;
-	private final Button ok, cancel;
+	private final List edit;
+	private final Button ok;
+	private final Button cancel;
 	private boolean isApply;
 	private final Component listener;
 	private final IELabel label;
@@ -47,7 +49,7 @@ class LangDialog extends Dialog {
 
 		label = new IELabel("List of languages");
 		constrain(this, label, 0, 0, 1, 1, GridBagConstraints.NONE, GridBagConstraints.WEST, 0.0, 0.0, 5, 5, 5, 5);
-		edit = new java.awt.List(10, true);
+		edit = new List(10, true);
 		constrain(this, edit, 0, 1, 4, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.WEST, 1.0, 0.0, 5, 5, 5, 5);
 
 		ok = new Button("Ok");
@@ -64,7 +66,7 @@ class LangDialog extends Dialog {
 		pack();
 	}
 
-	public void setList(LangItem[] t) {
+	public void setList(LangItem... t) {
 		edit.removeAll();
 		if (t == null) {
 			return;

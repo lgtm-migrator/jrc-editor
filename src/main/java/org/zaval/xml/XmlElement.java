@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class XmlElement {
 
@@ -123,14 +125,6 @@ public class XmlElement {
 		return new XmlElement(this.entities, this.ignoreWhitespace, false, this.ignoreCase);
 	}
 
-	private void setContent(String content) {
-		this.contents = content;
-	}
-
-	private void setName(String name) {
-		this.name = name;
-	}
-
 	@Override
 	public String toString() {
 		try {
@@ -154,17 +148,17 @@ public class XmlElement {
 		writer.print('<');
 		writer.print(this.name);
 		if (!this.attributes.isEmpty()) {
-			for (String s : this.attributes.keySet()) {
+			for (Map.Entry<String, String> stringStringEntry : this.attributes.entrySet()) {
 				writer.print(' ');
-				String value = this.attributes.get(s);
-				writer.print(s);
+				String value = stringStringEntry.getValue();
+				writer.print(stringStringEntry.getKey());
 				writer.print('=');
 				writer.write('"');
 				this.writeEncoded(writer, value);
 				writer.write('"');
 			}
 		}
-		if ((this.contents != null) && (this.contents.length() > 0)) {
+		if ((this.contents != null) && (!this.contents.isEmpty())) {
 			writer.print('>');
 			this.writeEncoded(writer, this.contents);
 			writer.print('<');
@@ -361,9 +355,7 @@ public class XmlElement {
 						break;
 					case '>':
 						if (delimiterCharsSkipped < 2) {
-							for (int i = 0; i < delimiterCharsSkipped; i++) {
-								buf.append(']');
-							}
+							buf.append(IntStream.range(0, delimiterCharsSkipped).mapToObj(i -> "]").collect(Collectors.joining()));
 							delimiterCharsSkipped = 0;
 							buf.append('>');
 						}
@@ -372,10 +364,8 @@ public class XmlElement {
 						}
 						break;
 					default:
-						for (int i = 0; i < delimiterCharsSkipped; i += 1) {
-							buf.append(']');
-						}
-						buf.append(ch);
+						buf.append(IntStream.range(0, delimiterCharsSkipped).mapToObj(i -> "]").collect(
+							Collectors.joining("", "", String.valueOf(ch))));
 						delimiterCharsSkipped = 0;
 				}
 			}
@@ -400,8 +390,6 @@ public class XmlElement {
 	}
 
 	private void skipSpecialTag(int bracketLevel) throws IOException {
-		int tagLevel = 1; // <
-		char stringDelimiter = '\0';
 		if (bracketLevel == 0) {
 			char ch = this.readChar();
 			if (ch == '[') {
@@ -421,6 +409,9 @@ public class XmlElement {
 				}
 			}
 		}
+		char stringDelimiter = '\0';
+		// <
+		int tagLevel = 1;
 		while (tagLevel > 0) {
 			char ch = this.readChar();
 			if (stringDelimiter == '\0') {
@@ -485,7 +476,7 @@ public class XmlElement {
 		StringBuffer buf = new StringBuffer();
 		this.scanIdentifier(buf);
 		String name = buf.toString();
-		elt.setName(name);
+		elt.name = name;
 		char ch = this.scanWhitespace();
 		while ((ch != '>') && (ch != '/')) {
 			buf.setLength(0);
@@ -567,10 +558,10 @@ public class XmlElement {
 		}
 		else {
 			if (this.ignoreWhitespace) {
-				elt.setContent(buf.toString().trim());
+				elt.contents = buf.toString().trim();
 			}
 			else {
-				elt.setContent(buf.toString());
+				elt.contents = buf.toString();
 			}
 		}
 		ch = this.readChar();
@@ -626,16 +617,16 @@ public class XmlElement {
 
 	private XmlParseException unexpectedEndOfData() {
 		String msg = "Unexpected end of data reached";
-		return new XmlParseException(this.getName(), this.parserLineNr, msg);
+		return new XmlParseException(this.name, this.parserLineNr, msg);
 	}
 
 	private XmlParseException expectedInput(String charSet) {
 		String msg = "Expected: " + charSet;
-		return new XmlParseException(this.getName(), this.parserLineNr, msg);
+		return new XmlParseException(this.name, this.parserLineNr, msg);
 	}
 
 	private XmlParseException unknownEntity(String name) {
 		String msg = "Unknown or invalid entity: &" + name + ";";
-		return new XmlParseException(this.getName(), this.parserLineNr, msg);
+		return new XmlParseException(this.name, this.parserLineNr, msg);
 	}
 }

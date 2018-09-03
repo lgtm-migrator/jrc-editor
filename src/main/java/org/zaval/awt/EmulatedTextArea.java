@@ -30,6 +30,7 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.stream.IntStream;
 
 public class EmulatedTextArea extends EmulatedTextField implements ScrollObject {
 	private boolean wordWrap;
@@ -233,8 +234,6 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 
 	@Override
 	public Dimension preferredSize() {
-		int w = 0, h;
-		int rows = 1;
 
 		Font f = getFont();
 		if (f == null) {
@@ -250,13 +249,11 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 		}
 
 		String text = getText();
-		for (int j = 0; j < text.length(); ++j) {
-			if (text.charAt(j) == '\n') {
-				++rows;
-			}
-		}
+		int rows = 1;
+		rows += IntStream.range(0, text.length()).filter(j -> text.charAt(j) == '\n').count();
 		StringTokenizer st = new StringTokenizer(text, "\n");
-		h = m.getHeight() * (rows + 1);
+		int h = m.getHeight() * (rows + 1);
+		int w = 0;
 		while (st.hasMoreTokens()) {
 			String s = st.nextToken();
 			w = Math.max(w, m.stringWidth(s));
@@ -316,8 +313,8 @@ public class EmulatedTextArea extends EmulatedTextField implements ScrollObject 
 		}
 		String allText = buffer.toString();
 		int currLine = rowNum;
-		for (int j = lineText.size() - 1; j >= currLine; j--) {
-			lineText.remove(j);
+		if (lineText.size() > currLine) {
+			lineText.subList(currLine, lineText.size()).clear();
 		}
 		setLineStart(0, 0);
 		int currPos = lineStart[currLine];

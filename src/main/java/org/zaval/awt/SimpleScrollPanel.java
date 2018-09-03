@@ -26,6 +26,7 @@ import java.awt.LayoutManager;
 import java.awt.Panel;
 import java.awt.Rectangle;
 import java.awt.Scrollbar;
+import java.util.Arrays;
 
 public class SimpleScrollPanel extends Panel implements LayoutManager {
 	private final Scrollbar hor;
@@ -79,12 +80,7 @@ public class SimpleScrollPanel extends Panel implements LayoutManager {
 		if (!(e.target instanceof Scrollbar)) {
 			return true;
 		}
-		for (int element : table) {
-			if (e.id == element) {
-				return false;
-			}
-		}
-		return true;
+		return Arrays.stream(table).noneMatch(element -> e.id == element);
 	}
 
 	@Override
@@ -177,11 +173,8 @@ public class SimpleScrollPanel extends Panel implements LayoutManager {
 		int wx = r.width;
 		int wy = r.height;
 
-		boolean seth;
-		boolean setv;
-
-		seth = (x.width > wx) || ((x.height > wy) && (x.width > (wx - ver_w)));
-		setv = (x.height > wy) || ((x.width > wx) && (x.height > (wy - hor_h)));
+		boolean seth = (x.width > wx) || ((x.height > wy) && (x.width > (wx - ver_w)));
+		boolean setv = (x.height > wy) || ((x.width > wx) && (x.height > (wy - hor_h)));
 
 		if (!seth) {
 			if (hor.isVisible()) {

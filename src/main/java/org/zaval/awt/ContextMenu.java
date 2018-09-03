@@ -177,7 +177,7 @@ public class ContextMenu extends Menu {
 		String state = types.get(name);
 		if (state != null) {
 			getParent();
-			if (state.equals("1")) {
+			if ("1".equals(state)) {
 				for (int i = 0; i < 2; i++) {
 					gr.drawLine(x + (hdist / 3) + i, ((y + stap) - htext) + vdist, x + (hdist / 2) + i, y + stap);
 					gr.drawLine(x + (hdist / 2) + i, y + stap, ((x + hdist) - 3) + i, ((y + stap) - htext) + vdist);
@@ -196,7 +196,7 @@ public class ContextMenu extends Menu {
 		int x = size.x + hdist;
 		int add = index * stap;
 		if (opt.isEnabled()) {
-			if (name.equals("-")) {
+			if ("-".equals(name)) {
 				drawSeparator(gr, y + add);
 				return;
 			}
@@ -246,10 +246,10 @@ public class ContextMenu extends Menu {
 
 	private void pressKey(Event evt) {
 		int num = countItems();
-		boolean flag = true;
 		if (num == 0) {
 			return;
 		}
+		boolean flag = true;
 		switch (evt.key) {
 			case Event.UP:
 				flag = decOption();
@@ -276,7 +276,7 @@ public class ContextMenu extends Menu {
 			return;
 		}
 		String state = types.get(getItem(act).getLabel());
-		if (state.equals("1")) {
+		if ("1".equals(state)) {
 			types.put(getItem(act).getLabel(), "0");
 		}
 		else {
@@ -309,7 +309,7 @@ public class ContextMenu extends Menu {
 			else {
 				act_option = 0;
 			}
-			if (getItem(act_option).getLabel().equals("-")) {
+			if ("-".equals(getItem(act_option).getLabel())) {
 				continue;
 			}
 			return true;
@@ -330,7 +330,7 @@ public class ContextMenu extends Menu {
 			else {
 				act_option = (num - 1);
 			}
-			if (getItem(act_option).getLabel().equals("-")) {
+			if ("-".equals(getItem(act_option).getLabel())) {
 				continue;
 			}
 			return true;
@@ -340,7 +340,6 @@ public class ContextMenu extends Menu {
 
 	private void pressMouse(Event evt) {
 		int num = countItems();
-		boolean flag = true;
 		if ((num == 0) || (!this.inside(evt.x, evt.y))) {
 			if (evt.clickCount >= 1) {
 				pressExit();
@@ -348,7 +347,8 @@ public class ContextMenu extends Menu {
 			return;
 		}
 		int option = (evt.y - size.y) / stap;
-		if ((option != act_option) && (option < num) && (!getItem(option).getLabel().equals("-"))) {
+		boolean flag = true;
+		if ((option != act_option) && (option < num) && (!"-".equals(getItem(option).getLabel()))) {
 			prev_option = act_option;
 			act_option = option;
 		}

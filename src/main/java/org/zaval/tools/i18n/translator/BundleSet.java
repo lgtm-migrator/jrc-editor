@@ -23,8 +23,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-class BundleSet implements TranslatorConstants {
+class BundleSet {
 	private final List<BundleItem> items = new ArrayList<>();
 	private final List<LangItem> lng = new ArrayList<>();
 	private final Map<String, BundleItem> nameCache = new HashMap<>();
@@ -52,8 +54,8 @@ class BundleSet implements TranslatorConstants {
 	}
 
 	int getLangIndex(String lng) {
-		int j, k = getLangCount();
-		for (j = 0; j < k; ++j) {
+		int k = getLangCount();
+		for (int j = 0; j < k; ++j) {
 			LangItem lx = getLanguage(j);
 			if (lx.getLangId().equals(lng)) {
 				return j;
@@ -75,8 +77,8 @@ class BundleSet implements TranslatorConstants {
 	}
 
 	int getItemIndex(String key) {
-		int j, k = getItemCount();
-		for (j = k - 1; j >= 0; --j) {
+		int k = getItemCount();
+		for (int j = k - 1; j >= 0; --j) {
 			BundleItem bi = getItem(j);
 			if (bi.getId().equals(key)) {
 				return j;
@@ -104,14 +106,8 @@ class BundleSet implements TranslatorConstants {
 	}
 
 	List<BundleItem> getKeysBeginningWith(String key) {
-		List<BundleItem> v = new ArrayList<>();
-		for (int j = 0; j < getItemCount(); ++j) {
-			BundleItem bi = getItem(j);
-			if (bi.getId().startsWith(key)) {
-				v.add(bi);
-			}
-		}
-		return v;
+		return IntStream.range(0, getItemCount()).mapToObj(this::getItem).filter(bi -> bi.getId().startsWith(key)).collect(
+			Collectors.toList());
 	}
 
 	void removeKeysBeginningWith(String key) {
@@ -132,7 +128,7 @@ class BundleSet implements TranslatorConstants {
 	}
 
 	private Locale parseLanguage(String suffix) {
-		if ((suffix == null) || (suffix.length() == 0)) {
+		if ((suffix == null) || (suffix.isEmpty())) {
 			return null;
 		}
 		int undInd = suffix.indexOf('_');
@@ -150,7 +146,7 @@ class BundleSet implements TranslatorConstants {
 		if (loc != null) {
 			String desc = loc.getDisplayLanguage();
 			String sCountry = loc.getDisplayCountry();
-			if ((sCountry != null) && (sCountry.length() > 0)) {
+			if ((sCountry != null) && (!sCountry.isEmpty())) {
 				desc += " (" + sCountry + ")";
 			}
 			addLanguage(lng, desc);

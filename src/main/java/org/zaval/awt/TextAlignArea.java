@@ -115,13 +115,13 @@ public class TextAlignArea extends AlignArea {
 	}
 
 	private void drawText(Graphics gr, String text, int xs, int ys, int max) {
-		int commr = 0;
 		StringTokenizer st = new StringTokenizer(text, ":");
 		String left = st.nextToken() + ":";
 		String right = st.nextToken();
 
 		FontMetrics fm = fontMetrics;
 		fm.stringWidth(left);
+		int commr = 0;
 		commr += fm.stringWidth(right);
 
 		gr.drawString(left, xs, ys);
@@ -129,7 +129,8 @@ public class TextAlignArea extends AlignArea {
 	}
 
 	private void drawJText(Graphics gr, String text, int xs, int ys, int max) {
-		int j = 0, sizes = 0;
+		int j = 0;
+		int sizes = 0;
 		StringTokenizer st = new StringTokenizer(text, "\t ");
 		String[] words = new String[st.countTokens()];
 		FontMetrics fm = fontMetrics;
@@ -212,13 +213,12 @@ public class TextAlignArea extends AlignArea {
 
 			for (String ss : vv) {
 				StringBuilder tk = new StringBuilder();
-				int tw = 0;
 				int c = 0;
 
-				for (;;) {
-					String token;
+				for (int tw = 0;;) {
 					next(ss, ps);
 
+					String token;
 					if (ps[1] != null) {
 						token = ps[1];
 					}
@@ -257,11 +257,7 @@ public class TextAlignArea extends AlignArea {
 
 			}
 
-			String[] strs = new String[vvv.size()];
-			for (int i = 0; i < vvv.size(); i++) {
-				strs[i] = vvv.get(i);
-			}
-			return strs;
+			return vvv.stream().toArray(String[]::new);
 		}
 		return null;
 	}

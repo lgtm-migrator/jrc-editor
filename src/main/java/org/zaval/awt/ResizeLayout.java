@@ -27,16 +27,12 @@ import java.awt.Rectangle;
 public class ResizeLayout implements LayoutManager {
 	private int fix = -1;
 
-	public ResizeLayout() {
-	}
-
 	void setSeparator(int sef, Container parent) {
 		fix = sef;
 		layoutAll(parent);
 	}
 
 	private void layoutAll(Container c) {
-		int i;
 		LayoutManager l = c.getLayout();
 		if (l != null) {
 			l.layoutContainer(c);
@@ -44,9 +40,9 @@ public class ResizeLayout implements LayoutManager {
 		Component[] o = c.getComponents();
 		c.repaint();
 
-		for (i = 0; i < o.length; ++i) {
-			if (o[i] instanceof Container) {
-				layoutAll((Container) o[i]);
+		for (Component element : o) {
+			if (element instanceof Container) {
+				layoutAll((Container) element);
 			}
 		}
 	}
@@ -61,16 +57,16 @@ public class ResizeLayout implements LayoutManager {
 
 	@Override
 	public Dimension preferredLayoutSize(Container parent) {
-		int i;
-		Panel left = null, right = null;
+		Panel left = null;
+		Panel right = null;
 		Component[] obj = parent.getComponents();
-		for (i = 0; i < obj.length; ++i) {
-			if (obj[i] instanceof Panel) {
+		for (Component element : obj) {
+			if (element instanceof Panel) {
 				if (left == null) {
-					left = (Panel) obj[i];
+					left = (Panel) element;
 				}
 				else if (right == null) {
-					right = (Panel) obj[i];
+					right = (Panel) element;
 				}
 				else {
 					break;
@@ -88,16 +84,16 @@ public class ResizeLayout implements LayoutManager {
 
 	@Override
 	public Dimension minimumLayoutSize(Container parent) {
-		int i;
-		Panel left = null, right = null;
+		Panel left = null;
+		Panel right = null;
 		Component[] obj = parent.getComponents();
-		for (i = 0; i < obj.length; ++i) {
-			if (obj[i] instanceof Panel) {
+		for (Component element : obj) {
+			if (element instanceof Panel) {
 				if (left == null) {
-					left = (Panel) obj[i];
+					left = (Panel) element;
 				}
 				else if (right == null) {
-					right = (Panel) obj[i];
+					right = (Panel) element;
 				}
 				else {
 					break;
@@ -115,24 +111,24 @@ public class ResizeLayout implements LayoutManager {
 
 	@Override
 	public void layoutContainer(Container parent) {
-		int i;
-		Panel left = null, right = null;
+		Panel left = null;
+		Panel right = null;
 		Component rl = null;
 		Component[] obj = parent.getComponents();
-		for (i = 0; i < obj.length; ++i) {
-			if (obj[i] instanceof Panel) {
+		for (Component element : obj) {
+			if (element instanceof Panel) {
 				if (left == null) {
-					left = (Panel) obj[i];
+					left = (Panel) element;
 				}
 				else if (right == null) {
-					right = (Panel) obj[i];
+					right = (Panel) element;
 				}
 				else {
 					break;
 				}
 			}
 			else if (rl == null) {
-				rl = obj[i];
+				rl = element;
 			}
 		}
 

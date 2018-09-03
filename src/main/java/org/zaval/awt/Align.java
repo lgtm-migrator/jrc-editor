@@ -17,14 +17,8 @@
 
 package org.zaval.awt;
 
-class Align implements AlignConstants {
-	private int align = CENTER;
-
-	/**
-	 * Constructs a new Align.
-	 */
-	Align() {
-	}
+class Align {
+	private int align = AlignConstants.CENTER;
 
 	/**
 	 * Sets the arrangement type as int value.

@@ -78,7 +78,7 @@ class AlignArea extends Align {
 	}
 
 	public Rectangle getAlignRectangle() {
-		if (isValid()) {
+		if (isValid) {
 			if (rect == null) {
 				return null;
 			}
@@ -100,17 +100,17 @@ class AlignArea extends Align {
 		int a = getAlign();
 		Rectangle r = new Rectangle(xx / 2, yy / 2, wx, wy);
 
-		if ((a & LEFT) > 0) {
+		if ((a & AlignConstants.LEFT) > 0) {
 			r.x = insets.left;
 		}
-		else if ((a & RIGHT) > 0) {
+		else if ((a & AlignConstants.RIGHT) > 0) {
 			r.x = xx - insets.right;
 		}
 
-		if ((a & TOP) > 0) {
+		if ((a & AlignConstants.TOP) > 0) {
 			r.y = insets.top;
 		}
-		else if ((a & BOTTOM) > 0) {
+		else if ((a & AlignConstants.BOTTOM) > 0) {
 			r.y = yy - insets.bottom;
 		}
 

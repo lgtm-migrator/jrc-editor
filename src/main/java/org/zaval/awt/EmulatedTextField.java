@@ -30,6 +30,10 @@ import java.awt.Point;
 import java.awt.PopupMenu;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -52,7 +56,9 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 	final Point shift = new Point(0, 0);
 	private final Color cursorColor = Color.black;
 	int cursorPos;
-	private int selPos, selWidth, startSel;
+	private int selPos;
+	private int selWidth;
+	private int startSel;
 	private final PopupMenu menu;
 	private final int minSize;
 
@@ -66,21 +72,20 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 		addMouseListener(this);
 		addFocusListener(this);
 
-		MenuItem mi1;
 		menu = new PopupMenu();
 		add(menu);
-		mi1 = new MenuItem("Cut");
-		menu.add(mi1);
-		mi1.addActionListener(this);
-		mi1.setActionCommand("Cut");
-		mi1 = new MenuItem("Copy");
-		menu.add(mi1);
-		mi1.addActionListener(this);
-		mi1.setActionCommand("Copy");
-		mi1 = new MenuItem("Paste");
-		menu.add(mi1);
-		mi1.addActionListener(this);
-		mi1.setActionCommand("Paste");
+		MenuItem menuItemCut = new MenuItem("Cut");
+		menu.add(menuItemCut);
+		menuItemCut.addActionListener(this);
+		menuItemCut.setActionCommand("Cut");
+		MenuItem menuItemCopy = new MenuItem("Copy");
+		menu.add(menuItemCopy);
+		menuItemCopy.addActionListener(this);
+		menuItemCopy.setActionCommand("Copy");
+		MenuItem menuItemPaste = new MenuItem("Paste");
+		menu.add(menuItemPaste);
+		menuItemPaste.addActionListener(this);
+		menuItemPaste.setActionCommand("Paste");
 		menu.addActionListener(this);
 		minSize = size;
 	}
@@ -695,18 +700,18 @@ public class EmulatedTextField extends Canvas implements KeyListener, MouseListe
 	 * Contributed by <a href="mailto:morten@bilpriser.dk">Morten Raahede Knudsen</a>.
 	 */
 	private static synchronized void writeToClipboard(String s) {
-		java.awt.datatransfer.Clipboard c = java.awt.Toolkit.getDefaultToolkit().getSystemClipboard();
-		java.awt.datatransfer.StringSelection s2 = new java.awt.datatransfer.StringSelection(s);
+		Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
+		StringSelection s2 = new StringSelection(s);
 		c.setContents(s2, s2);
 	}
 
 	private static synchronized String readFromClipboard() {
-		java.awt.datatransfer.Clipboard c = java.awt.Toolkit.getDefaultToolkit().getSystemClipboard();
-		java.awt.datatransfer.Transferable t = c.getContents("e");
+		Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
+		Transferable t = c.getContents("e");
 
-		if (t.isDataFlavorSupported(java.awt.datatransfer.DataFlavor.stringFlavor)) {
+		if (t.isDataFlavorSupported(DataFlavor.stringFlavor)) {
 			try {
-				return (String) t.getTransferData(java.awt.datatransfer.DataFlavor.stringFlavor);
+				return (String) t.getTransferData(DataFlavor.stringFlavor);
 			}
 			catch (Exception ex) {
 			}

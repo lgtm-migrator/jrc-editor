@@ -26,7 +26,10 @@ import java.awt.LayoutManager;
 import java.awt.Rectangle;
 
 class ScrollLayout implements LayoutManager {
-	private Component hs, vs, stubb, center;
+	private Component hs;
+	private Component vs;
+	private Component stubb;
+	private Component center;
 
 	public ScrollLayout() {
 		super();

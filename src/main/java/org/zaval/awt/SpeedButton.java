@@ -33,21 +33,26 @@ public class SpeedButton extends Canvas {
 	private static final int UP = 2;
 	private static final int DOWN = 3;
 
-	private Image normImg, upImg, disImg, downImg;
+	private Image normImg;
+	private Image upImg;
+	private Image disImg;
+	private Image downImg;
 
-	private int w, h, state = FREE;
+	private int w;
+	private int h;
+	private int state = FREE;
 
 	public SpeedButton(Image src) {
-		int border = -5;
-		int light = 30;
 		ButtonImageFilter filt = new BoxButtonFilter();
 		w = src.getWidth(this);
 		h = src.getHeight(this);
+		int border = -5;
 		border = -border;
 		border = (w * border) / 100;
 		if (border < 2) {
 			border = 2;
 		}
+		int light = 30;
 		init(src, getFilter(src, filt, light, border, false), getFilter(src, filt, -light, border, true),
 			getFilter(src, filt, -Math.abs(light), 0, false));
 	}
@@ -60,7 +65,7 @@ public class SpeedButton extends Canvas {
 	}
 
 	private Image getFilter(Image src, ButtonImageFilter filt, int light, int border, boolean b) {
-		filt = (ButtonImageFilter) filt.clone();
+		filt = filt.clone();
 		filt.setup(light, border, w, h, b);
 
 		ImageProducer prod = src.getSource();

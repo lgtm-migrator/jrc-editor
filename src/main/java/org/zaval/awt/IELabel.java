@@ -75,7 +75,8 @@ public class IELabel extends Canvas {
 		try {
 			measure();
 			Dimension b = size();
-			int xs, ys = ascent + ((b.height - hsize) / 2);
+			int xs;
+			int ys = ascent + ((b.height - hsize) / 2);
 			if (RIGHT == align) {
 				xs = b.width - wsize;
 			}
@@ -104,7 +105,6 @@ public class IELabel extends Canvas {
 	}
 
 	private void drawText(Graphics gr, String text, int xs, int ys, int max) {
-		int comml = 0, j = 0;
 		StringTokenizer st = new StringTokenizer(text, " \t");
 		if (st.countTokens() == 0) {
 			return;
@@ -112,6 +112,8 @@ public class IELabel extends Canvas {
 		String[] words = new String[st.countTokens()];
 
 		FontMetrics fm = getFontMetrics(getFont());
+		int j = 0;
+		int comml = 0;
 		while (st.hasMoreTokens()) {
 			words[j] = st.nextToken();
 			comml += fm.stringWidth(words[j]);
@@ -120,10 +122,10 @@ public class IELabel extends Canvas {
 		int spc = (max - comml) / words.length;
 		int spcd = (max - comml) % words.length;
 
-		int k = spcd, v;
+		int k = spcd;
 		for (j = 0; j < words.length; ++j) {
 			gr.drawString(words[j], xs, ys);
-			v = k / words.length;
+			int v = k / words.length;
 			if (v > 0) {
 				k = k % words.length;
 			}

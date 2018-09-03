@@ -31,7 +31,7 @@ abstract class BaseCheckbox extends Canvas {
 	private final static int RIGHT = 2;
 
 	private final Dimension sqSize = new Dimension(12, 12);
-	private final int textInset = 3;
+	private static final int textInset = 3;
 
 	boolean state;
 	private boolean hasFocus;
@@ -39,7 +39,8 @@ abstract class BaseCheckbox extends Canvas {
 	boolean mouse_down;
 
 	private int align = LEFT;
-	int posY, posX;
+	int posY;
+	int posX;
 	private Rectangle textArea = new Rectangle();
 	private final Rectangle eventBox = new Rectangle();
 	private final TextAlignArea alignArea = new TextAlignArea();
@@ -170,7 +171,7 @@ abstract class BaseCheckbox extends Canvas {
 			g.setColor(Color.gray);
 		}
 
-		if ((lab != null) && (lab.length() > 0)) {
+		if ((lab != null) && (!lab.isEmpty())) {
 			if (!isEnabled()) {
 				alignArea.draw(g, 0, 1, Color.white);
 			}
@@ -180,7 +181,7 @@ abstract class BaseCheckbox extends Canvas {
 
 		if (hasFocus) {
 			g.setColor(Color.black);
-			if ((lab != null) && (lab.length() > 0)) {
+			if ((lab != null) && (!lab.isEmpty())) {
 				drawRect(g, textArea.x - 1, textArea.y, textArea.width, textArea.height);
 			}
 		}
@@ -227,7 +228,7 @@ abstract class BaseCheckbox extends Canvas {
 			return super.keyDown(ev, key);
 		}
 
-		setState(!getState());
+		setState(!state);
 		Event e = new Event(this, Event.ACTION_EVENT, "1");
 		getParent().postEvent(e);
 		return true;

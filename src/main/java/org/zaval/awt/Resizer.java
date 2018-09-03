@@ -72,8 +72,10 @@ public class Resizer extends Canvas {
 	public void paint(Graphics gr) {
 		if (_enable) {
 			Rectangle r = bounds();
-			int x = 0, y = 0;
-			int w = r.width - (2 * x) - 1, h = r.height - (2 * y) - 1;
+			int x = 0;
+			int y = 0;
+			int w = r.width - (2 * x) - 1;
+			int h = r.height - (2 * y) - 1;
 			gr.setColor(Color.lightGray);
 			gr.fillRect(x, y, x + w, y + h);
 			gr.setColor(Color.white);
@@ -101,15 +103,14 @@ public class Resizer extends Canvas {
 		}
 
 		Component lc = getNextBottomChild(c, y1 + 1, x);
-		int yy1, yy2;
 		while ((lc != null) && (y1 < y2)) {
 			Rectangle lr = lc.bounds();
-			yy1 = y1 - lr.y;
+			int yy1 = y1 - lr.y;
 			if (yy1 < 0) {
 				yy1 = 0;
 			}
 
-			yy2 = y2 - lr.y;
+			int yy2 = y2 - lr.y;
 			if (yy2 >= lr.height) {
 				yy2 = lr.height - 1;
 			}
@@ -187,7 +188,7 @@ public class Resizer extends Canvas {
 			}
 		}
 
-		if (v.size() > 0) {
+		if (!v.isEmpty()) {
 			return v.get(0);
 		}
 		return null;
@@ -209,12 +210,12 @@ public class Resizer extends Canvas {
 		Rectangle rp = getParent().bounds();
 
 		int pos = (r.x + x) - startx - r.width;
-		int left = 0;
 		int right = (rp.width - (2 * r.width)) + rp.x;
 
 		if (pos > right) {
 			pos = right;
 		}
+		int left = 0;
 		if (pos < left) {
 			pos = left;
 		}

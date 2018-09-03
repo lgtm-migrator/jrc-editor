@@ -36,12 +36,12 @@ public class StatusBarStubbElement extends StatusBarElement {
 		int c = h / 5;
 		int xx = d.width - 2;
 		int yy = d.height - 2;
-		int y = yy - 2;
-		int x = xx - 2;
 		if ((c % 5) > 0) {
 			c++;
 		}
 
+		int x = xx - 2;
+		int y = yy - 2;
 		for (int i = 0; i < c; i++) {
 			gr.setColor(Color.gray);
 			gr.drawLine(x, yy, xx, y);

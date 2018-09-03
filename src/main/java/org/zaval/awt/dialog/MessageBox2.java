@@ -34,7 +34,9 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.zaval.awt.AlignConstants;
 import org.zaval.awt.ResultField;
@@ -51,7 +53,9 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 
 	private static final int INDENT = 10;
 	private static final int ICON_TEXT_GAP = 5;
-	private static final int w = 4, h = 3, maxlinecount = 15;
+	private static final int w = 4;
+	private static final int h = 3;
+	private static final int maxlinecount = 15;
 
 	public ResultField getTextContainer() {
 		return text;
@@ -128,13 +132,8 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 		validate();
 	}
 
-	public void setButtons(String[] sa) {
-		int j;
-		List<Button> z = new ArrayList<>(sa.length);
-		for (j = 0; j < sa.length; ++j) {
-			Button b = new Button(sa[j]);
-			z.add(b);
-		}
+	public void setButtons(String... sa) {
+		List<Button> z = Arrays.stream(sa).map(Button::new).collect(Collectors.toCollection(() -> new ArrayList<>(sa.length)));
 		setButtons(z);
 	}
 
@@ -224,22 +223,22 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 	}
 
 	private Dimension getButtonsSize() {
-		if ((buttons == null) || (buttons.size() == 0)) {
+		if ((buttons == null) || (buttons.isEmpty())) {
 			return new Dimension(0, 0);
 		}
-		int h = 23, w = 48; // minimum height and width
-		for (int i = 0; i < buttons.size(); i++) {
-			Dimension d = getButton(i).preferredSize();
-			h = Math.max(d.height, h);
-			w = Math.max(d.width, w);
+		int maxH = 23; // minimum height and width
+		int maxW = 48;
+		for (Button button : buttons) {
+			Dimension d = button.preferredSize();
+			maxH = Math.max(d.height, maxH);
+			maxW = Math.max(d.width, maxW);
 		}
-		return new Dimension(w, h);
+		return new Dimension(maxW, maxH);
 	}
 
 	private Rectangle getPosition(Rectangle area, Dimension size) {
-		int w, h;
-		w = Math.max(0, (area.width - size.width) / 2);
-		h = Math.max(0, (area.height - size.height) / 2);
+		int w = Math.max(0, (area.width - size.width) / 2);
+		int h = Math.max(0, (area.height - size.height) / 2);
 		return new Rectangle(area.x + w, area.y + h, area.width - (w * 2), area.height - (h * 2));
 	}
 
@@ -255,9 +254,8 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 	@Override
 	public Dimension preferredLayoutSize(Container parent) {
 		Insets ins = insets();
-		Dimension d;
 		Dimension d2 = Toolkit.getDefaultToolkit().getScreenSize();
-		d = getTextSize(d2.width / 2);
+		Dimension d = getTextSize(d2.width / 2);
 		int prefwidth = d.width;
 		int prefheight = d.height;
 
@@ -317,9 +315,8 @@ public class MessageBox2 extends Dialog implements LayoutManager {
 			text.move(r.x, r.y);
 			text.resize(r.width, r.height);
 		}
-		int x, y;
-		y = height + inst + h;
-		x = ((width - ((bsize.width + w) * buttons.size()) - w) / 2) + w + insl;
+		int y = height + inst + h;
+		int x = ((width - ((bsize.width + w) * buttons.size()) - w) / 2) + w + insl;
 		for (int i = 0; i < buttons.size(); i++) {
 			getButton(i).move(x, y);
 			getButton(i).resize(bsize);

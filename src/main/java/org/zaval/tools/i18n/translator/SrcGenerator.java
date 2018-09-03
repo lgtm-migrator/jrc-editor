@@ -33,7 +33,8 @@ class SrcGenerator {
 
 	void perform(BundleSet set) {
 		out.println("import java.util.*;\n\npublic class " + baseName(filename) + "\n{");
-		int j, k = set.getItemCount();
+		int j;
+		int k = set.getItemCount();
 		for (j = 0; j < k; ++j) {
 			BundleItem bi = set.getItem(j);
 			out.println("\tprivate String " + makeVarName(bi) + ";");

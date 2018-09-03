@@ -43,9 +43,9 @@ class SymTree extends Panel implements ScrollArea, ScrollObject {
 	private int viewHeight = 300;
 	private int viewWidth = 300; // pixel size of tree display
 
-	private final int cellSize = 16; // size of node image
-	private final int clickSize = 8; // size of mouse toggle (plus or minus)
-	private final int textInset = 6; // left margin for text
+	private static final int cellSize = 16; // size of node image
+	private static final int clickSize = 8; // size of mouse toggle (plus or minus)
+	private static final int textInset = 6; // left margin for text
 	private FontMetrics fm; // current font metrics
 	private final ScrollController sm;
 
@@ -53,7 +53,8 @@ class SymTree extends Panel implements ScrollArea, ScrollObject {
 	private Graphics g1; // offscreen graphics context
 	boolean noChoice;
 
-	private int posx, posy;
+	private int posx;
+	private int posy;
 	private final Dimension scrollInsets = new Dimension(10, 0);
 	private final LevelTree ltree;
 	private final ScrollLayout sl = new ScrollLayout();
@@ -418,7 +419,7 @@ class SymTree extends Panel implements ScrollArea, ScrollObject {
 		return selectedNode.getText();
 	}
 
-	void changeSelection(Event evt, int x, int y, boolean isToggle, boolean[] flags) {
+	void changeSelection(Event evt, int x, int y, boolean isToggle, boolean... flags) {
 		requestFocus();
 
 		Dimension d = size();
@@ -625,8 +626,8 @@ class SymTree extends Panel implements ScrollArea, ScrollObject {
 		g1.fillRect(0, 0, viewWidth, viewHeight); // clear image
 
 		int lastOne = ltree.v.size();
-		int skipCount = 0;
 		getViewCount();
+		int skipCount = 0;
 		for (int i = 0; i < lastOne; ++i) {
 			TreeNode node = null;
 			// This block is better than synchronization for every call to LevelTree
@@ -668,9 +669,9 @@ class SymTree extends Panel implements ScrollArea, ScrollObject {
 
 			// draw toggle box
 			if (isExpandable(node)) {
-				int xx = x + (clickSize / 2);
 
 				g1.setColor(getBackground());
+				int xx = x + (clickSize / 2);
 				g1.fillRect(xx, y + (clickSize / 2), clickSize, clickSize);
 				g1.setColor(getForeground());
 				g1.drawRect(xx, y + (clickSize / 2), clickSize, clickSize);
@@ -797,7 +798,7 @@ class SymTree extends Panel implements ScrollArea, ScrollObject {
 
 	private void correctSelect(TreeNode n) {
 		resetVector();
-		if ((selectedNode != null) && (ltree.v.indexOf(selectedNode) < 0)) {
+		if ((selectedNode != null) && (!ltree.v.contains(selectedNode))) {
 			changeSelection(n, ltree.v.indexOf(n));
 			Event event = new Event(this, 0, null);
 			sendActionEvent(event);

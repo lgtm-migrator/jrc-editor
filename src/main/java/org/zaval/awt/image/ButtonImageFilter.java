@@ -24,4 +24,7 @@ public abstract class ButtonImageFilter extends RGBImageFilter implements Clonea
 
 	@Override
 	public abstract int filterRGB(int x, int y, int rgb);
+
+	@Override
+	public abstract ButtonImageFilter clone();
 }

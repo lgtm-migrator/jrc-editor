@@ -103,14 +103,14 @@ public class Split { // NO_UCD (unused code)
 			bundle.getBundle().addLanguage("en");
 			String rlng = bundle.getBundle().getLanguage(0).getLangId();
 
-			for (String key : ask.keySet()) {
-				bundle.getBundle().addKey(key);
-				bundle.getBundle().updateValue(key, rlng, ask.get(key));
+			for (Map.Entry<String, String> stringStringEntry : ask.entrySet()) {
+				bundle.getBundle().addKey(stringStringEntry.getKey());
+				bundle.getBundle().updateValue(stringStringEntry.getKey(), rlng, stringStringEntry.getValue());
 			}
 		}
 	}
 
-	private void onSaveXml(String fileName, String[] parts) {
+	private void onSaveXml(String fileName, String... parts) {
 		if (fileName != null) {
 			try {
 				try (DataOutputStream out = new DataOutputStream(new FileOutputStream(fileName))) {
@@ -138,7 +138,7 @@ public class Split { // NO_UCD (unused code)
 		}
 	}
 
-	private void onSaveUtf(String fileName, String[] parts) {
+	private void onSaveUtf(String fileName, String... parts) {
 		if (fileName != null) {
 			try {
 				try (DataOutputStream out = new DataOutputStream(new FileOutputStream(fileName))) {
@@ -178,13 +178,12 @@ public class Split { // NO_UCD (unused code)
 	 * Reading unicode (UCS16) file stream into memory
 	 */
 	private String getBody(String file) throws IOException {
-		char ch;
 		try (DataInputStream in = new DataInputStream(new FileInputStream(file))) {
 			StringBuilder buf = new StringBuilder(in.available());
 			try {
 				in.readChar(); // skip UCS16 marker FEFF
 				for (;;) {
-					ch = in.readChar();
+					char ch = in.readChar();
 					buf.append(ch);
 				}
 			}
@@ -195,8 +194,8 @@ public class Split { // NO_UCD (unused code)
 	}
 
 	private void fillTable(Map<String, String> tbl) {
-		for (String k : tbl.keySet()) {
-			StringTokenizer st = new StringTokenizer(k, "!");
+		for (Map.Entry<String, String> stringStringEntry : tbl.entrySet()) {
+			StringTokenizer st = new StringTokenizer(stringStringEntry.getKey(), "!");
 			String key = st.nextToken();
 			if (!st.hasMoreTokens()) {
 				continue;
@@ -208,7 +207,7 @@ public class Split { // NO_UCD (unused code)
 			}
 
 			bundle.getBundle().addKey(key);
-			bundle.getBundle().updateValue(key, lang, tbl.get(k));
+			bundle.getBundle().updateValue(key, lang, stringStringEntry.getValue());
 		}
 	}
 

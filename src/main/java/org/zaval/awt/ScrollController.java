@@ -20,7 +20,9 @@ package org.zaval.awt;
 import java.awt.Dimension;
 import java.awt.Scrollbar;
 
-class ScrollController extends org.zaval.awt.util.Metrics {
+import org.zaval.awt.util.Metrics;
+
+class ScrollController extends Metrics {
 	static final int SCROLL_SIZE = 16;
 
 	private ScrollArea area;

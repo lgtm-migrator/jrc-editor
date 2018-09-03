@@ -69,10 +69,9 @@ public class Toolbar extends Panel implements LayoutManager {
 
 	@Override
 	public Dimension preferredLayoutSize(Container parent) {
-		int maxx = 0, maxy = 0, j;
-		Component[] v = getComponents();
-		for (j = 0; j < v.length; ++j) {
-			Component c = v[j];
+		int maxx = 0;
+		int maxy = 0;
+		for (Component c : getComponents()) {
 			Dimension d = c.preferredSize();
 			maxx += /* 1 + */ d.width;
 			maxy = Math.max(maxy, d.height);
@@ -82,7 +81,6 @@ public class Toolbar extends Panel implements LayoutManager {
 
 	@Override
 	public void layoutContainer(Container parent) {
-		int x, y, w, h, j;
 		Dimension real = parent.size();
 		preferredLayoutSize(parent);
 		Insets p_i = parent.insets();
@@ -91,15 +89,13 @@ public class Toolbar extends Panel implements LayoutManager {
 			return;
 		}
 
-		x = p_i.left;
-		y = p_i.top;
+		int x = p_i.left;
+		int y = p_i.top;
 
-		Component[] v = getComponents();
-		for (j = 0; j < v.length; ++j) {
-			Component c = v[j];
+		for (Component c : getComponents()) {
 			Dimension d = c.preferredSize();
-			w = d.width;
-			h = real.height;
+			int w = d.width;
+			int h = real.height;
 
 			c.resize(w, h);
 			c.move(x + p_i.left, y + p_i.top);

@@ -17,15 +17,14 @@
 
 package org.zaval.awt;
 
-public interface AlignConstants {
-	int LEFT = 0x1;
-	int RIGHT = 0x2;
-	int TOP = 0x4;
-	int BOTTOM = 0x8;
-	int FIT = 0x10;
-	int JUSTIFY = 0x20;
+public abstract class AlignConstants {
+	public static final int LEFT = 0x1;
+	public static final int RIGHT = 0x2;
+	public static final int TOP = 0x4;
+	public static final int BOTTOM = 0x8;
+	public static final int FIT = 0x10;
+	public static final int JUSTIFY = 0x20;
 
-	int TLEFT = LEFT | TOP;
-	int CENTER = 0;
-
+	public static final int TLEFT = LEFT | TOP;
+	public static final int CENTER = 0;
 }

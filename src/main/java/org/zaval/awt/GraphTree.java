@@ -26,10 +26,6 @@ import org.zaval.awt.peer.TreeNode;
 public class GraphTree extends SymTree {
 	private ContextMenuBar menubar;
 
-	public GraphTree() {
-		super();
-	}
-
 	public void setMenuBar(ContextMenuBar mb) {
 		menubar = mb;
 		menubar.setParent(this);

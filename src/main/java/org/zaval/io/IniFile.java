@@ -41,31 +41,31 @@ public class IniFile {
 	}
 
 	private void saveFile() throws IOException {
-		if (!dirty) {
-			return;
-		}
-		dirty = false;
-		try (PrintStream pr = new PrintStream(new FileOutputStream(file))) {
-			for (int j = 0; j < keys.size(); ++j) {
-				pr.print(keys.get(j));
-				pr.print("=");
-				pr.println(vals.get(j));
+		if (dirty) {
+			dirty = false;
+			try (PrintStream pr = new PrintStream(new FileOutputStream(file))) {
+				for (int j = 0; j < keys.size(); ++j) {
+					pr.print(keys.get(j));
+					pr.print("=");
+					pr.println(vals.get(j));
+				}
 			}
 		}
 	}
 
 	private void loadFile() throws IOException {
-		char ch = ' ';
-		String line;
 		try (BufferedReader in = new BufferedReader(new FileReader(file))) {
 
 			// [ \t]* ({symbol}+ '=' [ \t]* {symbol}*
 
+			String line;
+			char ch = ' ';
 			while ((line = in.readLine()) != null) {
-				int j = 0, k = line.length(), i;
+				int k = line.length();
 				if (k <= 0) {
 					continue;
 				}
+				int j = 0;
 				for (; j < k; ++j) {
 					ch = line.charAt(j);
 					if ((ch != '\t') && (ch != ' ')) {
@@ -75,6 +75,7 @@ public class IniFile {
 				if ((ch == '#') || (ch == '\n') || (ch == '\r')) {
 					continue;
 				}
+				int i;
 				for (i = j; j < k; ++j) {
 					ch = line.charAt(j);
 					if ((ch == '\t') || (ch == ' ') || (ch == '\n') || (ch == '\r') || (ch == '=') || (ch == '#')) {

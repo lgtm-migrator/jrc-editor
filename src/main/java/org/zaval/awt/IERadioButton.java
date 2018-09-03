@@ -29,8 +29,6 @@ public class IERadioButton extends BaseCheckbox {
 
 	@Override
 	public void paint(Graphics g, int x, int y, int width, int height) {
-		int xx = x + width;
-		int yy = y + height;
 
 		g.setColor(Color.lightGray);
 		if (isEnabled()) {
@@ -41,6 +39,8 @@ public class IERadioButton extends BaseCheckbox {
 
 		g.fillOval(x, y, width, height);
 		g.setColor(Color.white);
+		int yy = y + height;
+		int xx = x + width;
 		g.drawLine(x + 4, yy - 1, xx - 5, yy - 1);
 		g.drawLine(xx - 1, y + 4, xx - 1, yy - 5);
 		g.drawLine(x + 2, yy - 2, xx - 3, yy - 2);
