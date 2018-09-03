@@ -58,3 +58,9 @@ tasks.sonarqube {
 		(System.properties.'sonar.organization' && System.env.TRAVIS_PULL_REQUEST == 'false') || System.env.SCRUTINIZER
 	}
 }
+
+sonarqube {
+	properties {
+		property "sonar.exclusions", "**/org/zaval/tools/i18n/translator/generated/**"
+	}
+}

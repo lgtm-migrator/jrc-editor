@@ -17,6 +17,9 @@
 
 package org.zaval.tools.i18n.translator;
 
+import org.zaval.tools.i18n.translator.generated.JavaParser;
+import org.zaval.tools.i18n.translator.generated.UtfParser;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;

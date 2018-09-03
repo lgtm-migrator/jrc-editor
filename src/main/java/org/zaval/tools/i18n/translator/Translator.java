@@ -101,6 +101,8 @@ import org.zaval.awt.dialog.MessageBox2;
 import org.zaval.awt.peer.TreeNode;
 import org.zaval.io.IniFile;
 import org.zaval.io.InputIniFile;
+import org.zaval.tools.i18n.translator.generated.JavaParser;
+import org.zaval.tools.i18n.translator.generated.UtfParser;
 import org.zaval.util.SafeResourceBundle;
 
 class Translator extends Frame implements AWTEventListener {

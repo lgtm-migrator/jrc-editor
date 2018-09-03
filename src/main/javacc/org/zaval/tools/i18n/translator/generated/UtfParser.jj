@@ -48,7 +48,7 @@ options {
 
 PARSER_BEGIN(UtfParser)
 
-package org.zaval.tools.i18n.translator;
+package org.zaval.tools.i18n.translator.generated;
 
 import java.io.*;
 import java.util.*;
