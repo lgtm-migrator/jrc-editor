@@ -62,5 +62,6 @@ tasks.sonarqube {
 sonarqube {
 	properties {
 		property "sonar.exclusions", "**/org/zaval/tools/i18n/translator/generated/**"
+		property "sonar.branch.name", System.env.TRAVIS_BRANCH
 	}
 }
