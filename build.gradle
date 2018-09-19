@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2001-2002  Zaval Creative Engineering Group (http://www.zaval.org)
+ * Copyright (C) 2018 Christoph Obexer <cobexer@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * (version 2) as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ */
+
 plugins {
 	id 'java'
 	id 'application'
@@ -5,6 +23,7 @@ plugins {
 	id "com.diffplug.gradle.spotless" version "3.14.0"
 	id "ca.coglinc2.javacc" version "3.0.0"
 	id "org.sonarqube" version "2.6.2"
+	id "com.github.ben-manes.versions" version "0.20.0"
 }
 
 mainClassName = 'org.zaval.tools.i18n.translator.Main'
@@ -49,7 +68,7 @@ compileJavacc {
 }
 
 wrapper {
-	gradleVersion = '4.10'
+	gradleVersion = '4.10.1'
 	distributionType = Wrapper.DistributionType.ALL
 }
 
@@ -63,5 +82,28 @@ sonarqube {
 	properties {
 		property "sonar.exclusions", "**/org/zaval/tools/i18n/translator/generated/**"
 		property "sonar.branch.name", System.env.TRAVIS_BRANCH
+	}
+}
+
+dependencyUpdates {
+	revision = "release"
+	outputFormatter = "text"
+	resolutionStrategy = {
+		componentSelection { rules ->
+			rules.all { ComponentSelection selection ->
+				boolean rejected = ['alpha', 'beta', 'rc', 'cr', 'm'].any { qualifier ->
+					selection.candidate.version ==~ /(?i).*[.-]${qualifier}[.\d-]*/
+				}
+				if (rejected) {
+					selection.reject('Release candidate')
+				}
+				else {
+					rejected = selection.candidate.version.contains('-');
+					if (rejected) {
+						selection.reject('SNAPSHOT version')
+					}
+				}
+			}
+		}
 	}
 }
