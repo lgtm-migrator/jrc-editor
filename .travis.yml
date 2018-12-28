@@ -1,4 +1,4 @@
-sudo: false
+dist: xenial
 
 language: java
 
@@ -7,6 +7,7 @@ jdk:
   - openjdk11
 
 script:
+  - if [ "true" = `git rev-parse --is-shallow-repository` ] ; then git fetch --unshallow ; fi
   - ./gradlew assemble sonarqube "-Dsonar.projectKey=$SONAR_PROJECT_KEY" "-Dsonar.host.url=$SONAR_HOST_URL" "-Dsonar.organization=$SONAR_ORGANIZATION" "-Dsonar.login=$SONAR_TOKEN"
 
 before_cache:
@@ -15,6 +16,6 @@ before_cache:
 
 cache:
   directories:
-    - $HOME/.sonar/cache
+    - $HOME/.sonar/cache/
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
