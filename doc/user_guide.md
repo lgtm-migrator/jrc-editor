@@ -1,21 +1,17 @@
-# User's Guide
-
-## Zaval JRC Editor
+# JRC Editor User's Guide
 
 ## Version 3.0
 
-Zaval Creative Engineering Group
-<http://www.zaval.org>
 ## Contents
 
-- [Introduction to the Zaval JRC Editor](#intro)
-  - [What Can You Do with the Zaval Java Resource Editor](#what_can)
-  - [When To Use the Zaval Java Resource Editor](#when_to_use)
+- [Introduction to the JRC Editor](#intro)
+  - [What Can You Do with the Java Resource Editor](#what_can)
+  - [When To Use the Java Resource Editor](#when_to_use)
 - [Internationalization concept overview](#concept)
-- [Installing the Zaval Java Resource Editor](#install)
+- [Installing the Java Resource Editor](#install)
   - [Requirements](#requirements)
   - [Installation procedure](#procedure)
-- [Using Zaval JRC Editor](#usage)
+- [Using JRC Editor](#usage)
   - [Application start](#start)
   - [Editing existing resources](#existing)
   - [Creating new resources](#creating_new)
@@ -35,16 +31,14 @@ Zaval Creative Engineering Group
   - [Null keys](#nulls)
   - [Statistics](#statistics)
   - [Preferences](#prefs)
-- [Configuring Zaval JRC Editor](#config)
+- [Configuring JRC Editor](#config)
 - [Command-line tool](#command-line)
   - [Operating With Command-line version of JRC Editor](#command-line_options)
 - [Product limitations](#limits)
 - [Further product plans](#plans)
-- [Support available](#support)
-- [Stay informed!](#news)
 - [References](#refs)
 
-## <a id="intro" href="#intro">Introduction to the Zaval JRC Editor</a>
+## <a id="intro" href="#intro">Introduction to the JRC Editor</a>
 
 Since JDK 1.1.x. Sun introduced Internationalization concept for Java.
 
@@ -61,24 +55,24 @@ These files are called resources.
 We provide GUI tool to manipulate these resources.
 The files being produced by this tool is fully compatible with ResourceBundle expectations.
 
-So, the Zaval JRC Editor (also known as Zaval Java Resource Editor) solution is small and easy-to-use visual editor for resource files.
+So, the JRC Editor (also known as Java Resource Editor) solution is small and easy-to-use visual editor for resource files.
 
-## <a id="what_can" href="#what_can">What Can You Do with the Zaval Java Resource Editor</a>
+## <a id="what_can" href="#what_can">What Can You Do with the Java Resource Editor</a>
 
-Zaval JRC Editor is not a simply editing tool - it provides rich and flexible way to manage text-based resources.
+JRC Editor is not a simply editing tool - it provides rich and flexible way to manage text-based resources.
 In fact, you are able to make any distributed translations as you want in several forms outside JRCE.
 But in all cases you will need to merge all changes after translation and do a clean up texts being translated; and JRC Editor
 provides all necessary features to accomplish these tasks.
 
-The Zaval Java Resource Editor can be used for new and existing software localization, resources synchronization and any other resources manipulations.
+The Java Resource Editor can be used for new and existing software localization, resources synchronization and any other resources manipulations.
 
 It provides full support for any language specific resources (it depends on the fonts and font metrics settings of
 the host OS at your computer).
 The target of this tool is localization strings manipulation for all Java-based software that has appropriate support embedded.
 
-## <a id="when_to_use" href="#when_to_use">When To Use the Zaval Java Resource Editor.</a>
+## <a id="when_to_use" href="#when_to_use">When To Use the Java Resource Editor.</a>
 
-The Zaval JRC Editor is best used for regular access to various resource files.
+The JRC Editor is best used for regular access to various resource files.
 You can add your own language support to the existing software if strings are not hard-coded to the software.
 One of the greatest things in the internationalization is that you don't need to make code changes.
 
@@ -95,13 +89,13 @@ All resource files' names have two parts: resource name and localization suffix.
 When you want your program to 'speak' French, for example, the only thing you need to do is adding corresponding properties file.
 This procedure does not require any interaction with the software creator.
 
-## <a id="install" href="#install">Installing the Zaval Java Resource Editor</a>
+## <a id="install" href="#install">Installing the Java Resource Editor</a>
 
 We did our best to make the installation procedure of the product easy, so just follow the instructions.
 
 ## <a id="requirements" href="#requirements">Requirements</a>
 
-To use the Zaval JRC Editor you need a JDK/JRE installed on your computer. OpenJDK Verison 1.8 (8) and OpenJDK 11 were used during development.
+To use the JRC Editor you need a JDK/JRE installed on your computer. OpenJDK Verison 1.8 (8) and OpenJDK 11 were used during development.
 
 ## <a id="procedure" href="#procedure">Installation procedure</a>
 
@@ -128,10 +122,10 @@ Please, download the package corresponding to your OS to make the installation p
 
 3. **Installing on any OS (jrc-editor-2.0.X.tar.gz)**
 
-    Unpack zip/tarball with Zaval JRC Editor to an empty directory.
+    Unpack zip/tarball with JRC Editor to an empty directory.
     Use the appropriate launcher for your platform to start JRC Editor.
 
-## <a id="usage" href="#usage">Using Zaval JRC Editor</a>
+## <a id="usage" href="#usage">Using JRC Editor</a>
 
 ## <a id="start" href="#start">Application start</a>
 
@@ -140,7 +134,7 @@ When the application is started you are able to manipulate resource files.
 
 ## <a id="existing" href="#existing">Editing existing resources</a>
 
-Zaval Java Resource Editor consists of two panels displayed on Screenshot 1.
+Java Resource Editor consists of two panels displayed on Screenshot 1.
 To start working with your resource set you should make several steps:
 
 - From the **File** menu, choose **Open** or **New resource**.
@@ -154,9 +148,9 @@ So, adding "`.`" in key name automatically creates new hierarchy level.
 
 Right panel displays a list of the languages defined by the resource files set and values assigned to them.
 
-![Working area of the Zaval Java Resource Editor](images/jrc-editor.gif)
+![Working area of the Java Resource Editor](images/jrc-editor.gif)
 
-**Screenshot 4. Working area of the Zaval Java Resource Editor**
+**Screenshot 4. Working area of the Java Resource Editor**
 
 To hide a language from the right panel go through the following steps:
 
@@ -173,8 +167,7 @@ To edit key property for any language available do the following:
 To apply changes use **File -> Save** from the top menu or press on the ![Save](images/save.gif) (Save) icon.
 Resource file's name consists of base name (e.g. '`editor`'), language suffix (e.g. '`de`'), and `.properties`
 extension, for example, `editor_de.properties` (German), `editor_fr.properties` (French).
-In our example `jrc-editor.properties` file contains default English messages and is displayed in the title of the Zaval Java
-Resource Editor's panel.
+In our example `jrc-editor.properties` file contains default English messages and is displayed in the title of the Java Resource Editor's panel.
 
 To save all files with a different base name and/or write them to a different directory, use **File -> Save as** or press ![Save As...](images/saveas.gif) (Save As...) icon instead.
 
@@ -393,7 +386,7 @@ Namely:
 - **Use dot as a separator in key hierarchy**: to build the tree in the left panel we need to know the separator in key names, this option just let JRC Editor use dot ('`.`') as a separator.
 - **Use underscore as a separator in key hierarchy**: to build the tree in the left panel we need to know the separator in key names, this option just let JRC Editor use underscore ('`_`') as a separator.
 
-## <a id="config" href="#config">Configuring Zaval JRC Editor</a>
+## <a id="config" href="#config">Configuring JRC Editor</a>
 
 Some JRC Editor's functions can be configured via command-line options.
 These options are global and cannot be changed during JRC Editor execution.
@@ -462,21 +455,6 @@ Current tool implementation follows the minimalist computing concept. In near fu
 - Code generation and analysis improvements and multiple operations support;
 - Automated machine translation and spell-checking support.
 
-## <a id="support" href="#support">Support available</a>
-
-All support for software installation and problems should be sent directly to [support@zaval.org](mailto:support@zaval.org) with 'Re: Zaval JRC Editor Support' in subject line and plain text in the message body, describing your request and/or your problem.
-Since this software is distributed under the General Public License and is maintained by its authors on non-commercial basis, your request will be answered as soon as possible, but no later than 5 business days.
-
-The Zaval Creative Engineering Group carries out its software customization/new software development on the regular basis.
-For more info contact us at [info@zaval.org](mailto:info@zaval.org).
-
-## <a id="news" href="#news">Stay informed!</a>
-
-Now you can receive information on latest products' updates and hotfixes via email.
-
-This is a low-traffic list (1-2 messages per month).
-To subscribe, send blank mail to [news-subscribe@zaval.org](mailto:news-subscribe@zaval.org).
-
 ## <a id="refs" href="#refs">References</a>
 
 1. [The JavaTM Tutorial -> Internationalization](http://java.sun.com/docs/books/tutorial/i18n/)
@@ -487,13 +465,6 @@ To subscribe, send blank mail to [news-subscribe@zaval.org](mailto:news-subscrib
 6. [Codes for the Representation of Names of Languages](http://www.loc.gov/standards/iso639-2/englangn.html)
 7. [Code for the representation of names of languages (ISO 639:1988)](http://www.ics.uci.edu/pub/ietf/http/related/iso639.txt)
 
-For more information about the product, please contact [Zaval CE Group](mailto:support@zaval.org?Subject=Re:%20Zaval%20JRC%20Editor) directly in a free form.
-Please allow some time for reply.
-
-Thank you,
-
-The Zaval CE Group.
-
 ----
 
 Original idea: Victor Krapivin. Developed under Zaval Creative Process.
@@ -501,6 +472,7 @@ Original idea: Victor Krapivin. Developed under Zaval Creative Process.
 ----
 
 Copyright &copy; Zaval Creative Engineering Group, 2000-2002.
+Copyright &copy; Christoph Obexer, 2018-2019.
 
 ----
 
