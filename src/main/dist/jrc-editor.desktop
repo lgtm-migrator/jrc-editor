@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=JRC Editor
+GenericName=JRC Editor
+Exec=./jrc-editor
+Icon=jrc-editor
+Type=Application
+Terminal=false
