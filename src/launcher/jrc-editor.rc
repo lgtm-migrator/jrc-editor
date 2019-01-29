@@ -1,3 +1,0 @@
-#include "Resource.h"
-
-IDR_MAINFRAME           ICON    DISCARDABLE "../../jrc-editor.ico"
