@@ -3,10 +3,8 @@ sudo: false
 language: java
 
 jdk:
-  - oraclejdk8
-  - oraclejdk10
   - openjdk8
-  - openjdk10
+  - openjdk11
 
 script:
   - ./gradlew assemble sonarqube "-Dsonar.projectKey=$SONAR_PROJECT_KEY" "-Dsonar.host.url=$SONAR_HOST_URL" "-Dsonar.organization=$SONAR_ORGANIZATION" "-Dsonar.login=$SONAR_TOKEN"
