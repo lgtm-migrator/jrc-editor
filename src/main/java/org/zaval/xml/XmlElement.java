@@ -364,8 +364,9 @@ public class XmlElement {
 						}
 						break;
 					default:
-						buf.append(IntStream.range(0, delimiterCharsSkipped).mapToObj(i -> "]").collect(
-							Collectors.joining("", "", String.valueOf(ch))));
+						buf.append(IntStream.range(0, delimiterCharsSkipped)
+							.mapToObj(i -> "]")
+							.collect(Collectors.joining("", "", String.valueOf(ch))));
 						delimiterCharsSkipped = 0;
 				}
 			}

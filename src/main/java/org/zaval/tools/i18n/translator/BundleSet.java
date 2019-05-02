@@ -106,8 +106,10 @@ class BundleSet {
 	}
 
 	List<BundleItem> getKeysBeginningWith(String key) {
-		return IntStream.range(0, getItemCount()).mapToObj(this::getItem).filter(bi -> bi.getId().startsWith(key)).collect(
-			Collectors.toList());
+		return IntStream.range(0, getItemCount())
+			.mapToObj(this::getItem)
+			.filter(bi -> bi.getId().startsWith(key))
+			.collect(Collectors.toList());
 	}
 
 	void removeKeysBeginningWith(String key) {
