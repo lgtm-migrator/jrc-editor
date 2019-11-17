@@ -79,7 +79,6 @@ assemble {
 }
 
 wrapper {
-	gradleVersion = '5.4.1'
 	distributionType = Wrapper.DistributionType.ALL
 }
 
@@ -97,9 +96,9 @@ sonarqube {
 }
 
 dependencyUpdates {
-	revision = "release"
-	outputFormatter = "text"
-	resolutionStrategy = {
+	revision "release"
+	outputFormatter "text"
+	resolutionStrategy {
 		componentSelection { rules ->
 			rules.all { ComponentSelection selection ->
 				boolean rejected = ['alpha', 'beta', 'rc', 'cr', 'm'].any { qualifier ->
