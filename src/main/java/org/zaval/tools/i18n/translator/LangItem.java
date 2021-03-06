@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2001-2002  Zaval Creative Engineering Group (http://www.zaval.org)
+ * Copyright (C) 2019 Christoph Obexer <cobexer@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,28 +19,28 @@
 package org.zaval.tools.i18n.translator;
 
 class LangItem {
-	private final String lng;
-	private final String desc;
-	private String fname;
+	private final String id;
+	private final String description;
+	private String fileName;
 
-	LangItem(String lng, String dsc) {
-		this.lng = lng;
-		this.desc = dsc;
+	LangItem(String id, String description) {
+		this.id = id;
+		this.description = description;
 	}
 
-	String getLangId() {
-		return lng;
+	String getId() {
+		return id;
 	}
 
-	String getLangDescription() {
-		return desc;
+	String getDescription() {
+		return description;
 	}
 
-	String getLangFile() {
-		return fname;
+	String getFileName() {
+		return fileName;
 	}
 
-	void setLangFile(String s) {
-		this.fname = s;
+	void setFileName(String fileName) {
+		this.fileName = fileName;
 	}
 }

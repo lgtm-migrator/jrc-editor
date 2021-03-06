@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2001-2002  Zaval Creative Engineering Group (http://www.zaval.org)
+ * Copyright (C) 2019 Christoph Obexer <cobexer@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -32,9 +33,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class XmlElement {
-
-	private final Map<String, String> attributes;
-	private final List<XmlElement> children;
+	private final Map<String, String> attributes = new HashMap<>();
+	private final List<XmlElement> children = new ArrayList<>();
 	private String name;
 	private String contents;
 	private final Map<String, char[]> entities;
@@ -54,8 +54,6 @@ public class XmlElement {
 		this.ignoreCase = ignoreCase;
 		this.name = null;
 		this.contents = "";
-		this.attributes = new HashMap<>();
-		this.children = new ArrayList<>();
 		this.entities = entities;
 		if (fillBasicConversionTable) {
 			this.entities.put("amp", new char[] { '&' });
@@ -237,7 +235,7 @@ public class XmlElement {
 		}
 	}
 
-	private void scanIdentifier(StringBuffer result) throws IOException {
+	private void scanIdentifier(StringBuilder result) throws IOException {
 		for (;;) {
 			char ch = this.readChar();
 			if (((ch < 'A') || (ch > 'Z'))
@@ -270,7 +268,7 @@ public class XmlElement {
 		}
 	}
 
-	private char scanWhitespace(StringBuffer result) throws IOException {
+	private char scanWhitespace(StringBuilder result) throws IOException {
 		for (;;) {
 			char ch = this.readChar();
 			switch (ch) {
@@ -286,7 +284,7 @@ public class XmlElement {
 		}
 	}
 
-	private void scanString(StringBuffer string) throws IOException {
+	private void scanString(StringBuilder string) throws IOException {
 		char delimiter = this.readChar();
 		if ((delimiter != '\'') && (delimiter != '"')) {
 			throw this.expectedInput("' or \"");
@@ -305,7 +303,7 @@ public class XmlElement {
 		}
 	}
 
-	private void scanPCData(StringBuffer data) throws IOException {
+	private void scanPCData(StringBuilder data) throws IOException {
 		for (;;) {
 			char ch = this.readChar();
 			if (ch == '<') {
@@ -327,7 +325,7 @@ public class XmlElement {
 		}
 	}
 
-	private boolean checkCDATA(StringBuffer buf) throws IOException {
+	private boolean checkCDATA(StringBuilder buf) throws IOException {
 		char ch = this.readChar();
 		if (ch != '[') {
 			this.unreadChar(ch);
@@ -474,7 +472,7 @@ public class XmlElement {
 	}
 
 	private void scanElement(XmlElement elt) throws IOException {
-		StringBuffer buf = new StringBuffer();
+		StringBuilder buf = new StringBuilder();
 		this.scanIdentifier(buf);
 		String name = buf.toString();
 		elt.name = name;
@@ -578,7 +576,7 @@ public class XmlElement {
 		}
 	}
 
-	private void resolveEntity(StringBuffer buf) throws IOException {
+	private void resolveEntity(StringBuilder buf) throws IOException {
 		char ch;
 		StringBuilder keyBuf = new StringBuilder();
 		for (;;) {

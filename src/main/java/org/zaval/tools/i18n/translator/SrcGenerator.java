@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2001-2002  Zaval Creative Engineering Group (http://www.zaval.org)
+ * Copyright (C) 2019 Christoph Obexer <cobexer@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -27,32 +28,27 @@ class SrcGenerator {
 
 	SrcGenerator(String filename) throws IOException {
 		FileOutputStream fop = new FileOutputStream(filename);
-		out = new PrintStream(fop);
+		this.out = new PrintStream(fop);
 		this.filename = filename;
 	}
 
 	void perform(BundleSet set) {
 		out.println("import java.util.*;\n\npublic class " + baseName(filename) + "\n{");
-		int j;
-		int k = set.getItemCount();
-		for (j = 0; j < k; ++j) {
-			BundleItem bi = set.getItem(j);
+		BundleItem[] items = set.getItems().toArray(BundleItem[]::new);
+		for (BundleItem bi : items) {
 			out.println("\tprivate String " + makeVarName(bi) + ";");
 		}
 		out.println();
-		for (j = 0; j < k; ++j) {
-			BundleItem bi = set.getItem(j);
+		for (BundleItem bi : items) {
 			out.println("\tpublic final String get" + makeFunName(bi) + "()\t{ return " + makeVarName(bi) + ";}");
 		}
 		out.println();
-		for (j = 0; j < k; ++j) {
-			BundleItem bi = set.getItem(j);
+		for (BundleItem bi : items) {
 			out.println("\tpublic final void set" + makeFunName(bi) + "(String what)\t{ this." + makeVarName(bi) + " = what;}");
 		}
 		out.println();
 		out.println("\tpublic void loadFromResource(ResourceBundle rs)\n\t{");
-		for (j = 0; j < k; ++j) {
-			BundleItem bi = set.getItem(j);
+		for (BundleItem bi : items) {
 			out.println("\t\ttry{ set"
 				+ makeFunName(bi)
 				+ "(rs.getString(\""

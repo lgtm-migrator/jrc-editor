@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2001-2002  Zaval Creative Engineering Group (http://www.zaval.org)
+ * Copyright (C) 2019 Christoph Obexer <cobexer@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,9 +18,6 @@
 
 package org.zaval.tools.i18n.translator;
 
-import org.zaval.tools.i18n.translator.generated.JavaParser;
-import org.zaval.tools.i18n.translator.generated.UtfParser;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
@@ -29,6 +27,10 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Map;
 import java.util.StringTokenizer;
+
+import org.zaval.tools.i18n.translator.generated.UtfParser;
+import org.zaval.util.LambdaUtils;
+import org.zaval.xml.XmlReader;
 
 public class Split { // NO_UCD (unused code)
 	private BundleManager bundle = new BundleManager();
@@ -44,15 +46,13 @@ public class Split { // NO_UCD (unused code)
 	private void join(BundleManager bundle2, boolean part) {
 		if (part) {
 			BundleSet set = bundle2.getBundle();
-			int items = set.getItemCount();
-			for (int i = 0; i < items; ++i) {
-				BundleItem bi = set.getItem(i);
+			set.getItems().forEachOrdered(bi -> {
 				bundle.getBundle().addKey(bi.getId());
 				for (String lang : bi.getLanguages()) {
 					bundle.getBundle().addLanguage(lang);
 					bundle.getBundle().updateValue(bi.getId(), lang, bi.getTranslation(lang));
 				}
-			}
+			});
 		}
 		else {
 			bundle = bundle2;
@@ -97,32 +97,14 @@ public class Split { // NO_UCD (unused code)
 		}
 	}
 
-	private void onParseCode(String fileName) throws Exception {
-		if (fileName != null) {
-			fileName = bundle.replace(fileName, "\\", "/");
-			JavaParser parser = new JavaParser(new FileInputStream(fileName));
-			Map<String, String> ask = parser.parse();
-
-			bundle.getBundle().addLanguage("en");
-			String rlng = bundle.getBundle().getLanguage(0).getLangId();
-
-			for (Map.Entry<String, String> stringStringEntry : ask.entrySet()) {
-				bundle.getBundle().addKey(stringStringEntry.getKey());
-				bundle.getBundle().updateValue(stringStringEntry.getKey(), rlng, stringStringEntry.getValue());
-			}
-		}
-	}
-
 	private void onSaveXml(String fileName, String... parts) {
 		if (fileName != null) {
 			try {
 				try (DataOutputStream out = new DataOutputStream(new FileOutputStream(fileName))) {
 					BundleSet set = bundle.getBundle();
-					int items = set.getItemCount();
 					out.writeChar((char) 0xFEFF);
 					out.writeChars("<xml>\n");
-					for (int i = 0; i < items; ++i) {
-						BundleItem bi = set.getItem(i);
+					set.getItems().forEachOrdered(LambdaUtils.unchecked(bi -> {
 						out.writeChars("\t<key name=\"" + bi.getId() + "\">\n");
 						for (String lang : bi.getLanguages()) {
 							if (!inArray(parts, lang)) {
@@ -131,7 +113,7 @@ public class Split { // NO_UCD (unused code)
 							out.writeChars("\t\t<value lang=\"" + lang + "\">" + bi.getTranslation(lang) + "</value>\n");
 						}
 						out.writeChars("\t</key>\n");
-					}
+					}));
 					out.writeChars("</xml>\n");
 				}
 			}
@@ -146,11 +128,9 @@ public class Split { // NO_UCD (unused code)
 			try {
 				try (DataOutputStream out = new DataOutputStream(new FileOutputStream(fileName))) {
 					BundleSet set = bundle.getBundle();
-					int items = set.getItemCount();
 					out.writeChar((char) 0xFEFF);
 					out.writeChars("#JRC Editor 2.0: do not modify this line\r\n\r\n");
-					for (int i = 0; i < items; ++i) {
-						BundleItem bi = set.getItem(i);
+					set.getItems().forEachOrdered(LambdaUtils.unchecked(bi -> {
 						out.writeChars("KEY=\"" + bi.getId() + "\":\r\n");
 						for (String lang : bi.getLanguages()) {
 							if (!inArray(parts, lang)) {
@@ -159,7 +139,7 @@ public class Split { // NO_UCD (unused code)
 							out.writeChars("\t\"" + lang + "\"=\"" + bi.getTranslation(lang) + "\"\r\n");
 						}
 						out.writeChars("\r\n");
-					}
+					}));
 				}
 			}
 			catch (Exception e) {
@@ -233,12 +213,6 @@ public class Split { // NO_UCD (unused code)
 	}
 
 	private void tryToLoad(String fileName) throws IOException {
-		try {
-			onParseCode(fileName);
-			return;
-		}
-		catch (Exception e) {
-		}
 		try {
 			onLoadXml(fileName);
 			return;

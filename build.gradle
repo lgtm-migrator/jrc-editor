@@ -26,7 +26,7 @@ plugins {
 }
 
 application {
-	mainClassName = 'org.zaval.tools.i18n.translator.Main'
+	mainClassName = 'org.zaval.tools.i18n.translator.JrcEditor'
 	executableDir = ''
 }
 
@@ -48,6 +48,8 @@ spotless {
 }
 
 dependencies {
+	compile 'org.apache.commons:commons-configuration2:2.5'
+	compile 'commons-beanutils:commons-beanutils:1.9.4'
 	compile 'jakarta-regexp:jakarta-regexp:1.4'
 }
 

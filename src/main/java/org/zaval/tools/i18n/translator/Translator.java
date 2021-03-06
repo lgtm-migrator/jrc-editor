@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2001-2002  Zaval Creative Engineering Group (http://www.zaval.org)
+ * Copyright (C) 2019 Christoph Obexer <cobexer@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,108 +18,112 @@
 
 package org.zaval.tools.i18n.translator;
 
-import java.awt.AWTEvent;
+import static org.zaval.ui.UiUtils.constrain;
+
 import java.awt.BorderLayout;
-import java.awt.Button;
-import java.awt.CheckboxMenuItem;
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.Event;
 import java.awt.FileDialog;
-import java.awt.FlowLayout;
-import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.LayoutManager;
-import java.awt.Menu;
-import java.awt.MenuBar;
-import java.awt.MenuItem;
-import java.awt.MenuShortcut;
-import java.awt.Panel;
-import java.awt.Rectangle;
-import java.awt.TextField;
-import java.awt.Toolkit;
-import java.awt.Window;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
-import java.awt.event.AWTEventListener;
+import java.awt.GridLayout;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.ByteArrayOutputStream;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.StringReader;
+import java.io.StringWriter;
+import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
+import javax.swing.SwingWorker;
+import javax.swing.WindowConstants;
+import javax.swing.border.BevelBorder;
+import javax.swing.text.JTextComponent;
+
+import org.apache.commons.configuration2.INIConfiguration;
+import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
+import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
-import org.zaval.awt.AlignConstants;
-import org.zaval.awt.BorderedPanel;
-import org.zaval.awt.ContextMenu;
-import org.zaval.awt.ContextMenuBar;
-import org.zaval.awt.EmulatedTextField;
-import org.zaval.awt.GraphTree;
-import org.zaval.awt.IELabel;
-import org.zaval.awt.LevelTree;
-import org.zaval.awt.ResizeLayout;
-import org.zaval.awt.Resizer;
-import org.zaval.awt.ResultField;
-import org.zaval.awt.SimpleScrollPanel;
-import org.zaval.awt.SpeedButton;
-import org.zaval.awt.StatusBar;
-import org.zaval.awt.StatusBarElement;
-import org.zaval.awt.StatusBarStubbElement;
-import org.zaval.awt.TextAlignArea;
-import org.zaval.awt.Toolbar;
-import org.zaval.awt.ToolkitResolver;
-import org.zaval.awt.dialog.EditDialog;
-import org.zaval.awt.dialog.MessageBox2;
-import org.zaval.awt.peer.TreeNode;
-import org.zaval.io.IniFile;
-import org.zaval.io.InputIniFile;
-import org.zaval.tools.i18n.translator.generated.JavaParser;
 import org.zaval.tools.i18n.translator.generated.UtfParser;
+import org.zaval.ui.AboutDialog;
+import org.zaval.ui.LangDialog;
+import org.zaval.ui.ReplaceDialog;
+import org.zaval.ui.SearchDialog;
+import org.zaval.ui.TranslationTree;
+import org.zaval.ui.TranslationTreeListener;
+import org.zaval.ui.TranslationTreeNode;
+import org.zaval.util.LambdaUtils;
 import org.zaval.util.SafeResourceBundle;
+import org.zaval.xml.XmlReader;
 
-class Translator extends Frame implements AWTEventListener {
-	private MessageBox2 closeDialog;
-	private MessageBox2 delDialog;
-	private MessageBox2 errDialog;
-	private MessageBox2 repDialog;
+@SuppressWarnings("serial")
+class Translator extends JFrame implements TranslationTreeListener {
+	private static final String OPTION_PICKLIST = "picklist";
+	private static final String OPTION_ALLOW_DOT = "allowDot";
+	private static final String OPTION_AUTO_EXPAND_TF = "autoExpandTF";
+	private static final String OPTION_OMIT_SPACES = "omitSpaces";
+	private static final String OPTION_KEEP_LAST_DIR = "keepLastDir";
+	private static final String OPTION_ALLOW_U_SCORE = "allowUScore";
 
-	private EmulatedTextField keyName;
-	private Button keyInsertButton;
-	private Button keyDeleteButton;
-	private Button dropComment;
-	private IELabel keynLab;
-	private GraphTree tree;
-	private Panel textPanel;
-	private List<LangState> langStates = new ArrayList<>();
+	private JOptionPane repDialog;
+
+	private JTextField keyName;
+	private JLabel keynLab;
+	private TranslationTree tree;
+	private JPanel textPanel;
+	private final Map<String, LangState> langStates = new LinkedHashMap<>();
 	private String lastDirectory = ".";
 
 	// Options
@@ -128,82 +133,36 @@ class Translator extends Frame implements AWTEventListener {
 	private boolean allowDot = true;
 	private boolean allowUScore = true;
 
-	private MenuItem newBundleMenu;
-	private MenuItem openBundleMenu;
-	private MenuItem openBundleMenuP;
-	private MenuItem saveBundleMenu;
-	private MenuItem saveAsBundleMenu;
-	private MenuItem genMenu;
-	private MenuItem parseMenu;
-	private MenuItem saveXmlBundleMenu;
-	private MenuItem saveUtfBundleMenu;
-	private MenuItem loadXmlBundleMenu;
-	private MenuItem loadUtfBundleMenu;
-	private MenuItem saveXmlBundleMenuP;
-	private MenuItem saveUtfBundleMenuP;
-	private MenuItem loadXmlBundleMenuP;
-	private MenuItem loadUtfBundleMenuP;
-	private MenuItem loadJarMenu;
-	private MenuItem closeMenu;
-	private MenuItem exitMenu;
-	private MenuItem newLangMenu;
-	private Menu langMenu;
-	private Menu fileMenu;
-	private MenuItem delMenu;
-	private MenuItem insMenu;
-	private MenuItem renMenu;
-	private MenuItem editCopyMenu;
-	private MenuItem editCutMenu;
-	private MenuItem editPasteMenu;
-	private MenuItem editDeleteMenu;
-	private MenuItem searchMenu;
-	private MenuItem searchAgainMenu;
-	private MenuItem replaceToMenu;
-	private MenuItem aboutMenu;
-	private MenuItem expandTreeMenu;
-	private MenuItem collapseTreeMenu;
-	private MenuItem expandNodeMenu;
-	private MenuItem collapseNodeMenu;
-	private CheckboxMenuItem hideTransMenu;
-	private MenuItem statisticsMenu;
-	private CheckboxMenuItem showNullsMenu;
+	private JMenu openRecentMenu;
+	private JMenuItem saveBundleMenu;
+	private JMenuItem saveAsBundleMenu;
+	private JMenuItem genMenu;
+	private JMenuItem closeMenu;
+	private JMenuItem exitMenu;
+	private JMenu langMenu;
+	private JMenu fileMenu;
+	private JCheckBoxMenuItem hideTransMenu;
+	private JCheckBoxMenuItem showNullsMenu;
 
 	// Options
-	private CheckboxMenuItem keepLastDirMenu;
-	private CheckboxMenuItem omitSpacesMenu;
-	private CheckboxMenuItem autoExpandTFMenu;
-	private CheckboxMenuItem allowDotMenu;
-	private CheckboxMenuItem allowUScoreMenu;
+	private JCheckBoxMenuItem keepLastDirMenu;
+	private JCheckBoxMenuItem omitSpacesMenu;
+	private JCheckBoxMenuItem autoExpandTFMenu;
+	private JCheckBoxMenuItem allowDotMenu;
+	private JCheckBoxMenuItem allowUScoreMenu;
 
-	// Context menus
-	private MenuItem ctNewMenu;
-	private MenuItem ctNodeExpandMenu;
-	private MenuItem ctNodeCollapseMenu;
-	private MenuItem ctNodeDeleteMenu;
-	private MenuItem ctNodeRenameMenu;
+	private JTextField commField;
+	private JLabel sbl1;
+	private JLabel sbl2;
 
-	private EmulatedTextField commField;
-	private IELabel sbl1;
-	private IELabel sbl2;
-
-	private ToolkitResolver imgres;
 	private boolean exitInitiated = true;
 	private boolean isDirty;
 	private String wasSelectedKey;
-	private String SYS_DIR;
 	private BundleManager bundle = new BundleManager();
-	private final Panel pane = new Panel();
-	private Toolbar tool;
-	private SimpleScrollPanel scrPanel;
+	private final JPanel pane = new JPanel(new BorderLayout());
 
 	private final String[] CLOSE_BUTTONS = new String[3];
-	private final String[] YESNO_BUTTONS = new String[2];
-	private final String[] DELETE_BUTTONS = new String[3];
-	private final String[] DELETE_BUTTONS2 = new String[2];
-	private final String[] DELETE_BUTTONS3 = new String[2];
 	private final String[] REPLACE_BUTTONS = new String[3];
-
-	private MenuItem[] tbar2menu;
 
 	private static final int MAX_PICK_LENGTH = 40;
 	private List<String> pickList = new ArrayList<>(8);
@@ -223,24 +182,26 @@ class Translator extends Frame implements AWTEventListener {
 	private BundleItem curItemForReplace;
 	private LangItem curLangForReplace;
 
-	private final List<Component> tabOrder = new ArrayList<>();
-
-	public Translator(String s, SafeResourceBundle res) {
-		init(s, res);
+	public Translator(SafeResourceBundle res) {
+		init(res);
 		onNewBundle();
 	}
 
-	public Translator(String s, SafeResourceBundle res, String bundleName) {
-		init(s, res);
+	public Translator(SafeResourceBundle res, String bundleName) {
+		init(res);
 		clear();
 		readResources(bundleName, false);
 	}
 
-	private void init(String s, SafeResourceBundle res) {
-		SYS_DIR = s;
+	private void init(SafeResourceBundle res) {
+		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				onClose();
+			}
+		});
 		rcTable = res;
-
-		Toolkit.getDefaultToolkit().addAWTEventListener(this, AWTEvent.KEY_EVENT_MASK);
 
 		CLOSE_BUTTONS[0] = RC("dialog.button.yes");
 		CLOSE_BUTTONS[1] = RC("dialog.button.no");
@@ -250,185 +211,186 @@ class Translator extends Frame implements AWTEventListener {
 		REPLACE_BUTTONS[1] = RC("dialog.button.no");
 		REPLACE_BUTTONS[2] = RC("dialog.button.cancel");
 
-		YESNO_BUTTONS[0] = RC("dialog.button.yes");
-		YESNO_BUTTONS[1] = RC("dialog.button.no");
-
-		DELETE_BUTTONS[0] = RC("dialog.button.delete.all");
-		DELETE_BUTTONS[1] = RC("dialog.button.delete.this");
-		DELETE_BUTTONS[2] = RC("dialog.button.cancel");
-
-		DELETE_BUTTONS2[0] = DELETE_BUTTONS[0];
-		DELETE_BUTTONS2[1] = DELETE_BUTTONS[2];
-		DELETE_BUTTONS3[0] = DELETE_BUTTONS[1];
-		DELETE_BUTTONS3[1] = DELETE_BUTTONS[2];
-
-		imgres = new ToolkitResolver();
 		this.setLayout(new BorderLayout(0, 0));
 		add("Center", pane);
 
-		tool = new Toolbar();
-		tool.add(91, new IELabel(RC("menu.file") + ":"));
-		tool.add(0, new SpeedButton(imgres.getImage(SYS_DIR + "new.gif", this)));
-		tool.add(1, new SpeedButton(imgres.getImage(SYS_DIR + "load.gif", this)));
-		tool.add(2, new SpeedButton(imgres.getImage(SYS_DIR + "save.gif", this)));
-		tool.add(3, new SpeedButton(imgres.getImage(SYS_DIR + "saveas.gif", this)));
-		tool.add(92, new IELabel("+"));
-		tool.add(4, new SpeedButton(imgres.getImage(SYS_DIR + "deploy.gif", this)));
-		tool.add(5, new SpeedButton(imgres.getImage(SYS_DIR + "import.gif", this)));
-		tool.add(93, new IELabel(RC("menu.edit") + ":"));
-		tool.add(6, new SpeedButton(imgres.getImage(SYS_DIR + "newlang.gif", this)));
-		tool.add(7, new SpeedButton(imgres.getImage(SYS_DIR + "del.gif", this)));
-		tool.add(94, new IELabel(RC("menu.help") + ": "));
-		tool.add(8, new SpeedButton(imgres.getImage(SYS_DIR + "about.gif", this)));
+		JButton newBundleToolButton = createToolBarButton(this::onNewBundle, "new.gif", RC("tools.translator.menu.new.bundle"));
+		JButton openBundleToolButton = createToolBarButton(this::onLoadBundle, "load.gif", RC("tools.translator.menu.open"));
+		JButton saveBundleToolButton = createToolBarButton(this::onSave, "save.gif", RC("tools.translator.menu.save"));
+		JButton saveAsToolButton = createToolBarButton(this::onSaveAs, "saveas.gif", RC("tools.translator.menu.saveas"));
+		JButton genToolButton = createToolBarButton(this::onGenCode, "deploy.gif", RC("tools.translator.menu.generate"));
+		JButton newLangToolButton = createToolBarButton(this::onNewResource, "newlang.gif", RC("tools.translator.menu.new.lang"));
+		JButton delToolButton = createToolBarButton(this::onDeleteKey, "del.gif", RC("tools.translator.menu.delete"));
+		JButton aboutToolButton = createToolBarButton(this::onAbout, "about.gif", RC("menu.about"));
+
+		JToolBar tool = new JToolBar();
+		tool.setFloatable(false);
+		tool.setRollover(true);
+		tool.add(new JLabel(RC("menu.file") + ":"));
+		tool.add(newBundleToolButton);
+		tool.add(openBundleToolButton);
+		tool.add(saveBundleToolButton);
+		tool.add(saveAsToolButton);
+		tool.addSeparator();
+		tool.add(genToolButton);
+		tool.addSeparator();
+		tool.add(new JLabel(RC("menu.edit") + ":"));
+		tool.add(newLangToolButton);
+		tool.add(delToolButton);
+		tool.addSeparator();
+		tool.add(new JLabel(RC("menu.help") + ": "));
+		tool.add(aboutToolButton);
 		add("North", tool);
 
-		setIconImage(imgres.getImage(SYS_DIR + "jrc-editor.gif"));
+		//TODO: use setIconImages to provide higher resolution images
+		setIconImage(getImageIcon("jrc-editor.gif").getImage());
 
-		StatusBar panel3 = new StatusBar/*Panel*/();
-		sbl1 = new IELabel();
-		panel3.add(new StatusBarElement(sbl1, 20));
-		sbl2 = new IELabel();
-		panel3.add(new StatusBarElement(sbl2, 80));
-		StatusBarElement se = new StatusBarStubbElement(new Panel(), 0, new Dimension(22, 19));
-		se.setLayout(new FlowLayout(FlowLayout.LEFT, 1, 2));
-		se.setType(0);
-		panel3.add(se);
+		JPanel panel3 = new JPanel(new GridBagLayout());
+		panel3.setPreferredSize(new Dimension(0, (int) (panel3.getFontMetrics(panel3.getFont()).getHeight() * 1.5f)));
+		panel3.setBorder(new BevelBorder(BevelBorder.LOWERED));
+
+		sbl1 = new JLabel();
+		JPanel sbl1Panel = new JPanel(new GridLayout(1, 1));
+		sbl1Panel.setPreferredSize(new Dimension(2, 0));
+		sbl1Panel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+		sbl1Panel.add(sbl1);
+		sbl2 = new JLabel();
+		JPanel sbl2Panel = new JPanel(new GridLayout(1, 1));
+		sbl2Panel.setPreferredSize(new Dimension(8, 0));
+		sbl2Panel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+		sbl2Panel.add(sbl2);
+
+		constrain(panel3, sbl1Panel, 0, 0, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, 0.2, 1.0, 0, 0, 0, 0);
+		constrain(panel3, sbl2Panel, 1, 0, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, 0.8, 1.0, 0, 0, 0, 0);
 		add("South", panel3);
 
-		tree = new GraphTree();
-		tree.setResolver(imgres);
-		tree.setBackground(Color.white);
-		ContextMenuBar mbar = new ContextMenuBar(this);
+		tree = new TranslationTree(getImageIcon(TranslatorConstants.WARN_IMAGE), this);
 
-		ContextMenu _ctNewMenu = new ContextMenu("");
-		ctNewMenu = new MenuItem(RC("tools.translator.menu.insert"));
-		_ctNewMenu.add(ctNewMenu);
-		mbar.add(_ctNewMenu);
+		JPopupMenu ctNodeMenu = new JPopupMenu("");
+		JMenuItem ctNewMenu = createMenuItem(this::onNewKey, RC("tools.translator.menu.insert"));
+		ctNodeMenu.add(ctNewMenu);
+		JMenuItem ctNodeExpandMenu = createMenuItem(this::onExpandTreeNode, RC("tools.translator.menu.expand"));
+		ctNodeMenu.add(ctNodeExpandMenu);
+		JMenuItem ctNodeCollapseMenu = createMenuItem(this::onCollapseTreeNode, RC("tools.translator.menu.collapse"));
+		ctNodeMenu.add(ctNodeCollapseMenu);
+		JMenuItem ctNodeDeleteMenu = createMenuItem(this::onDeleteKey, RC("tools.translator.menu.delete"));
+		ctNodeMenu.add(ctNodeDeleteMenu);
+		JMenuItem ctNodeRenameMenu = createMenuItem(this::onRenameKey, RC("tools.translator.menu.rename"));
+		ctNodeMenu.add(ctNodeRenameMenu);
+		tree.setComponentPopupMenu(ctNodeMenu);
 
-		ContextMenu _ctNodeMenu = new ContextMenu("");
-		ctNewMenu = new MenuItem(RC("tools.translator.menu.insert"));
-		_ctNodeMenu.add(ctNewMenu);
-		ctNodeExpandMenu = new MenuItem(RC("tools.translator.menu.expand"));
-		_ctNodeMenu.add(ctNodeExpandMenu);
-		ctNodeCollapseMenu = new MenuItem(RC("tools.translator.menu.collapse"));
-		_ctNodeMenu.add(ctNodeCollapseMenu);
-		ctNodeDeleteMenu = new MenuItem(RC("tools.translator.menu.delete"));
-		_ctNodeMenu.add(ctNodeDeleteMenu);
-		ctNodeRenameMenu = new MenuItem(RC("tools.translator.menu.rename"));
-		_ctNodeMenu.add(ctNodeRenameMenu);
-		mbar.add(_ctNodeMenu);
-		tree.setMenuBar(mbar);
+		JSplitPane mainPanel = new JSplitPane();
+		mainPanel.setDividerSize(3);
+		mainPanel.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
+		JPanel keyPanel = new JPanel(new GridBagLayout());
 
-		pane.setLayout(new BorderLayout());
-		Panel mainPanel = new BorderedPanel(BorderedPanel.RAISED2/*SUNKEN*/);
-		GridBagLayout gbl = new GridBagLayout();
-		Panel keyPanel = new Panel(gbl);
+		JLabel keyLabel = new JLabel(RC("tools.translator.label.key"));
+		constrain(keyPanel, keyLabel, 0, 0, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.NONE, 0.0, 0.0, 5, 5, 5, 5);
 
-		IELabel keyLabel = new IELabel(RC("tools.translator.label.key"));
-		constrain(keyPanel, keyLabel, 0, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, 0.0, 0.0, 5, 5, 5, 5);
-
-		keyName = new EmulatedTextField();
-		keyName.setBackground(Color.white);
+		keyName = new JTextField();
 		constrain(keyPanel, keyName, 1, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.BOTH, 1.0, 1.0, 5, 5, 5, 5);
+		keyName.addActionListener((e) -> onInsertKey());
 
-		keyInsertButton = new Button(RC("tools.translator.label.insert"));
+		JButton keyInsertButton = createButton(this::onInsertKey, RC("tools.translator.label.insert"));
 		constrain(keyPanel, keyInsertButton, 2, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, 0.0, 0.0, 5, 5, 5, 5);
 
-		keyDeleteButton = new Button(RC("tools.translator.label.delete"));
+		JButton keyDeleteButton = createButton(this::onDeleteKey, RC("tools.translator.label.delete"));
 		constrain(keyPanel, keyDeleteButton, 3, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, 0.0, 0.0, 5, 5, 5, 5);
 
 		pane.add(keyPanel, "South");
 		pane.add(mainPanel, "Center");
-		ResizeLayout resizeLayout = new ResizeLayout();
-		Resizer rss = new Resizer();
-		textPanel = new Panel();
-		scrPanel = new SimpleScrollPanel(textPanel);
-		setBackground(Color.lightGray);
-		mainPanel.setLayout(resizeLayout);
-		mainPanel.add(tree);
-		mainPanel.add(scrPanel);
-		mainPanel.add(rss);
-		GridBagLayout textLayout = new GridBagLayout();
-		textPanel.setLayout(textLayout);
+		textPanel = new JPanel(new GridBagLayout());
+		JScrollPane scrPane = new JScrollPane(textPanel);
+		mainPanel.setLeftComponent(tree.getComponent());
+		mainPanel.setRightComponent(scrPane);
 
-		tabOrder.add(tree);
-		tabOrder.add(keyName);
-		tabOrder.add(keyInsertButton);
-		tabOrder.add(keyDeleteButton);
+		JMenuBar menuBar = new JMenuBar();
+		fileMenu = new JMenu(RC("menu.file"));
+		JMenuItem newBundleMenu = createMenuItem(this::onNewBundle, RC("tools.translator.menu.new.bundle"), KeyEvent.VK_N);
+		JMenuItem openBundleMenu = createMenuItem(this::onLoadBundle, RC("tools.translator.menu.open"), KeyEvent.VK_O);
+		openRecentMenu = new JMenu(RC("tools.translator.menu.open.recent"));
+		openRecentMenu.setEnabled(false);
+		saveBundleMenu = createMenuItem(this::onSave, RC("tools.translator.menu.save"), KeyEvent.VK_S);
+		saveBundleMenu.addChangeListener(e -> saveBundleToolButton.setEnabled(saveBundleMenu.isEnabled()));
+		saveBundleMenu.setEnabled(false);
+		saveAsBundleMenu = createMenuItem(this::onSaveAs, RC("tools.translator.menu.saveas"));
+		saveAsBundleMenu.addChangeListener(e -> saveAsToolButton.setEnabled(saveAsBundleMenu.isEnabled()));
+		saveAsBundleMenu.setEnabled(false);
+		closeMenu = createMenuItem(this::onCloseMenu, RC("tools.translator.menu.close"));
+		closeMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_DOWN_MASK));
+		closeMenu.setEnabled(false);
+		exitMenu = createMenuItem(this::onClose, RC("menu.exit"));
+		exitMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
 
-		MenuBar menuBar = new MenuBar();
-		fileMenu = new Menu(RC("menu.file"));
-		newBundleMenu = new MenuItem(RC("tools.translator.menu.new.bundle"), new MenuShortcut(KeyEvent.VK_N));
-		openBundleMenu = new MenuItem(RC("tools.translator.menu.open"), new MenuShortcut(KeyEvent.VK_O));
-		saveBundleMenu = new MenuItem(RC("tools.translator.menu.save"), new MenuShortcut(KeyEvent.VK_S));
-		saveBundleMenu.disable();
-		saveAsBundleMenu = new MenuItem(RC("tools.translator.menu.saveas"));
-		saveAsBundleMenu.disable();
-		closeMenu = new MenuItem(RC("tools.translator.menu.close"));
-		closeMenu.disable();
-		exitMenu = new MenuItem(RC("menu.exit"));
+		JMenu editMenu = new JMenu(RC("menu.edit"));
 
-		Menu editMenu = new Menu(RC("menu.edit"));
+		JMenuItem editCopyMenu = createMenuItem(this::onCopy, RC("tools.translator.menu.edit.copy"));
+		editCopyMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK));
+		JMenuItem editCutMenu = createMenuItem(this::onCut, RC("tools.translator.menu.edit.cut"));
+		editCutMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_DOWN_MASK));
+		JMenuItem editPasteMenu = createMenuItem(this::onPaste, RC("tools.translator.menu.edit.paste"));
+		editPasteMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK));
+		JMenuItem editDeleteMenu = createMenuItem(this::onDelete, RC("tools.translator.menu.edit.delete"));
+		editDeleteMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
+		JMenuItem searchMenu = createMenuItem(this::onSearch, RC("menu.search"));
+		searchMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK));
+		JMenuItem searchAgainMenu = createMenuItem(this::onSearchAgain, RC("menu.searchagain"), KeyEvent.VK_F);
+		searchAgainMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0));
+		JMenuItem replaceToMenu = createMenuItem(this::onReplace, RC("menu.replace"));
 
-		editCopyMenu = new MenuItem(RC("tools.translator.menu.edit.copy") /* , new MenuShortcut(KeyEvent.VK_C) */ );
-		editCutMenu = new MenuItem(RC("tools.translator.menu.edit.cut") /* , new MenuShortcut(KeyEvent.VK_X) */ );
-		editPasteMenu = new MenuItem(RC("tools.translator.menu.edit.paste") /* , new MenuShortcut(KeyEvent.VK_V) */ );
-		editDeleteMenu = new MenuItem(RC("tools.translator.menu.edit.delete"));
-		searchMenu = new MenuItem(RC("menu.search"));
-		searchAgainMenu = new MenuItem(RC("menu.searchagain"), new MenuShortcut(KeyEvent.VK_F));
-		replaceToMenu = new MenuItem(RC("menu.replace"));
+		JMenuItem newLangMenu = createMenuItem(this::onNewResource, RC("tools.translator.menu.new.lang"), KeyEvent.VK_L);
+		JMenuItem delMenu = createMenuItem(this::onDeleteKey, RC("tools.translator.menu.delete"), KeyEvent.VK_D);
+		JMenuItem insMenu = createMenuItem(this::onNewKey, RC("tools.translator.menu.insert"), KeyEvent.VK_I);
+		JMenuItem renMenu = createMenuItem(this::onRenameKey, RC("tools.translator.menu.rename"), KeyEvent.VK_R);
 
-		newLangMenu = new MenuItem(RC("tools.translator.menu.new.lang"), new MenuShortcut(KeyEvent.VK_L));
-		delMenu = new MenuItem(RC("tools.translator.menu.delete"), new MenuShortcut(KeyEvent.VK_D));
-		insMenu = new MenuItem(RC("tools.translator.menu.insert"), new MenuShortcut(KeyEvent.VK_I));
-		renMenu = new MenuItem(RC("tools.translator.menu.rename"), new MenuShortcut(KeyEvent.VK_R));
+		JMenu treeMenu = new JMenu(RC("menu.tree"));
+		JMenuItem expandNodeMenu = createMenuItem(this::onExpandTreeNode, RC("tools.translator.menu.node.expand") /*, KeyEvent.VK_PLUS)*/);
+		JMenuItem collapseNodeMenu = createMenuItem(this::onCollapseTreeNode,
+			RC("tools.translator.menu.node.collapse") /*, KeyEvent.VK_MINUS)*/);
+		JMenuItem expandTreeMenu = createMenuItem(this::onExpandAllTreeNodes, RC("tools.translator.menu.expand"));
+		JMenuItem collapseTreeMenu = createMenuItem(this::onCollapseAllTreeNodes, RC("tools.translator.menu.collapse"));
+		hideTransMenu = createCheckBoxMenuItem(this::onToggleHideTranslated, RC("tools.translator.menu.hide.completed"));
 
-		Menu treeMenu = new Menu(RC("menu.tree"));
-		expandNodeMenu = new MenuItem(RC("tools.translator.menu.node.expand") /*, new MenuShortcut(KeyEvent.VK_PLUS)*/);
-		collapseNodeMenu = new MenuItem(RC("tools.translator.menu.node.collapse") /*, new MenuShortcut(KeyEvent.VK_MINUS)*/ );
-		expandTreeMenu = new MenuItem(RC("tools.translator.menu.expand"));
-		collapseTreeMenu = new MenuItem(RC("tools.translator.menu.collapse"));
-		hideTransMenu = new CheckboxMenuItem(RC("tools.translator.menu.hide.completed"));
+		JMenu viewMenu = new JMenu(RC("menu.options"));
+		JMenuItem statisticsMenu = createMenuItem(this::onStatistics, RC("tools.translator.menu.statistics"));
+		showNullsMenu = createCheckBoxMenuItem(this::onShowNulls, RC("tools.translator.menu.nulls"), false);
+		langMenu = new JMenu(RC("tools.translator.menu.showres"));
+		langMenu.setEnabled(false);
+		JMenu optionsMenu = new JMenu(RC("tools.translator.menu.options"));
+		keepLastDirMenu = createCheckBoxMenuItem(this::onToggleKeepLastDir, RC("tools.translator.menu.options.keeplastdir"), true);
+		omitSpacesMenu = createCheckBoxMenuItem(this::onToggleOmitSpaces, RC("tools.translator.menu.options.omitspaces"), true);
+		autoExpandTFMenu = createCheckBoxMenuItem(this::onToggleAutoExpandTF, RC("tools.translator.menu.options.autofit"), true);
+		allowDotMenu = createCheckBoxMenuItem(this::onToggleAllowDot, RC("tools.translator.menu.options.allowdot"), true);
+		allowUScoreMenu = createCheckBoxMenuItem(this::onToggleAllowUnderscore, RC("tools.translator.menu.options.allowuscore"), true);
+		omitSpacesMenu.setEnabled(false);
 
-		Menu viewMenu = new Menu(RC("menu.options"));
-		statisticsMenu = new MenuItem(RC("tools.translator.menu.statistics"));
-		showNullsMenu = new CheckboxMenuItem(RC("tools.translator.menu.nulls"), false);
-		langMenu = new Menu(RC("tools.translator.menu.showres"));
-		langMenu.disable();
-		Menu optionsMenu = new Menu/*Item*/(RC("tools.translator.menu.options"));
-		keepLastDirMenu = new CheckboxMenuItem(RC("tools.translator.menu.options.keeplastdir"), true);
-		omitSpacesMenu = new CheckboxMenuItem(RC("tools.translator.menu.options.omitspaces"), true);
-		autoExpandTFMenu = new CheckboxMenuItem(RC("tools.translator.menu.options.autofit"), true);
-		allowDotMenu = new CheckboxMenuItem(RC("tools.translator.menu.options.allowdot"), true);
-		allowUScoreMenu = new CheckboxMenuItem(RC("tools.translator.menu.options.allowuscore"), true);
-		omitSpacesMenu.disable();
+		JMenu helpMenu = new JMenu(RC("menu.help"));
+		JMenuItem aboutMenu = createMenuItem(this::onAbout, RC("menu.about"));
 
-		Menu helpMenu = new Menu(RC("menu.help"));
-		aboutMenu = new MenuItem(RC("menu.about"));
+		JMenu toolMenu = new JMenu(RC("tools.translator.menu.tools"));
+		genMenu = createMenuItem(this::onGenCode, RC("tools.translator.menu.generate"));
+		genMenu.addChangeListener(e -> genToolButton.setEnabled(genMenu.isEnabled()));
+		genMenu.setEnabled(false);
+		JMenuItem saveXmlBundleMenu = createMenuItem(() -> onSaveXml(false), RC("tools.translator.menu.save.xml"));
+		JMenuItem saveUtfBundleMenu = createMenuItem(() -> onSaveUtf(false), RC("tools.translator.menu.save.utf"));
+		JMenuItem loadXmlBundleMenu = createMenuItem(() -> onLoadXml(false), RC("tools.translator.menu.load.xml"));
+		JMenuItem loadUtfBundleMenu = createMenuItem(() -> onLoadUtf(false), RC("tools.translator.menu.load.utf"));
 
-		Menu toolMenu = new Menu(RC("tools.translator.menu.tools"));
-		genMenu = new MenuItem(RC("tools.translator.menu.generate"));
-		genMenu.disable();
-		parseMenu = new MenuItem(RC("tools.translator.menu.parse"));
-		saveXmlBundleMenu = new MenuItem(RC("tools.translator.menu.save.xml"));
-		saveUtfBundleMenu = new MenuItem(RC("tools.translator.menu.save.utf"));
-		loadXmlBundleMenu = new MenuItem(RC("tools.translator.menu.load.xml"));
-		loadUtfBundleMenu = new MenuItem(RC("tools.translator.menu.load.utf"));
+		JMenuItem saveXmlBundleMenuP = createMenuItem(() -> onSaveXml(true), RC("tools.translator.menu.save.xml.part"));
+		JMenuItem saveUtfBundleMenuP = createMenuItem(() -> onSaveUtf(true), RC("tools.translator.menu.save.utf.part"));
+		JMenuItem loadXmlBundleMenuP = createMenuItem(() -> onLoadXml(true), RC("tools.translator.menu.load.xml.part"));
+		JMenuItem loadUtfBundleMenuP = createMenuItem(() -> onLoadUtf(true), RC("tools.translator.menu.load.utf.part"));
+		JMenuItem openBundleMenuP = createMenuItem(() -> onOpen(true), RC("tools.translator.menu.load.part"));
 
-		saveXmlBundleMenuP = new MenuItem(RC("tools.translator.menu.save.xml.part"));
-		saveUtfBundleMenuP = new MenuItem(RC("tools.translator.menu.save.utf.part"));
-		loadXmlBundleMenuP = new MenuItem(RC("tools.translator.menu.load.xml.part"));
-		loadUtfBundleMenuP = new MenuItem(RC("tools.translator.menu.load.utf.part"));
-		openBundleMenuP = new MenuItem(RC("tools.translator.menu.load.part"));
-
-		loadJarMenu = new MenuItem(RC("tools.translator.menu.load.jar"));
+		JMenuItem loadJarMenu = createMenuItem(this::onLoadJar, RC("tools.translator.menu.load.jar"));
 
 		fileMenu.add(newBundleMenu);
 		fileMenu.add(openBundleMenu);
+		fileMenu.add(openRecentMenu);
 		fileMenu.add(saveBundleMenu);
 		fileMenu.add(saveAsBundleMenu);
 		fileMenu.add(closeMenu);
-		fileMenu.addSeparator();
+		fileMenu.add(exitMenu);
 
 		editMenu.add(newLangMenu);
 		editMenu.addSeparator();
@@ -478,7 +440,6 @@ class Translator extends Frame implements AWTEventListener {
 		toolMenu.add(saveUtfBundleMenuP);
 		toolMenu.addSeparator();
 		toolMenu.add(genMenu);
-		toolMenu.add(parseMenu);
 
 		helpMenu.add(aboutMenu);
 
@@ -488,426 +449,195 @@ class Translator extends Frame implements AWTEventListener {
 		menuBar.add(treeMenu);
 		menuBar.add(toolMenu);
 		menuBar.add(helpMenu);
-		setMenuBar(menuBar);
+		setJMenuBar(menuBar);
 
-		delDialog = new MessageBox2(this);
-		delDialog.setIcon(imgres.getImage(SYS_DIR + "ogo.gif", delDialog));
-		delDialog.setTitle(RC("dialog.title.warning"));
-		delDialog.setButtons(DELETE_BUTTONS);
-		delDialog.addListener(this);
+		String title = RC("dialog.title.warning");
+		repDialog = new JOptionPane("", JOptionPane.WARNING_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, REPLACE_BUTTONS,
+			REPLACE_BUTTONS[0]);
+		JDialog dlg = repDialog.createDialog(this, title);
+		dlg.setModal(false);
+		dlg.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentHidden(ComponentEvent e) {
+				onReplaceDialogClosed();
+			}
+		});
+	}
 
-		closeDialog = new MessageBox2(this);
-		closeDialog.setText(RC("tools.translator.message.save"));
-		closeDialog.setTitle(RC("dialog.title.warning"));
-		closeDialog.setIcon(imgres.getImage(SYS_DIR + "ogo.gif", closeDialog));
-		closeDialog.setButtons(CLOSE_BUTTONS);
-		closeDialog.addListener(this);
+	public ImageIcon getImageIcon(String name) {
+		try {
+			return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("org/zaval/ui/images/" + name))); //$NON-NLS-1$
+		}
+		catch (IOException ioe) {
+			throw new RuntimeException(ioe);
+		}
+	}
 
-		repDialog = new MessageBox2(this);
-		repDialog.setText("");
-		repDialog.setTitle(RC("dialog.title.warning"));
-		repDialog.setIcon(imgres.getImage(SYS_DIR + "ogo.gif", repDialog));
-		repDialog.setButtons(REPLACE_BUTTONS);
-		repDialog.addListener(this);
+	private JButton createToolBarButton(Runnable callback, String icon, String tooltip) {
+		JButton button = new JButton(getImageIcon(icon));
+		button.addActionListener(e -> callback.run());
+		button.setToolTipText(tooltip);
+		return button;
+	}
 
-		errDialog = new MessageBox2(this);
-		errDialog.setText("");
-		errDialog.setTitle(RC("dialog.title.warning"));
-		errDialog.setIcon(imgres.getImage(SYS_DIR + "Stop.gif", errDialog));
-		String[] OK_BUT = { RC("dialog.button.ok") };
-		errDialog.setButtons(OK_BUT);
+	private void onToggleAllowUnderscore() {
+		allowUScore = allowUScoreMenu.getState();
+		saveIni();
+	}
 
-		tbar2menu = new MenuItem[] {
-			newBundleMenu,
-			openBundleMenu,
-			saveBundleMenu,
-			saveAsBundleMenu,
-			genMenu,
-			parseMenu,
-			newLangMenu,
-			delMenu,
-			aboutMenu };
+	private void onToggleAllowDot() {
+		allowDot = allowDotMenu.getState();
+		saveIni();
+	}
+
+	private void onToggleAutoExpandTF() {
+		autoExpandTF = autoExpandTFMenu.getState();
+		saveIni();
+	}
+
+	private void onToggleOmitSpaces() {
+		omitSpaces = omitSpacesMenu.getState();
+		saveIni();
+	}
+
+	private void onToggleKeepLastDir() {
+		keepLastDir = keepLastDirMenu.getState();
+		saveIni();
+	}
+
+	private void onShowNulls() {
+		setIndicators(tree.getRootNode());
+	}
+
+	private void onToggleHideTranslated() {
+		hideTranslated(hideTransMenu.getState());
+		updateStatusBar();
+	}
+
+	private void onCollapseAllTreeNodes() {
+		tree.setAllExpandedState(false);
+	}
+
+	private void onExpandAllTreeNodes() {
+		tree.setAllExpandedState(true);
+	}
+
+	private void onCloseMenu() {
+		exitInitiated = false;
+		onClose();
+	}
+
+	private void onCollapseTreeNode() {
+		collapse(tree.getSelectedNode());
+	}
+
+	private void onExpandTreeNode() {
+		expand(tree.getSelectedNode());
+	}
+
+	private JMenuItem createMenuItem(Runnable callback, String text, int mnemonic) {
+		JMenuItem item = new JMenuItem(text, mnemonic);
+		item.addActionListener(e -> callback.run());
+		return item;
+	}
+
+	private JMenuItem createMenuItem(Runnable callback, String text) {
+		return createMenuItem(callback, text, 0);
+	}
+
+	private JCheckBoxMenuItem createCheckBoxMenuItem(Runnable callback, String text, boolean defaultState) {
+		JCheckBoxMenuItem item = new JCheckBoxMenuItem(text, defaultState);
+		item.addActionListener(e -> callback.run());
+		return item;
+	}
+
+	private JCheckBoxMenuItem createCheckBoxMenuItem(Runnable callback, String text) {
+		return createCheckBoxMenuItem(callback, text, true);
+	}
+
+	private JButton createButton(Runnable callback, String text) {
+		JButton item = new JButton(text);
+		item.addActionListener(e -> callback.run());
+		return item;
 	}
 
 	@Override
-	public boolean handleEvent(Event e) {
-		if (e.id == Event.WINDOW_DESTROY) {
-			onClose();
-			return true;
+	public void onTreeSelectionChanged(Optional<TranslationTreeNode> newSelectedNode) {
+		String newKey = newSelectedNode.map(n -> n.getText()).orElse(null);
+		if (!Objects.equals(wasSelectedKey, newKey)) {
+			setTranslations(newKey);
+			invokeAutoFit();
 		}
-
-		if (e.target == tree) {
-			if (e.id == TranslatorConstants.REMOVE_REQUIRED) {
-				onDeleteKey();
-			}
-			if ((e.target == tree) && (!Objects.equals(wasSelectedKey, tree.getSelectedText()))) {
-				setTranslations();
-				invokeAutoFit();
-			}
-			// actually, we should just list all events that tree can handle itself.
-		}
-		return super.handleEvent(e);
 	}
 
 	@Override
-	public void eventDispatched(AWTEvent event) {
-		if (event.getID() != KeyEvent.KEY_TYPED) {
-			return;
-		}
-		if (!(event instanceof KeyEvent)) {
-			return;
-		}
-		KeyEvent ke = (KeyEvent) event;
-		if (ke.getKeyChar() != '\t') {
-			return;
-		}
-		moveFocus();
+	public void onDeleteTreeNode(Optional<TranslationTreeNode> selectedNode) {
+		onDeleteKey();
 	}
 
-	@Override
-	public boolean keyDown(Event e, int key) {
-		if ((e.target == keyName) && (key == Event.ENTER)) {
-			onInsertKey();
-			return true;
+	private void onReplaceDialogClosed() {
+		Object value = repDialog.getValue();
+		if (Objects.equals(value, REPLACE_BUTTONS[0])) {
+			makeReplaceImpl();
 		}
-		else if ((e.target instanceof Button) && (key == Event.ENTER)) {
-			action(e, null);
-			return true;
+		else if (Objects.equals(value, REPLACE_BUTTONS[2])) {
+			replaceTo = null;
 		}
-		// to be corrected if keyName wants to receive "Enter" from JTextField
-		return false;
+		updateStatusBar();
 	}
 
-	@Override
-	public boolean action(Event e, Object arg) {
-		if (e.target instanceof Toolbar) {
-			int pos = Integer.parseInt((String) arg);
-			if ((pos < 0) || (pos >= tbar2menu.length)) {
-				return false;
-			}
-			e.target = tbar2menu[pos];
-		}
+	private void updateStatusBar() {
+		int visLangCount = getVisLangCount();
+		int languageCount = bundle.getBundle().getLanguageCount();
+		int itemCount = bundle.getBundle().getItemCount();
+		sbl1.setText(MessageFormat.format(" {0}/{1}, {2} ", visLangCount, languageCount, itemCount));
+	}
 
-		if (e.target == statisticsMenu) {
-			onStatistics();
-		}
-		if (e.target == searchMenu) {
-			onSearch();
-		}
-		if (e.target == searchAgainMenu) {
-			onSearchAgain();
-		}
-		if (e.target == replaceToMenu) {
-			onReplace();
-		}
-
-		if ((e.target == expandNodeMenu) || (e.target == ctNodeExpandMenu)) {
-			expand(tree.getSelectedNode());
-		}
-		if ((e.target == collapseNodeMenu) || (e.target == ctNodeCollapseMenu)) {
-			collapse(tree.getSelectedNode());
-		}
-		if (e.target == expandTreeMenu) {
-			tree.expandAll();
-			tree.repaint();
-		}
-		if (e.target == collapseTreeMenu) {
-			tree.collapseAll();
-			tree.repaint();
-		}
-		if (e.target == hideTransMenu) {
-			hideTranslated(hideTransMenu.getState());
-		}
-		if (e.target == dropComment) {
-			commField.setText("");
-			setTranslations();
-		}
-
-		if (e.target == editCopyMenu) {
-			Component ccur = getFocusOwner();
-			if (ccur instanceof EmulatedTextField) {
-				EmulatedTextField cur = (EmulatedTextField) ccur;
-				cur.blCopy();
-			}
-			else if (ccur instanceof TextField) {
-				TextField cur = (TextField) ccur;
-				Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
-				StringSelection s2 = new StringSelection(cur.getSelectedText());
-				c.setContents(s2, s2);
+	private void onDelete() {
+		Component ccur = getFocusOwner();
+		if (ccur instanceof JTextComponent) {
+			JTextComponent cur = (JTextComponent) ccur;
+			if (cur.getSelectionStart() > 0) {
+				cur.replaceSelection("");
 			}
 		}
-		if (e.target == editCutMenu) {
-			Component ccur = getFocusOwner();
-			if (ccur instanceof EmulatedTextField) {
-				EmulatedTextField cur = (EmulatedTextField) ccur;
-				cur.blCopy();
-				cur.blDelete();
-			}
-			else if (ccur instanceof TextField) {
-				TextField cur = (TextField) ccur;
-				Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
-				StringSelection s2 = new StringSelection(cur.getSelectedText());
-				c.setContents(s2, s2);
-				if (!cur.getSelectedText().isEmpty()) {
-					cur.setText(cur.getText().substring(0, cur.getSelectionStart()) + cur.getText().substring(cur.getSelectionEnd()));
-				}
-			}
-		}
-		if (e.target == editPasteMenu) {
-			Component ccur = getFocusOwner();
-			if (ccur instanceof EmulatedTextField) {
-				EmulatedTextField cur = (EmulatedTextField) ccur;
-				cur.blPaste();
-			}
-			else if (ccur instanceof TextField) {
-				TextField cur = (TextField) ccur;
+	}
 
-				Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
-				Transferable t = c.getContents("e");
+	private void onPaste() {
+		Component ccur = getFocusOwner();
+		if (ccur instanceof JTextComponent) {
+			((JTextComponent) ccur).paste();
+		}
+	}
 
-				String nt = "";
-				if (t.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-					try {
-						nt = (String) t.getTransferData(DataFlavor.stringFlavor);
-					}
-					catch (Exception ex) {
-					}
-				}
+	private void onCut() {
+		Component ccur = getFocusOwner();
+		if (ccur instanceof JTextComponent) {
+			((JTextComponent) ccur).cut();
+		}
+	}
 
-				if (!cur.getSelectedText().isEmpty()) {
-					cur.setText(cur.getText().substring(0, cur.getSelectionStart()) + nt + cur.getText().substring(cur.getSelectionEnd()));
-				}
-				else {
-					cur.setText(cur.getText().substring(0, cur.getCaretPosition()) + nt + cur.getText().substring(cur.getCaretPosition()));
-				}
-			}
+	private void onCopy() {
+		Component ccur = getFocusOwner();
+		if (ccur instanceof JTextComponent) {
+			((JTextComponent) ccur).copy();
 		}
-		if (e.target == editDeleteMenu) {
-			Component ccur = getFocusOwner();
-			if (ccur instanceof EmulatedTextField) {
-				EmulatedTextField cur = (EmulatedTextField) ccur;
-				cur.blDelete();
-			}
-			else if (ccur instanceof TextField) {
-				TextField cur = (TextField) ccur;
-				if (!cur.getSelectedText().isEmpty()) {
-					cur.setText(cur.getText().substring(0, cur.getSelectionStart()) + cur.getText().substring(cur.getSelectionEnd()));
-				}
-			}
-		}
-
-		if (e.target == newLangMenu) {
-			onNewResource();
-		}
-		if ((e.target == insMenu) || (e.target == ctNewMenu)) {
-			onNewKey();
-		}
-		if ((e.target == renMenu) || (e.target == ctNodeRenameMenu)) {
-			onRenameKey();
-		}
-		if (e.target == newBundleMenu) {
-			onNewBundle();
-		}
-		if (e.target == closeMenu) {
-			exitInitiated = false;
-			onClose();
-		}
-		if (e.target == openBundleMenu) {
-			onOpen(false);
-		}
-		if (e.target == saveBundleMenu) {
-			onSave();
-		}
-		if (e.target == saveAsBundleMenu) {
-			onSaveAs();
-		}
-		if (e.target == exitMenu) {
-			onClose();
-		}
-		if (e.target == keyInsertButton) {
-			onInsertKey();
-		}
-		if ((e.target == keyDeleteButton) || (e.target == delMenu) || (e.target == ctNodeDeleteMenu)) {
-			onDeleteKey();
-		}
-		if (e.target == genMenu) {
-			onGenCode();
-		}
-		if (e.target == parseMenu) {
-			onParseCode();
-		}
-		if (e.target == aboutMenu) {
-			onAbout();
-		}
-
-		if (e.target == loadXmlBundleMenu) {
-			onLoadXml(false);
-		}
-		if (e.target == saveXmlBundleMenu) {
-			onSaveXml(false);
-		}
-		if (e.target == loadUtfBundleMenu) {
-			onLoadUtf(false);
-		}
-		if (e.target == saveUtfBundleMenu) {
-			onSaveUtf(false);
-		}
-
-		if (e.target == openBundleMenuP) {
-			onOpen(true);
-		}
-		if (e.target == loadXmlBundleMenuP) {
-			onLoadXml(true);
-		}
-		if (e.target == saveXmlBundleMenuP) {
-			onSaveXml(true);
-		}
-		if (e.target == loadUtfBundleMenuP) {
-			onLoadUtf(true);
-		}
-		if (e.target == saveUtfBundleMenuP) {
-			onSaveUtf(true);
-		}
-
-		if (e.target == loadJarMenu) {
-			onLoadJar();
-		}
-
-		if ((e.target instanceof CheckboxMenuItem) && (e.target == showNullsMenu)) {
-			setIndicators(tree.getRootNode());
-			tree.repaint();
-		}
-		if (e.target instanceof CheckboxMenuItem) {
-			for (int i = 0; i < langStates.size(); i++) {
-				LangState ls = getLangState(i);
-				if (e.target == ls.box) {
-					ls.hidden = !ls.hidden;
-					ls.tf.setVisible(!ls.hidden);
-					ls.label.setVisible(!ls.hidden);
-					setIndicators(tree.getRootNode());
-					textPanel.invalidate();
-					validate();
-				}
-				ls.box.setState(!ls.hidden);
-			}
-		}
-		if ((e.target == closeDialog) && (e.arg instanceof Button)) {
-			if (!((Button) e.arg).getLabel().equals(CLOSE_BUTTONS[2])) {
-				if (((Button) e.arg).getLabel().equals(CLOSE_BUTTONS[0])) {
-					onSave();
-				}
-				if (exitInitiated) {
-					finish();
-				}
-				else {
-					clear();
-				}
-			}
-			exitInitiated = true;
-		}
-		if ((e.target == delDialog) && (e.arg instanceof Button) && ((Button) e.arg).getLabel().equals(DELETE_BUTTONS[0])) {
-			String key = tree.getSelectedText();
-			// remove all subkeys
-			if (key != null) {
-				isDirty = true;
-				TreeNode tn = tree.getNode(key);
-				if (tn != null) {
-					tn = tn.parent;
-				}
-				bundle.getBundle().removeKeysBeginningWith(key);
-
-				tree.remove(key); // kill children
-				removeLeafs(key); // clean leafs out of model
-				adjustIndicator(tn);
-				tree.repaint();
-				wasSelectedKey = null;
-				setTranslations();
-			}
-		}
-		if ((e.target == delDialog) && (e.arg instanceof Button) && ((Button) e.arg).getLabel().equals(DELETE_BUTTONS[1])) {
-			// Only this
-			String key = tree.getSelectedText();
-			if (key != null) {
-				isDirty = true;
-				TreeNode tn = tree.getNode(key);
-				if (tn == null) {
-					return true;
-				}
-
-				// Not an leaf => don't touch tree but update model
-				bundle.getBundle().removeKey(key);
-				if ((tree.enumChild(tn) == null) || (tree.enumChild(tn).length == 0)) {
-					tree.remove(key);
-					removeLeafs(key);
-				}
-				tree.selectNode(tn.parent);
-
-				adjustIndicator(tn);
-				tree.repaint();
-
-				wasSelectedKey = null;
-				setTranslations();
-				textPanel.invalidate();
-				validate();
-			}
-		}
-
-		if (e.target == repDialog) {
-			if ((e.arg instanceof Button) && ((Button) e.arg).getLabel().equals(REPLACE_BUTTONS[0])) {
-				makeReplaceImpl();
-			}
-			else if ((e.arg instanceof Button) && ((Button) e.arg).getLabel().equals(REPLACE_BUTTONS[2])) {
-				replaceTo = null;
-			}
-		}
-
-		if (e.target == keepLastDirMenu) {
-			keepLastDir = keepLastDirMenu.getState();
-		}
-		if (e.target == omitSpacesMenu) {
-			omitSpaces = omitSpacesMenu.getState();
-		}
-		if (e.target == autoExpandTFMenu) {
-			autoExpandTF = autoExpandTFMenu.getState();
-		}
-		if (e.target == allowDotMenu) {
-			allowDot = allowDotMenu.getState();
-		}
-		if (e.target == allowUScoreMenu) {
-			allowUScore = allowUScoreMenu.getState();
-		}
-
-		if (e.target instanceof MenuItem) {
-			String lbl = ((MenuItem) e.target).getLabel();
-			for (String path : pickList) {
-				String patz = stretchPath(path);
-				if (patz.equals(lbl)) {
-					clear();
-					readResources(path, false);
-					break;
-				}
-			}
-		}
-		sbl1.setText(" " + getVisLangCount() + "/" + bundle.getBundle().getLangCount() + ", " + bundle.getBundle().getItemCount() + " ");
-		return true;
 	}
 
 	private void setTranslations() {
-		String newKey = tree.getSelectedText();
-		setTranslations(newKey);
+		setTranslations(tree.getSelectedText());
 	}
 
 	private void setTranslations(String newKey) {
 		if (wasSelectedKey != null) {
-			for (int i = 0; i < langStates.size(); i++) {
-				LangState ls = getLangState(i);
+			for (LangState ls : langStates.values()) {
 				if (ls.hidden) {
 					continue;
 				}
 				String trans = ls.tf.getText();
 				BundleItem bi = bundle.getBundle().getItem(wasSelectedKey);
 				if (bi == null) {
-					// do not add the translation implicitely - disable
+					// do not add the translation implicitly - disable
 					// the language field
 					ls.tf.setVisible(false);
 					ls.label.setVisible(false);
@@ -928,17 +658,16 @@ class Translator extends Frame implements AWTEventListener {
 			if (bi != null) {
 				bi.setComment(comm);
 			}
-			adjustIndicator(tree.getNode(wasSelectedKey));
-			setIndicators(tree.getNode(wasSelectedKey));
-			tree.repaint();
+			TranslationTreeNode selectedNode = tree.getNode(wasSelectedKey);
+			adjustIndicator(selectedNode);
+			setIndicators(selectedNode);
 		}
 		if (newKey == null) {
 			return;
 		}
 
 		BundleItem bi = bundle.getBundle().getItem(newKey);
-		for (int i = 0; i < langStates.size(); i++) {
-			LangState ls = getLangState(i);
+		for (LangState ls : langStates.values()) {
 			String ss = bi == null ? null : bi.getTranslation(ls.name);
 			if (ss == null) {
 				ss = "";
@@ -960,14 +689,12 @@ class Translator extends Frame implements AWTEventListener {
 			commField.setText(commText == null ? "" : commText);
 		}
 		keynLab.setText("Key: " + newKey);
-		keynLab.repaint();
 		sbl2.setText(newKey);
 		adjustIndicator(tree.getNode(newKey));
 
 		wasSelectedKey = newKey;
 		String startValue = wasSelectedKey + ".";
 		keyName.setText(startValue);
-		tree.repaint();
 	}
 
 	private String getValidKey() {
@@ -991,70 +718,133 @@ class Translator extends Frame implements AWTEventListener {
 		if (illegalChar.isEmpty()) {
 			return bundle.replace(key, "..", "");
 		}
-		MessageBox2 mess = new MessageBox2(this);
-		mess.setTitle(RC("dialog.title.warning"));
-		mess.setText(bundle.replace(RC("tools.translator.message.illchar"), "[%illchar%]", illegalChar));
-		mess.setIcon(imgres.getImage(SYS_DIR + "stop.gif", mess));
-		mess.setButtons(RC("dialog.button.ok"));
-		mess.show();
+		String text = bundle.replace(RC("tools.translator.message.illchar"), "[%illchar%]", illegalChar);
+		JOptionPane.showMessageDialog(this, text, RC("dialog.title.warning"), JOptionPane.WARNING_MESSAGE);
 		return null;
 	}
 
 	private void onInsertKey() {
-		if (bundle.getBundle().getLangCount() == 0) {
-			return;
-		}
-		String key = getValidKey();
-		if (key != null) {
-			addToTree(key);
-			bundle.getBundle().addKey(key);
-			bundle.getBundle().resort();
-			commField.setText("");
-			isDirty = true;
-			tree.selectNodeAndOpen(key);
-			tree.repaint();
-			setTranslations();
-			saveBundleMenu.enable();
-			saveAsBundleMenu.enable();
-			genMenu.enable();
-			setIndicators(tree.getRootNode());
-			isDirty = true;
+		if (bundle.getBundle().hasLanguages()) {
+			String key = getValidKey();
+			if (key != null) {
+				addToTree(key);
+				bundle.getBundle().addKey(key);
+				commField.setText("");
+				isDirty = true;
+				tree.selectNode(key);
+				setTranslations();
+				saveBundleMenu.setEnabled(true);
+				saveAsBundleMenu.setEnabled(true);
+				genMenu.setEnabled(true);
+				setIndicators(tree.getRootNode());
+				isDirty = true;
 
-			textPanel.invalidate();
-			validate();
+				textPanel.invalidate();
+				validate();
+			}
+			updateStatusBar();
 		}
-		syncToolbar();
 	}
 
 	private void onDeleteKey() {
-		String key = tree.getSelectedText();
-		if (key == null) {
-			return;
-		}
-		delDialog.setText(bundle.replace(RC("tools.translator.message.delkey"), "[%key%]", key));
-
-		TreeNode tn = tree.getNode(key);
+		TranslationTreeNode tn = tree.getSelectedNode();
 		if (tn == null) {
 			return;
 		}
-		boolean hasChilds = (tree.enumChild(tn) != null) && (tree.enumChild(tn).length != 0);
+		String key = tn.getText();
+		boolean hasChilds = tree.enumChild(tn).length != 0;
 		BundleItem bi = bundle.getBundle().getItem(key);
+		boolean doDeleteThis = false;
+		boolean doDeleteAll = false;
+		String title = RC("dialog.title.warning");
+		String message = bundle.replace(RC("tools.translator.message.delkey"), "[%key%]", key);
 		if ((bi != null) && hasChilds) {
-			delDialog.setButtons(DELETE_BUTTONS);
+			String[] options = { RC("dialog.button.delete.all"), RC("dialog.button.delete.this"), RC("dialog.button.cancel") };
+			int selection = JOptionPane.showOptionDialog(this, message, title, JOptionPane.YES_NO_CANCEL_OPTION,
+				JOptionPane.WARNING_MESSAGE, null, options, options[0]);
+			doDeleteAll = 0 == selection;
+			doDeleteThis = 1 == selection;
 		}
 		else if ((bi != null) && !hasChilds) {
-			delDialog.setButtons(DELETE_BUTTONS3);
+			String[] options = { RC("dialog.button.delete.this"), RC("dialog.button.cancel") };
+			int selection = JOptionPane.showOptionDialog(this, message, title, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null,
+				options, options[0]);
+			doDeleteThis = 0 == selection;
 		}
 		else if (bi == null) {
-			delDialog.setButtons(DELETE_BUTTONS2);
+			String[] options = { RC("dialog.button.delete.all"), RC("dialog.button.cancel") };
+			int selection = JOptionPane.showOptionDialog(this, message, title, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null,
+				options, options[0]);
+			doDeleteAll = 0 == selection;
 		}
-		delDialog.show();
+
+		if (doDeleteAll) {
+			isDirty = true;
+			TranslationTreeNode parentNode = tn.getParent();
+			TranslationTreeNode nextToSelect = tn.getPreviousSibling();
+			if (null == nextToSelect) {
+				nextToSelect = tn.getNextSibling();
+			}
+			if (null == nextToSelect) {
+				nextToSelect = parentNode;
+			}
+			bundle.getBundle().removeKeysBeginningWith(key);
+
+			tree.remove(key); // kill children
+			removeLeafs(key); // clean leafs out of model
+			adjustIndicator(parentNode);
+			tree.selectNode(nextToSelect);
+			wasSelectedKey = null;
+			setTranslations();
+			updateStatusBar();
+		}
+		else if (doDeleteThis) {
+			isDirty = true;
+			// Not an leaf => don't touch tree but update model
+			bundle.getBundle().removeKey(key);
+			TranslationTreeNode parentNode = tn.getParent();
+			TranslationTreeNode nextToSelect = tn;
+			if (tree.enumChild(tn).length == 0) {
+				nextToSelect = tn.getPreviousSibling();
+				if (null == nextToSelect) {
+					nextToSelect = tn.getNextSibling();
+				}
+				if (null == nextToSelect) {
+					nextToSelect = parentNode;
+				}
+				tree.remove(key);
+			}
+			tree.selectNode(nextToSelect);
+
+			adjustIndicator(parentNode);
+
+			wasSelectedKey = null;
+			setTranslations();
+			textPanel.invalidate();
+			validate();
+			updateStatusBar();
+		}
 	}
 
 	private void onClose() {
 		setTranslations();
 		if (isDirty) {
-			closeDialog.show();
+			String message = RC("tools.translator.message.save");
+			String title = RC("dialog.title.warning");
+			int result = JOptionPane.showOptionDialog(this, message, title, JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
+				null, CLOSE_BUTTONS, CLOSE_BUTTONS[2]);
+			if (0 == result) {
+				onSave();
+			}
+			if (2 != result) {
+				if (exitInitiated) {
+					finish();
+				}
+				else {
+					clear();
+				}
+				exitInitiated = true;
+			}
 		}
 		else if (exitInitiated) {
 			finish();
@@ -1066,28 +856,28 @@ class Translator extends Frame implements AWTEventListener {
 	}
 
 	private void finish() {
-		hide();
+		setVisible(false);
 		saveIni();
-		System.exit(0);
+		dispose();
 	}
 
 	private void onSave() {
-		if (bundle.getBundle().getLangCount() == 0) {
-			return;
+		LangItem firstLanguage = bundle.getBundle().getFirstLanguage();
+		if (null != firstLanguage) {
+			String fn = firstLanguage.getFileName();
+			if (fn == null) {
+				onSaveAs();
+				return;
+			}
+			setTranslations();
+			try {
+				bundle.store(null);
+			}
+			catch (Exception e) {
+				infoException(e);
+			}
+			isDirty = false;
 		}
-		String fn = bundle.getBundle().getLanguage(0).getLangFile();
-		if (fn == null) {
-			onSaveAs();
-			return;
-		}
-		setTranslations();
-		try {
-			bundle.store(null);
-		}
-		catch (Exception e) {
-			infoException(e);
-		}
-		isDirty = false;
 	}
 
 	private void clear() {
@@ -1101,81 +891,65 @@ class Translator extends Frame implements AWTEventListener {
 		wasSelectedKey = null;
 		textPanel.removeAll();
 		langMenu.removeAll();
-		if (tree.getRootNode() != null) {
-			tree.remove(tree.getRootNode());
-		}
-		tree.repaint();
+		tree.removeAll();
 		textPanel.invalidate();
 		validate();
 		isDirty = false;
 		bundle = new BundleManager();
-		langStates = new ArrayList<>();
+		langStates.clear();
 
-		closeMenu.disable();
-		saveBundleMenu.disable();
-		saveAsBundleMenu.disable();
-		genMenu.disable();
-		langMenu.disable();
-	}
-
-	private LangState getLangState(int idx) {
-		return langStates.get(idx);
+		closeMenu.setEnabled(false);
+		saveBundleMenu.setEnabled(false);
+		saveAsBundleMenu.setEnabled(false);
+		genMenu.setEnabled(false);
+		langMenu.setEnabled(false);
 	}
 
 	private int getVisLangCount() {
-		return (int) IntStream.range(0, langStates.size()).mapToObj(this::getLangState).filter(ls -> !ls.hidden).count();
+		return (int) langStates.values().stream().filter(ls -> !ls.hidden).count();
 	}
 
 	private void setAllIndicators() {
-		for (int i = 0; i < langStates.size(); i++) {
-			LangState ls = getLangState(i);
+		for (LangState ls : langStates.values()) {
 			ls.hidden = false;
 			ls.box.setState(true);
 		}
-		// Fire it async as it take large time
-		hideTransMenu.disable();
-		(new Thread(this::setIndicatorsInit)).start();
-	}
-
-	private void setIndicatorsInit() {
+		hideTransMenu.setEnabled(false);
 		sbl2.setText(RC("tools.translator.progress.indicator"));
-		sbl2.repaint();
 		setIndicators(tree.getRootNode());
-		hideTransMenu.enable();
+		hideTransMenu.setEnabled(true);
 		sbl2.setText("");
-		sbl2.repaint();
 	}
 
-	private boolean setIndicators(TreeNode tn) {
+	private boolean setIndicators(TranslationTreeNode tn) {
 		if (tn == null) {
 			return false;
 		}
-		boolean res = setIndicators(tn.sibling);
-		return setIndicator(tn, setIndicators(tn.child)) || res;
+		boolean res = setIndicators(tn.getNextSibling());
+		return setIndicator(tn, setIndicators(tn.getFirstChild())) || res;
 	}
 
-	private boolean setIndicator(TreeNode tn, boolean childOn) {
+	private boolean setIndicator(TranslationTreeNode tn, boolean childOn) {
 		if (tn == null) {
 			return false;
 		}
 		if (getVisLangCount() < 2) {
-			tn.setIndicator(null);
+			tn.setShowIndicator(false);
 			return false;
 		}
 		if (childOn) {
-			tn.setIndicator(SYS_DIR + TranslatorConstants.WARN_IMAGE);
+			tn.setShowIndicator(true);
 			return true;
 		}
 
 		BundleItem bi = bundle.getBundle().getItem(tn.getText());
 		if (bi == null) {
-			tn.setIndicator(null);
+			tn.setShowIndicator(false);
 			return false;
 		}
 		boolean isPres = false;
 		boolean isAbs = false;
-		for (int i = 0; i < langStates.size(); i++) {
-			LangState ls = getLangState(i);
+		for (LangState ls : langStates.values()) {
 			if (ls.hidden) {
 				continue;
 			}
@@ -1186,16 +960,16 @@ class Translator extends Frame implements AWTEventListener {
 			isAbs |= ts == null;
 			isPres |= ts != null;
 		}
-		tn.setIndicator(null);
+		tn.setShowIndicator(false);
 		if (isAbs && isPres) {
-			tree.setIndicator(tn.getText(), SYS_DIR + TranslatorConstants.WARN_IMAGE);
+			tn.setShowIndicator(true);
 			notCompletedCount++;
 		}
 		else {
 			if (isAbs) {
 				nullsCount++;
 				if (showNullsMenu.getState()) {
-					tn.setIndicator(SYS_DIR + TranslatorConstants.WARN_IMAGE);
+					tn.setShowIndicator(true);
 					return true;
 				}
 			}
@@ -1203,26 +977,26 @@ class Translator extends Frame implements AWTEventListener {
 		return isAbs && isPres;
 	}
 
-	private void adjustIndicator(TreeNode tn) {
+	private void adjustIndicator(TranslationTreeNode tn) {
 		if (tn == null) {
 			return;
 		}
-		setIndicator(tn, isSetInSiblings(tn.child));
-		adjustIndicator(tn.parent);
+		setIndicator(tn, isSetInSiblings(tn.getFirstChild()));
+		adjustIndicator(tn.getParent());
 	}
 
-	private boolean isSetInSiblings(TreeNode tn) {
+	private boolean isSetInSiblings(TranslationTreeNode tn) {
 		if (tn == null) {
 			return false;
 		}
-		if (tn.getIndicator() != null) {
+		if (tn.isShowIndicator()) {
 			return true;
 		}
-		return isSetInSiblings(tn.sibling);
+		return isSetInSiblings(tn.getNextSibling());
 	}
 
 	private void onSearch() {
-		SearchDialog ed = new SearchDialog(this, RC("tools.translator.label.search.caption"), true, this);
+		SearchDialog ed = new SearchDialog(this, RC("tools.translator.label.search.caption"), true);
 		ed.setLabelCaption(RC("tools.translator.label.search.label"));
 		ed.setButtonsCaption(RC("dialog.button.ok"), CLOSE_BUTTONS[2]);
 
@@ -1250,10 +1024,11 @@ class Translator extends Frame implements AWTEventListener {
 		lastKeyFound = null;
 		onSearchAgain();
 		ed.dispose();
+		updateStatusBar();
 	}
 
 	private void onReplace() {
-		ReplaceDialog ed = new ReplaceDialog(this, RC("tools.translator.label.replace.caption"), true, this);
+		ReplaceDialog ed = new ReplaceDialog(this, RC("tools.translator.label.replace.caption"), true);
 		ed.setLabelCaption(RC("tools.translator.label.search.label"));
 		ed.setButtonsCaption(RC("dialog.button.ok"), CLOSE_BUTTONS[2]);
 		ed.setReplaceLabel(RC("tools.translator.label.replace.label"));
@@ -1306,7 +1081,7 @@ class Translator extends Frame implements AWTEventListener {
 	}
 
 	private void makeReplaceImpl() {
-		String lang = curLangForReplace.getLangId();
+		String lang = curLangForReplace.getId();
 		String val = curItemForReplace.getTranslation(lang);
 		if (searchRegex) {
 			try {
@@ -1335,14 +1110,14 @@ class Translator extends Frame implements AWTEventListener {
 		curItemForReplace.setTranslation(lang, val);
 
 		if (tree.getSelectedText().equals(curItemForReplace.getId())) {
-			int k = bundle.getBundle().getLangIndex(lang);
-			LangState ls = getLangState(k);
+			LangState ls = langStates.get(lang);
 			if (ls != null) {
 				ls.tf.setText(val);
-				ls.tf.getControl().requestFocus();
+				ls.tf.requestFocusInWindow();
 			}
 		}
 		isDirty = true;
+		updateStatusBar();
 	}
 
 	private void makeReplace(BundleItem bi, LangItem li) {
@@ -1356,14 +1131,15 @@ class Translator extends Frame implements AWTEventListener {
 				setTranslations(curItemForReplace.getId());
 				textPanel.invalidate();
 				validate();
-				tree.repaint();
 			}
-			repDialog.setModal(replaceAll);
+			JDialog dlg = ((JDialog) repDialog.getTopLevelAncestor());
+			dlg.setModal(replaceAll);
 			String mess = RC("tools.translator.message.found");
 			mess = bundle.replace(mess, "[%found%]", searchCriteria);
 			mess = bundle.replace(mess, "[%subst%]", replaceTo);
-			repDialog.setText(mess);
-			repDialog.show();
+			repDialog.setMessage(mess);
+			dlg.pack();
+			dlg.setVisible(true);
 		}
 		else {
 			makeReplaceImpl();
@@ -1378,41 +1154,38 @@ class Translator extends Frame implements AWTEventListener {
 		boolean first = lastKeyFound == null;
 
 		int j = 0;
+		BundleSet set = bundle.getBundle();
 		if (lastKeyFound != null) {
-			j = bundle.getBundle().getItemIndex(lastKeyFound) + 1;
+			j = set.getItemIndex(lastKeyFound) + 1;
 		}
-		int i;
 		if (!searchData) { // Key names
-			for (i = j; i < bundle.getBundle().getItemCount(); ++i) {
-				BundleItem bi = bundle.getBundle().getItem(i);
-				String val = bi.getId();
-				if (isMatchedWith(val)) {
-					lastKeyFound = val;
-					tree.selectNode(bi.getId());
-					tree.openToNode(bi.getId());
-					setTranslations(bi.getId());
-					textPanel.invalidate();
-					validate();
-					tree.requestFocus();
-					tree.repaint();
-					return;
-				}
+			Optional<BundleItem> nextMatch = set.getItems().skip(j).filter(it -> isMatchedWith(it.getId())).findFirst();
+			if (nextMatch.isPresent()) {
+				lastKeyFound = nextMatch.get().getId();
+				tree.selectNode(lastKeyFound);
+				tree.openToNode(lastKeyFound);
+				setTranslations(lastKeyFound);
+				textPanel.invalidate();
+				validate();
+				tree.requestFocusInWindow();
+				return;
 			}
 			lastKeyFound = null;
 			if (first) {
 				searchCriteria = null;
 			}
-			errDialog.setText(first ? RC("tools.translator.label.search.nokeys") : RC("tools.translator.label.search.nomorekeys"));
-			errDialog.show();
+
+			String title = RC("dialog.title.warning");
+			String message = first ? RC("tools.translator.label.search.nokeys") : RC("tools.translator.label.search.nomorekeys");
+			JOptionPane.showMessageDialog(this, message, title, JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 
 		int replacements = 0;
-		for (i = j; i < bundle.getBundle().getItemCount(); ++i) {
-			BundleItem bi = bundle.getBundle().getItem(i);
-			for (int k = 0; k < bundle.getBundle().getLangCount(); ++k) {
-				LangItem li = bundle.getBundle().getLanguage(k);
-				String val = bi.getTranslation(li.getLangId());
+		BundleItem[] items = set.getItems().skip(j).toArray(BundleItem[]::new);
+		for (BundleItem bi : items) {
+			for (LangItem li : set.getLanguages()) {
+				String val = bi.getTranslation(li.getId());
 				if (isMatchedWith(val)) {
 					lastKeyFound = bi.getId();
 
@@ -1420,7 +1193,6 @@ class Translator extends Frame implements AWTEventListener {
 						tree.selectNode(bi.getId());
 						tree.openToNode(bi.getId());
 						setTranslations(bi.getId());
-						tree.repaint();
 
 						if (replaceTo != null) {
 							makeReplace(bi, li);
@@ -1429,9 +1201,8 @@ class Translator extends Frame implements AWTEventListener {
 						textPanel.invalidate();
 						validate();
 						if (replaceTo == null) {
-							textPanel.requestFocus();
-							LangState ls = getLangState(k);
-							ls.tf.getControl().requestFocus();
+							textPanel.requestFocusInWindow();
+							langStates.get(li.getId()).tf.requestFocusInWindow();
 						}
 						return;
 					}
@@ -1448,29 +1219,31 @@ class Translator extends Frame implements AWTEventListener {
 			searchCriteria = null;
 		}
 		if (replacements > 0) {
-			errDialog.setText(bundle.replace(RC("tools.translator.label.replaced.count"), "[%replaced%]", Integer.toString(replacements)));
+			String message = bundle.replace(RC("tools.translator.label.replaced.count"), "[%replaced%]", Integer.toString(replacements));
+			String title = RC("dialog.title.warning");
+			JOptionPane.showMessageDialog(this, message, title, JOptionPane.ERROR_MESSAGE);
 		}
 		else {
-			errDialog.setText(first ? RC("tools.translator.label.search.nokeys") : RC("tools.translator.label.search.nomorekeys"));
+			String message = first ? RC("tools.translator.label.search.nokeys") : RC("tools.translator.label.search.nomorekeys");
+			String title = RC("dialog.title.warning");
+			JOptionPane.showMessageDialog(this, message, title, JOptionPane.ERROR_MESSAGE);
 		}
-		errDialog.show();
+		updateStatusBar();
 	}
 
 	private void onNewResource() {
-		EditDialog ed = new EditDialog(this, RC("tools.translator.label.newrestitle"), true, this);
-		ed.setLabelCaption(RC("tools.translator.label.filesuff"));
-		ed.setButtonsCaption(RC("dialog.button.ok"), CLOSE_BUTTONS[2]);
-		ed.doModal();
-		String text = ed.getText();
-		if ((text.length() <= 0) || !ed.isApply()) {
+		String title = RC("tools.translator.label.newrestitle");
+		String message = RC("tools.translator.label.filesuff");
+		String text = JOptionPane.showInputDialog(this, message, title, JOptionPane.PLAIN_MESSAGE);
+
+		if ((null == text) || text.isEmpty()) {
 			return;
 		}
 		bundle.getBundle().addLanguage(text);
 		syncLanguage(text);
 
-		for (int i = 0; i < langStates.size(); i++) {
-			LangState ls = getLangState(i);
-			CheckboxMenuItem cmi = ls.box;
+		for (LangState ls : langStates.values()) {
+			JCheckBoxMenuItem cmi = ls.box;
 			boolean show = cmi.getState();
 			ls.tf.setVisible(show);
 			ls.hidden = !show;
@@ -1479,6 +1252,7 @@ class Translator extends Frame implements AWTEventListener {
 		setAllIndicators();
 		textPanel.invalidate();
 		validate();
+		updateStatusBar();
 	}
 
 	private void onNewBundle() {
@@ -1486,11 +1260,16 @@ class Translator extends Frame implements AWTEventListener {
 		initControls();
 		bundle.getBundle().addLanguage("en");
 		bundle.getBundle().addKey("creationDate");
-		bundle.getBundle().updateValue("creationDate", "en", (new Date()).toLocaleString());
-		bundle.getBundle().resort();
+		bundle.getBundle().updateValue("creationDate", "en", (new Date()).toString());
 		initData(false);
 		setTitle(null);
 		isDirty = false;
+		updateStatusBar();
+	}
+
+	private void onLoadBundle() {
+		onOpen(false);
+		updateStatusBar();
 	}
 
 	private SafeResourceBundle rcTable;
@@ -1505,30 +1284,11 @@ class Translator extends Frame implements AWTEventListener {
 		if (filename != null) {
 			add = " [" + filename + "]";
 		}
-		super.setTitle("Zaval JRC Editor" + add);
+		super.setTitle("JRC Editor" + add);
 		sbl2.setText(filename == null ? "" : filename);
 	}
 
-	private void join(BundleManager bundle2, boolean part) {
-		if (part) {
-			BundleSet set = bundle2.getBundle();
-			int items = set.getItemCount();
-			for (int i = 0; i < items; ++i) {
-				BundleItem bi = set.getItem(i);
-				BundleItem bi2 = bundle.getBundle().addKey(bi.getId());
-				for (String lang : bi.getLanguages()) {
-					bundle.getBundle().addLanguage(lang);
-					bi2.setTranslation(lang, bi.getTranslation(lang));
-				}
-			}
-			set.resort();
-		}
-		else {
-			bundle = bundle2;
-		}
-	}
-
-	private class Loader implements Runnable {
+	private class Loader extends SwingWorker<BundleManager, Void> {
 		private final String fileName;
 		private final boolean part;
 
@@ -1538,19 +1298,27 @@ class Translator extends Frame implements AWTEventListener {
 		}
 
 		@Override
-		public void run() {
-			setCursor(Cursor.WAIT_CURSOR);
-			sbl2.setText(RC("tools.translator.progress.loadfiles"));
-			sbl2.repaint();
-			try {
-				BundleManager bundle2 = new BundleManager(fileName);
-				join(bundle2, part);
+		protected BundleManager doInBackground() throws Exception {
+			BundleManager bundle2 = new BundleManager(fileName);
+			if (part) {
+				BundleSet set = bundle.getBundle();
+				bundle2.getBundle().getItems().forEachOrdered(bi -> {
+					BundleItem bi2 = set.addKey(bi.getId());
+					for (String lang : bi.getLanguages()) {
+						set.addLanguage(lang);
+						bi2.setTranslation(lang, bi.getTranslation(lang));
+					}
+				});
 			}
-			catch (Exception e) {
-				infoException(e);
+			else {
+				bundle = bundle2;
 			}
+			return bundle;
+		}
+
+		@Override
+		protected void done() {
 			sbl2.setText(RC("tools.translator.progress.maketree"));
-			sbl2.repaint();
 
 			if (!part) {
 				initControls();
@@ -1566,97 +1334,99 @@ class Translator extends Frame implements AWTEventListener {
 	private void readResources(String fileName, boolean part) {
 		File f = new File(fileName);
 		if (!f.canRead()) {
-			errDialog.setText(fileName + ":" + RC("no.file.found"));
-			errDialog.show();
+			String title = RC("dialog.title.warning");
+			String message = fileName + ": " + RC("no.file.found");
+			JOptionPane.showMessageDialog(this, message, title, JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 
-		(new Thread(new Loader(fileName, part))).start();
 		setTitle(fileName);
 		addToPickList(fileName);
+		updateStatusBar();
+		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		sbl2.setText(RC("tools.translator.progress.loadfiles"));
+		new Loader(fileName, part).execute();
 	}
 
 	private void initControls() {
-		IELabel commLab = new IELabel(RC("tools.translator.label.comments"));
+		JLabel commLab = new JLabel(RC("tools.translator.label.comments"));
 		constrain(textPanel, commLab, 0, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, 0.0, 0.0, 10, 3, 0, 15);
 
-		commField = new EmulatedTextField();
-		commField.setBackground(Color.lightGray);
-		constrain(textPanel, commField, 1, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.BOTH, 1.0, 1.0, 3, 3, 5, 15);
+		commField = new JTextField();
+		commField.setPreferredSize(new Dimension(0, commField.getFontMetrics(commField.getFont()).getHeight() * 3));
+		constrain(textPanel, commField, 1, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, 1.0, 1.0, 3, 3, 5, 15);
 
-		dropComment = new Button(RC("tools.translator.label.dropcomment"));
+		JButton dropComment = createButton(this::onDropComment, RC("tools.translator.label.dropcomment"));
 		constrain(textPanel, dropComment, 2, 0, 1, 1, GridBagConstraints.NORTH, GridBagConstraints.NONE, 0.0, 0.0, 3, 3, 5, 15);
 
-		keynLab = new IELabel("");
+		keynLab = new JLabel("");
 		constrain(textPanel, keynLab, 0, 1, 3, 1, GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, 1.0, 0.0, 10, 3, 0, 15);
-		langMenu.enable();
+		langMenu.setEnabled(true);
+	}
+
+	private void onDropComment() {
+		commField.setText("");
+		setTranslations();
 	}
 
 	private void syncLanguage(String lang) {
 		LangItem lang2 = bundle.getBundle().getLanguage(lang);
-		int i = bundle.getBundle().getLangIndex(lang);
-
-		String langLab = lang2.getLangDescription();
+		String langLab = lang2.getDescription();
 		LangState ls = new LangState();
-		ls.name = lang2.getLangId();
-		ls.box = new CheckboxMenuItem(langLab, false);
+		ls.name = lang2.getId();
+		ls.box = new JCheckBoxMenuItem(langLab, false);
+		ls.box.addActionListener(e -> {
+			ls.hidden = !ls.hidden;
+			ls.tf.setVisible(!ls.hidden);
+			ls.label.setVisible(!ls.hidden);
+			setIndicators(tree.getRootNode());
+			textPanel.invalidate();
+			validate();
+		});
 		ls.box.setState(true);
-		ls.label = new IELabel(langLab + ":", IELabel.LEFT);
-		ls.tf = new TextAreaWrap();
-		ls.tf.getControl().setBackground(Color.white);
+		ls.label = new JLabel(langLab + ":");
+		ls.tf = new JTextArea();
 		ls.tf.setLocale(new Locale(lang, ""));
-		ls.tf.getControl().addKeyListener(new KeyAdapter() {
+		ls.tf.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent ke) {
 				if (!ke.isActionKey() && (ke.getKeyChar() == '\n')) {
 					invokeAutoFit();
 				}
-				checkForScrolling(ke.getComponent());
+				//checkForScrolling(ke.getComponent()); //TODO: scroll into view?
 			}
 		});
 
-		langStates.add(ls);
+		langStates.put(lang, ls);
 		langMenu.add(ls.box);
 
+		int i = bundle.getBundle().getLanguageIndex(lang);
+
 		constrain(textPanel, ls.label, 0, i + 2, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, 0.0, 0.0, 10, 3, 0, 3);
-		constrain(textPanel, ls.tf.getControl(), 1, i + 2, 2, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, 1.0, 1.0, 3,
-			3, 5, 3);
+		constrain(textPanel, ls.tf, 1, i + 2, 2, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, 1.0, 1.0, 3, 3, 5, 3);
 	}
 
-	private void addToTree(String s) {
-		if (tree.getNode(s) != null) {
-			return;
-		}
-		int ind = allowDot ? s.lastIndexOf(TranslatorConstants.KEY_SEPARATOR) : -1;
-		int ind2 = allowUScore ? s.lastIndexOf(TranslatorConstants.KEY_SEPARATOR_2) : -1;
-		if (ind2 > ind) {
-			ind = ind2;
-		}
+	private TranslationTreeNode addToTree(String s) {
+		TranslationTreeNode node = tree.getNode(s);
+		if (null == node) {
+			int ind = allowDot ? s.lastIndexOf(TranslatorConstants.KEY_SEPARATOR) : -1;
+			int ind2 = allowUScore ? s.lastIndexOf(TranslatorConstants.KEY_SEPARATOR_2) : -1;
+			if (ind2 > ind) {
+				ind = ind2;
+			}
 
-		TreeNode tnew = new TreeNode(s, SYS_DIR + TranslatorConstants.OPEN_IMAGE, SYS_DIR + TranslatorConstants.CLOSE_IMAGE);
-		if (ind < 0) {
-			tnew.caption = s;
-			tree.insertRoot(s);
-			tnew = tree.getNode(s);
-			tnew.setExpandedImage(SYS_DIR + TranslatorConstants.OPEN_IMAGE);
-			tnew.setCollapsedImage(SYS_DIR + TranslatorConstants.CLOSE_IMAGE);
+			TranslationTreeNode nodeParent = ind < 0 ? tree.getRootNode() : addToTree(s.substring(0, ind));
+			node = nodeParent.createChildNode(s);
+			node.setCaption(s.substring(ind + 1));
 		}
-		else {
-			String tname = s.substring(0, ind);
-			addToTree(tname);
-			TreeNode ttpar = tree.getNode(tname);
-			tnew.caption = s.substring(ind + 1);
-			tree.insert(tnew, ttpar, LevelTree.CHILD);
-			tnew = tree.getNode(s);
-		}
-		tnew.setContextMenu(1);
+		return node;
 	}
 
 	private String lookupFileForLoad(String mask) {
 		FileDialog openFileDialog1 = new FileDialog(this, RC("tools.translator.label.opentitle"), FileDialog.LOAD);
 		openFileDialog1.setDirectory(lastDirectory);
 		openFileDialog1.setFile(mask);
-		openFileDialog1.show();
+		openFileDialog1.setVisible(true);
 
 		String filename = openFileDialog1.getFile();
 		if (filename != null) {
@@ -1672,7 +1442,7 @@ class Translator extends Frame implements AWTEventListener {
 		FileDialog openFileDialog1 = new FileDialog(this, RC("tools.translator.label.saveastitle"), FileDialog.SAVE);
 		openFileDialog1.setDirectory(lastDirectory);
 		openFileDialog1.setFile(fileName);
-		openFileDialog1.show();
+		openFileDialog1.setVisible(true);
 
 		String filename = openFileDialog1.getFile();
 		if ((filename != null) && keepLastDir) {
@@ -1683,7 +1453,7 @@ class Translator extends Frame implements AWTEventListener {
 	}
 
 	private void onSaveAs() {
-		String fn = bundle.getBundle().getLanguage(0).getLangFile();
+		String fn = bundle.getBundle().getFirstLanguage().getFileName();
 		if (fn == null) {
 			fn = "autosaved";
 		}
@@ -1705,94 +1475,61 @@ class Translator extends Frame implements AWTEventListener {
 
 	private void infoException(Exception e) {
 		e.printStackTrace();
-		try {
-			ByteArrayOutputStream ba = new ByteArrayOutputStream();
-			PrintStream p = new PrintStream(ba);
-			e.printStackTrace(p);
-			p.close();
-			String msg = new String(ba.toByteArray(), 0);
+		try (StringWriter writer = new StringWriter()) {
+			e.printStackTrace(new PrintWriter(writer));
+			String msg = writer.getBuffer().toString();
 
-			String hdr = e.getMessage() == null ? e.toString() : e.getMessage();
-			hdr = hdr + "\n" + msg;
-			errDialog.setText(hdr);
-			errDialog.show();
+			String message = e.getMessage() == null ? e.toString() : e.getMessage();
+			message = message + "\n" + msg;
+
+			String title = RC("dialog.title.warning");
+			JOptionPane.showMessageDialog(this, message, title, JOptionPane.ERROR_MESSAGE);
 		}
 		catch (Exception z) {
+			z.printStackTrace();
 		}
 	}
 
 	private void onAbout() {
-		MessageBox2 aboutDialog = new MessageBox2(this);
-		aboutDialog.setText(RC("tools.translator.copyright"));
-		aboutDialog.setTitle(RC("dialog.title.info"));
-		aboutDialog.setIcon(imgres.getImage(SYS_DIR + "ZavalCE.gif", aboutDialog));
-		String[] OK_BUT = { RC("dialog.button.ok") };
-		aboutDialog.setButtons(OK_BUT);
-		aboutDialog.show();
+		String title = RC("dialog.title.info");
+		String zavalCopyright = "Copyright &copy; 2001-2002 <a href=\"http://www.zaval.org\">Zaval Creative Engineering Group (http://www.zaval.org)</a><br/>";
+		String cobexerCopyright = "Copyright &copy 2018-2019 <a href=\"mailto:cobexer+jrceditor@gmail.com?subject=JRC-Editor\"> Obexer Christoph &lt;cobexer+jrceditor@gmail.com&gt;</a>";
+		String copyright = "<html>" + zavalCopyright + cobexerCopyright;
+		String ok = RC("dialog.button.ok");
+		ImageIcon image = getImageIcon("ZavalCE.gif");
+		AboutDialog aboutDialog = new AboutDialog(this, title, copyright, ok, image);
+		aboutDialog.setVisible(true);
 	}
 
 	private void onStatistics() {
-		MessageBox2 sDialog = new MessageBox2(this);
 		nullsCount = 0;
 		notCompletedCount = 0;
 		setIndicators(tree.getRootNode());
-		String text = RC("tools.translator.label.statistics.lang") + bundle.getBundle().getLangCount() + "\n";
-		text = text + RC("tools.translator.label.statistics.record") + bundle.getBundle().getItemCount() + "\n";
-		text = text + RC("tools.translator.label.statistics.nulls") + nullsCount + "\n";
-		text = text + RC("tools.translator.label.statistics.notcompleted") + notCompletedCount;
-		sDialog.setText(text);
-		sDialog.setTitle(RC("dialog.title.info"));
-		String[] OK_BUT = { RC("dialog.button.ok") };
-		sDialog.setButtons(OK_BUT);
-
-		ResultField rf = sDialog.getTextContainer();
-		TextAlignArea area = rf.getAlignArea();
-		area.setAlign(AlignConstants.FIT | AlignConstants.TOP);
-		sDialog.show();
+		String lang = RC("tools.translator.label.statistics.lang");
+		String record = RC("tools.translator.label.statistics.record");
+		String nulls = RC("tools.translator.label.statistics.nulls");
+		String notcompleted = RC("tools.translator.label.statistics.notcompleted");
+		int langCount = bundle.getBundle().getLanguageCount();
+		int recordCount = bundle.getBundle().getItemCount();
+		String format = "%s %d\n%s %d\n%s %d\n%s %d";
+		String text = String.format(format, lang, langCount, record, recordCount, nulls, nullsCount, notcompleted, notCompletedCount);
+		JOptionPane.showMessageDialog(this, text, RC("dialog.title.info"), JOptionPane.INFORMATION_MESSAGE);
+		updateStatusBar();
 	}
 
 	private void onGenCode() {
 		try {
-			String fn = (bundle.getBundle().getLangCount() == 0) || (bundle.getBundle().getLanguage(0).getLangFile() == null)
+			BundleSet b = bundle.getBundle();
+			LangItem firstLanguage = b.getFirstLanguage();
+			String fn = (null == firstLanguage) || (firstLanguage.getFileName() == null)
 				? "Sample"
-				: bundle.baseName(bundle.getBundle().getLanguage(0).getLangFile());
+				: bundle.baseName(firstLanguage.getFileName());
 			fn = fn.substring(0, 1).toUpperCase() + fn.substring(1);
 
 			String filename = lookupFileForStore(fn + "ResourceMapped.java");
 			if (filename != null) {
 				SrcGenerator srcgen = new SrcGenerator(bundle.replace(filename, "\\", "/"));
-				srcgen.perform(bundle.getBundle());
-			}
-		}
-		catch (Exception e) {
-			infoException(e);
-		}
-	}
-
-	private void onParseCode() {
-		try {
-			String mask = "*.java";
-			String filename = lookupFileForLoad(mask);
-			if (filename != null) {
-				filename = bundle.replace(filename, "\\", "/");
-				JavaParser parser = new JavaParser(new FileInputStream(filename));
-				Map<String, String> ask = parser.parse();
-				if (ask.isEmpty()) {
-					ask.put("empty", "");
-				}
-
-				clear();
-				initControls();
-				bundle.getBundle().addLanguage("en");
-				String rlng = bundle.getBundle().getLanguage(0).getLangId();
-
-				for (Map.Entry<String, String> stringStringEntry : ask.entrySet()) {
-					BundleItem bi = bundle.getBundle().addKey(stringStringEntry.getKey());
-					bi.setTranslation(rlng, stringStringEntry.getValue());
-				}
-				bundle.getBundle().resort();
-				initData(false);
-				setTitle(filename);
+				srcgen.perform(b);
 			}
 		}
 		catch (Exception e) {
@@ -1802,53 +1539,55 @@ class Translator extends Frame implements AWTEventListener {
 
 	private void initData(boolean part) {
 		/* Initialize language set */
-		for (int i = 0; i < bundle.getBundle().getLangCount(); ++i) {
-			LangItem lang2 = bundle.getBundle().getLanguage(i);
-			syncLanguage(lang2.getLangId());
+		BundleSet set = bundle.getBundle();
+		for (LangItem lang : set.getLanguages()) {
+			syncLanguage(lang.getId());
 		}
 		hideTransMenu.setState(false);
 
 		/* Add all keys in tree view ... */
-		BundleItem bi = bundle.getBundle().getItem(0);
-		addToTree(bi.getId());
+		BundleItem bi = set.getItems().findFirst().orElse(null);
+		if (null != bi) {
+			addToTree(bi.getId());
 
-		for (int i = 1; i < bundle.getBundle().getItemCount(); ++i) {
-			BundleItem bi2 = bundle.getBundle().getItem(i);
-			addToTree(bi2.getId());
-			if ((i % 250) == 0) {
-				sbl2.setText("    " + i + " " + RC("tools.translator.progress.addkeys"));
-				sbl2.repaint();
-			}
+			AtomicInteger counter = new AtomicInteger();
+			set.getItems().forEachOrdered(bi2 -> {
+				addToTree(bi2.getId());
+				int i = counter.get();
+				if ((i % 250) == 0) {
+					sbl2.setText("    " + i + " " + RC("tools.translator.progress.addkeys"));
+				}
+				counter.incrementAndGet();
+			});
 		}
 		setAllIndicators();
 		sbl2.setText("");
-		sbl2.repaint();
-		setCursor(Cursor.DEFAULT_CURSOR);
+		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
 		/* ... and make all keys closed by default */
 
 		/* ... find first key, open it and select */
-		if (bundle.getBundle().getItemCount() > 0) {
-			String id = bundle.getBundle().getItem(0).getId();
-			tree.selectNodeAndOpen(id);
+		if (null != bi) {
+			String id = bi.getId();
+			tree.selectNode(id);
 			wasSelectedKey = null;
 			setTranslations();
 		}
 
-		tree.requestFocus();
+		tree.requestFocusInWindow();
 
-		closeMenu.enable();
-		saveBundleMenu.enable();
-		saveAsBundleMenu.enable();
-		genMenu.enable();
+		closeMenu.setEnabled(true);
+		saveBundleMenu.setEnabled(true);
+		saveAsBundleMenu.setEnabled(true);
+		genMenu.setEnabled(true);
 
 		textPanel.invalidate();
 		validate();
 		repaint();
-		syncToolbar();
 		if (!part) {
 			loadPickList();
 		}
+		updateStatusBar();
 	}
 
 	private void invokeAutoFit() {
@@ -1858,46 +1597,37 @@ class Translator extends Frame implements AWTEventListener {
 		}
 	}
 
-	private void expand(TreeNode tn) {
+	private void expand(TranslationTreeNode tn) {
 		if (tn != null) {
-			TreeNode[] children = tree.enumChild(tn);
-			if (children != null) {
-				for (TreeNode element : children) {
-					expand(element);
-				}
+			for (TranslationTreeNode element : tree.enumChild(tn)) {
+				expand(element);
 			}
 			tree.openNode(tn.getText());
 		}
 	}
 
-	private void collapse(TreeNode tn) {
+	private void collapse(TranslationTreeNode tn) {
 		if (tn != null) {
-			TreeNode[] children = tree.enumChild(tn);
-			if (children != null) {
-				for (TreeNode element : children) {
-					collapse(element);
-				}
+			for (TranslationTreeNode element : tree.enumChild(tn)) {
+				collapse(element);
 			}
 			tree.closeNode(tn.getText());
 		}
 	}
 
-	private void syncToolbar() {
-		for (int j = 0; j < tbar2menu.length; ++j) {
-			tool.setEnabled(j, tbar2menu[j].isEnabled());
-		}
-	}
-
 	private void linkPickList() {
+		openRecentMenu.removeAll();
 		for (String aPickList : pickList) {
 			String patz = stretchPath(aPickList);
-			MenuItem item = new MenuItem(patz);
-			fileMenu.add(item);
+			JMenuItem item = new JMenuItem(patz);
+			item.setToolTipText(aPickList);
+			item.addActionListener(e -> {
+				clear();
+				readResources(aPickList, false);
+			});
+			openRecentMenu.add(item);
 		}
-		if (!pickList.isEmpty()) {
-			fileMenu.addSeparator();
-		}
-		fileMenu.add(exitMenu);
+		openRecentMenu.setEnabled(!pickList.isEmpty());
 	}
 
 	private void removePickList() {
@@ -1907,17 +1637,20 @@ class Translator extends Frame implements AWTEventListener {
 
 		int j;
 		String s1 = stretchPath(pickList.get(0));
-		for (j = 0; j < fileMenu.countItems(); ++j) {
-			String patz = fileMenu.getItem(j).getLabel();
-			if (patz.equals(s1)) {
-				break;
+		for (j = 0; j < fileMenu.getItemCount(); ++j) {
+			JMenuItem item = fileMenu.getItem(j);
+			if (null != item) {
+				String patz = item.getText();
+				if (patz.equals(s1)) {
+					break;
+				}
 			}
 		}
 		pickList = new ArrayList<>();
-		if (j >= fileMenu.countItems()) {
+		if (j >= fileMenu.getItemCount()) {
 			return;
 		}
-		for (; j < fileMenu.countItems();) {
+		while (j < fileMenu.getItemCount()) {
 			fileMenu.remove(j);
 		}
 	}
@@ -1932,33 +1665,18 @@ class Translator extends Frame implements AWTEventListener {
 	private void loadPickList() {
 		removePickList();
 		try {
-			String path = System.getProperty("user.home") + "/.jrc-editor.conf";
-			InputIniFile ini = new InputIniFile(path);
-			Map<String, String> tbl = ini.getItems();
-
-			for (String key : tbl.keySet()) {
-				String val = tbl.get(key);
-				if (!key.startsWith("picklist.")) {
-					continue;
-				}
-				try {
-					key = key.substring(key.indexOf('.') + 1);
-					int pickLevel = Integer.parseInt(key);
-					while (pickList.size() <= pickLevel) {
-						pickList.add(null);
-					}
-					pickList.set(pickLevel, val);
-				}
-				catch (Exception error) {
-					error.printStackTrace();
-				}
+			File path = getLegacyConfigFile();
+			INIConfiguration ini = new INIConfiguration();
+			if (path.exists() && path.isFile()) {
+				ini.read(new FileReader(path));
 			}
 
-			keepLastDir = (tbl.get("keepLastDir") == null) || "Y".equals(tbl.get("keepLastDir"));
-			omitSpaces = (tbl.get("omitSpaces") == null) || "Y".equals(tbl.get("omitSpaces"));
-			autoExpandTF = (tbl.get("autoExpandTF") == null) || "Y".equals(tbl.get("autoExpandTF"));
-			allowDot = (tbl.get("allowDot") == null) || "Y".equals(tbl.get("allowDot"));
-			allowUScore = (tbl.get("allowUScore") == null) || "Y".equals(tbl.get("allowUScore"));
+			pickList.addAll(ini.getList(String.class, OPTION_PICKLIST, Collections.emptyList()));
+			keepLastDir = ini.getBoolean(OPTION_KEEP_LAST_DIR, true);
+			omitSpaces = ini.getBoolean(OPTION_OMIT_SPACES, true);
+			autoExpandTF = ini.getBoolean(OPTION_AUTO_EXPAND_TF, true);
+			allowDot = ini.getBoolean(OPTION_ALLOW_DOT, true);
+			allowUScore = ini.getBoolean(OPTION_ALLOW_U_SCORE, true);
 
 			keepLastDirMenu.setState(keepLastDir);
 			omitSpacesMenu.setState(omitSpaces);
@@ -1966,77 +1684,59 @@ class Translator extends Frame implements AWTEventListener {
 			allowDotMenu.setState(allowDot);
 			allowUScoreMenu.setState(allowUScore);
 		}
-		catch (Exception e1) {
+		catch (Exception ex) {
+			ex.printStackTrace();
 		}
 
-		for (int j = 0; j < pickList.size(); ++j) {
-			Object obj = pickList.get(j);
-			if (obj == null) {
-				pickList.remove(j);
-				--j;
-			}
-		}
+		pickList.removeIf(it -> null == it || it.trim().isEmpty());
 		linkPickList();
 	}
 
 	private void addToPickList(String name) {
-		if (name == null) {
-			return;
+		if (null != name && !name.isEmpty()) {
+			pickList.remove(name);
+			pickList.add(0, name);
+			pickList = pickList.subList(0, Math.min(7, pickList.size()));
+			saveIni();
 		}
-		for (int j = 0; j < pickList.size(); ++j) {
-			String v1 = pickList.get(j);
-			if (v1.equals(name)) {
-				pickList.remove(j);
-				--j;
-			}
-		}
-
-		pickList.add(0, name);
-		while (pickList.size() >= 8) {
-			pickList.remove(7);
-		}
-		saveIni();
 	}
 
 	private void saveIni() {
 		try {
-			String path = System.getProperty("user.home") + "/.jrc-editor.conf";
-			IniFile ini = new IniFile(path);
-			for (int j = 0; j < pickList.size(); ++j) {
-				ini.putString("picklist." + j, pickList.get(j));
+			File path = getLegacyConfigFile();
+			if (!path.exists()) {
+				path.createNewFile();
 			}
-
-			ini.putString("keepLastDir", keepLastDir ? "Y" : "N");
-			ini.putString("omitSpaces", omitSpaces ? "Y" : "N");
-			ini.putString("autoExpandTF", autoExpandTF ? "Y" : "N");
-			ini.putString("allowDot", allowDot ? "Y" : "N");
-			ini.putString("allowUScore", keepLastDir ? "Y" : "N");
-			ini.close();
+			Configurations configs = new Configurations();
+			FileBasedConfigurationBuilder<INIConfiguration> builder = configs.iniBuilder(path);
+			INIConfiguration ini = builder.getConfiguration();
+			ini.setProperty(OPTION_PICKLIST, pickList);
+			ini.setProperty(OPTION_KEEP_LAST_DIR, keepLastDir);
+			ini.setProperty(OPTION_OMIT_SPACES, omitSpaces);
+			ini.setProperty(OPTION_AUTO_EXPAND_TF, autoExpandTF);
+			ini.setProperty(OPTION_ALLOW_DOT, allowDot);
+			ini.setProperty(OPTION_ALLOW_U_SCORE, allowUScore);
+			builder.save();
 		}
 		catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
-	private String[] getLangSet() {
-		LangDialog ed = new LangDialog(this, RC("tools.translator.label.choosetitle"), true, this);
+	private File getLegacyConfigFile() {
+		return new File(System.getProperty("user.home") + File.separator + TranslatorConstants.LEGACY_CONFIG_FILENAME);
+	}
+
+	private List<LangItem> getLangSet() {
+		LangDialog<LangItem> ed = new LangDialog<>(this, RC("tools.translator.label.choosetitle"), true,
+			i -> String.format("%s: %s", i.getId(), i.getDescription()));
 		ed.setLabelCaption(RC("tools.translator.label.chooselabel"));
 		ed.setButtonsCaption(RC("dialog.button.ok"), CLOSE_BUTTONS[2]);
 
-		LangItem[] lset = new LangItem[bundle.getBundle().getLangCount()];
-		Arrays.setAll(lset, i -> bundle.getBundle().getLanguage(i));
-		ed.setList(lset);
+		ed.setList(bundle.getBundle().getLanguages());
 
 		ed.doModal();
-		String[] ask = ed.getList();
-		if ((ask == null) || (ask.length <= 0) || !ed.isApply()) {
-			return null;
-		}
-		for (int i = 0; i < ask.length; ++i) {
-			if (ask[i].indexOf(':') > 0) {
-				ask[i] = ask[i].substring(0, ask[i].indexOf(':')).trim();
-			}
-		}
-		return ask;
+		return ed.isApply() ? ed.getList() : Collections.emptyList();
 	}
 
 	private void onOpen(boolean part) {
@@ -2048,14 +1748,16 @@ class Translator extends Frame implements AWTEventListener {
 			}
 			readResources(filename, part);
 		}
+		updateStatusBar();
 	}
 
+	// FIXME: this needs to use a real XML api...
 	private void onSaveXml(boolean part) {
-		String[] parts = part ? getLangSet() : null;
-		if (part && ((parts == null) || (parts.length < 2))) {
+		List<LangItem> parts = part ? getLangSet() : Collections.emptyList();
+		if (part && (parts.size() < 2)) {
 			return;
 		}
-		String fn = bundle.getBundle().getLanguage(0).getLangFile();
+		String fn = bundle.getBundle().getFirstLanguage().getFileName();
 		if (fn == null) {
 			fn = "autosaved";
 		}
@@ -2065,20 +1767,18 @@ class Translator extends Frame implements AWTEventListener {
 			try {
 				try (DataOutputStream out = new DataOutputStream(new FileOutputStream(filename))) {
 					BundleSet set = bundle.getBundle();
-					int items = set.getItemCount();
 					out.writeChar((char) 0xFEFF);
 					out.writeChars("<xml>\n");
-					for (int i = 0; i < items; ++i) {
-						BundleItem bi = set.getItem(i);
+					Set<String> write = parts.stream().map(LangItem::getId).collect(Collectors.toSet());
+					set.getItems().forEachOrdered(LambdaUtils.unchecked(bi -> {
 						out.writeChars("\t<key name=\"" + bi.getId() + "\">\n");
 						for (String lang : bi.getLanguages()) {
-							if (part && !inArray(parts, lang)) {
-								continue;
+							if (!part || write.contains(lang)) {
+								out.writeChars("\t\t<value lang=\"" + lang + "\">" + bi.getTranslation(lang) + "</value>\n");
 							}
-							out.writeChars("\t\t<value lang=\"" + lang + "\">" + bi.getTranslation(lang) + "</value>\n");
 						}
 						out.writeChars("\t</key>\n");
-					}
+					}));
 					out.writeChars("</xml>\n");
 				}
 			}
@@ -2088,13 +1788,15 @@ class Translator extends Frame implements AWTEventListener {
 		}
 	}
 
+	// FIXME: this needs to properly escape the strings for the file format
 	private void onSaveUtf(boolean part) {
-		String[] parts = part ? getLangSet() : null;
-		if (part && ((parts == null) || (parts.length < 2))) {
+		List<LangItem> parts = part ? getLangSet() : Collections.emptyList();
+		if (part && (parts.size() < 2)) {
 			return;
 		}
 
-		String fn = bundle.getBundle().getLanguage(0).getLangFile();
+		BundleSet set = bundle.getBundle();
+		String fn = set.getFirstLanguage().getFileName();
 		if (fn == null) {
 			fn = "autosaved";
 		}
@@ -2103,31 +1805,24 @@ class Translator extends Frame implements AWTEventListener {
 		if (filename != null) {
 			try {
 				try (DataOutputStream out = new DataOutputStream(new FileOutputStream(filename))) {
-					BundleSet set = bundle.getBundle();
-					int items = set.getItemCount();
 					out.writeChar((char) 0xFEFF);
 					out.writeChars("#JRC Editor: do not modify this line\r\n\r\n");
-					for (int i = 0; i < items; ++i) {
-						BundleItem bi = set.getItem(i);
+					Set<String> write = parts.stream().map(LangItem::getId).collect(Collectors.toSet());
+					set.getItems().forEachOrdered(LambdaUtils.unchecked(bi -> {
 						out.writeChars("KEY=\"" + bi.getId() + "\":\r\n");
 						for (String lang : bi.getLanguages()) {
-							if (part && !inArray(parts, lang)) {
-								continue;
+							if (!part || write.contains(lang)) {
+								out.writeChars("\t\"" + lang + "\"=\"" + bi.getTranslation(lang) + "\"\r\n");
 							}
-							out.writeChars("\t\"" + lang + "\"=\"" + bi.getTranslation(lang) + "\"\r\n");
 						}
 						out.writeChars("\r\n");
-					}
+					}));
 				}
 			}
 			catch (Exception e) {
 				infoException(e);
 			}
 		}
-	}
-
-	private boolean inArray(String[] array, String lang) {
-		return Arrays.stream(array).anyMatch(element -> element.equalsIgnoreCase(lang));
 	}
 
 	/**
@@ -2166,7 +1861,6 @@ class Translator extends Frame implements AWTEventListener {
 			bundle.getBundle().addKey(key);
 			bundle.getBundle().updateValue(key, lang, stringStringEntry.getValue());
 		}
-		bundle.getBundle().resort();
 	}
 
 	private void onLoadXml(boolean part) {
@@ -2191,6 +1885,7 @@ class Translator extends Frame implements AWTEventListener {
 			initData(part);
 			setTitle(filename);
 		}
+		updateStatusBar();
 	}
 
 	private void onLoadUtf(boolean part) {
@@ -2215,72 +1910,19 @@ class Translator extends Frame implements AWTEventListener {
 			initData(part);
 			setTitle(filename);
 		}
+		updateStatusBar();
 	}
 
 	private void onNewKey() {
-		EditDialog ed = new EditDialog(this, RC("tools.translator.label.newkeytitle"), true, this);
-		ed.setLabelCaption(RC("tools.translator.label.insert"));
-		ed.setButtonsCaption(RC("dialog.button.ok"), CLOSE_BUTTONS[2]);
-		ed.doModal();
-		String text = ed.getText();
-		if ((text.length() <= 0) || !ed.isApply()) {
+		String title = RC("tools.translator.label.newkeytitle");
+		String message = RC("tools.translator.label.insert");
+		String text = JOptionPane.showInputDialog(this, message, title, JOptionPane.PLAIN_MESSAGE);
+		if ((null == text) || text.isEmpty()) {
 			return;
 		}
 		keyName.setText(text);
 		onInsertKey();
-	}
-
-	private void moveFocus() {
-		Component p = this;
-		while ((p != null) && !(p instanceof Window)) {
-			p = p.getParent();
-		}
-		if (p == null) {
-			return;
-		}
-		Window wnd = (Window) p;
-
-		Component focused = wnd.getFocusOwner();
-		int idx = tabOrder.indexOf(focused);
-		if (idx >= 0) {
-			if ((idx + 1) < tabOrder.size()) {
-				Component c = tabOrder.get(idx + 1);
-				c.requestFocus();
-				return;
-			}
-		}
-		int i;
-		for (i = 0; i < langStates.size(); i++) {
-			LangState ls = getLangState(i);
-			if (ls.hidden) {
-				continue;
-			}
-			if (ls.tf.getControl() == focused) {
-				break;
-			}
-		}
-
-		if (i < langStates.size()) {
-			for (++i; i < langStates.size(); ++i) {
-				LangState ls = getLangState(i);
-				if (ls.hidden) {
-					continue;
-				}
-				ls.tf.requestFocus();
-				return;
-			}
-			tree.requestFocus();
-			return;
-		}
-		for (i = 0; i < langStates.size(); ++i) {
-			LangState ls = getLangState(i);
-			if (ls.hidden) {
-				continue;
-			}
-			ls.tf.requestFocus();
-			return;
-		}
-		tree.requestFocus();
+		updateStatusBar();
 	}
 
 	private void removeLeafs(String key) {
@@ -2288,9 +1930,9 @@ class Translator extends Frame implements AWTEventListener {
 		if (bundle.getBundle().getItem(key) != null) {
 			return;
 		}
-		TreeNode tn = tree.getNode(key);
+		TranslationTreeNode tn = tree.getNode(key);
 		if (tn != null) {
-			if ((tree.enumChild(tn) != null) && (tree.enumChild(tn).length > 0)) {
+			if (tree.enumChild(tn).length > 0) {
 				return;
 			}
 			tree.remove(key);
@@ -2306,19 +1948,12 @@ class Translator extends Frame implements AWTEventListener {
 	}
 
 	private void onRenameKey() {
-		String oldKeyName = keyName.getText();
-		if (oldKeyName.endsWith(".")) {
-			oldKeyName = oldKeyName.substring(0, oldKeyName.length() - 1);
-		}
+		String oldKeyName = keyName.getText().replaceFirst("\\.$", "");
+		String title = RC("tools.translator.label.rename.caption");
+		String message = RC("tools.translator.label.rename.label");
+		String newKeyName = (String) JOptionPane.showInputDialog(this, message, title, JOptionPane.PLAIN_MESSAGE, null, null, oldKeyName);
 
-		EditDialog ed = new EditDialog(this, RC("tools.translator.label.rename.caption"), true, this);
-		ed.setLabelCaption(RC("tools.translator.label.rename.label"));
-		ed.setButtonsCaption(RC("dialog.button.ok"), CLOSE_BUTTONS[2]);
-		ed.setText(oldKeyName);
-		ed.doModal();
-
-		String newKeyName = ed.getText();
-		if ((newKeyName.trim().length() <= 0) || !ed.isApply()) {
+		if ((null == newKeyName) || newKeyName.trim().isEmpty()) {
 			return;
 		}
 		if (oldKeyName.equals(newKeyName)) {
@@ -2326,28 +1961,25 @@ class Translator extends Frame implements AWTEventListener {
 		}
 
 		BundleItem biOldAlone = bundle.getBundle().getItem(oldKeyName);
-		List<BundleItem> en = bundle.getBundle().getKeysBeginningWith(oldKeyName);
-		Map<String, String> oldValues = new HashMap<>();
-		for (BundleItem biOld : en) {
-			oldValues.clear();
+		bundle.getBundle().getKeysBeginningWith(oldKeyName).forEachOrdered(biOld -> {
 			String newKey = newKeyName;
 			if (biOldAlone == null) {
 				newKey = newKeyName + biOld.getId().substring(oldKeyName.length());
 			}
 
-			int k = bundle.getBundle().getLangCount();
 			if (bundle.getBundle().getItem(newKey) != null) {
-				errDialog.setText(RC("tools.translator.label.rename.dup"));
-				errDialog.show();
+				String errorTitle = RC("dialog.title.warning");
+				String errorMessage = RC("tools.translator.label.rename.dup");
+				JOptionPane.showMessageDialog(this, errorMessage, errorTitle, JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 
 			// Keep old values
-			for (int j = 0; j < k; ++j) {
-				String lang = bundle.getBundle().getLanguage(j).getLangId();
-				String value = biOld.getTranslation(lang);
+			Map<String, String> oldValues = new HashMap<>();
+			for (LangItem lang : bundle.getBundle().getLanguages()) {
+				String value = biOld.getTranslation(lang.getId());
 				if (value != null) {
-					oldValues.put(lang, value);
+					oldValues.put(lang.getId(), value);
 				}
 			}
 			bundle.getBundle().removeKey(biOld.getId());
@@ -2356,25 +1988,23 @@ class Translator extends Frame implements AWTEventListener {
 			keyName.setText(newKey);
 			addToTree(newKey);
 			BundleItem biNew = bundle.getBundle().addKey(newKey);
-			for (int j = 0; j < k; ++j) {
-				String lang = bundle.getBundle().getLanguage(j).getLangId();
-				String value = oldValues.get(lang);
+			for (LangItem lang : bundle.getBundle().getLanguages()) {
+				String value = oldValues.get(lang.getId());
 				if (value != null) {
-					biNew.setTranslation(lang, value);
+					biNew.setTranslation(lang.getId(), value);
 				}
 			}
-		}
+		});
 		isDirty = true;
 
 		// Remove old key
 		tree.remove(oldKeyName);
 		removeLeafs(oldKeyName);
-		bundle.getBundle().resort();
 
-		tree.selectNodeAndOpen(newKeyName);
-		tree.repaint();
+		tree.selectNode(newKeyName);
 		setTranslations();
 		setIndicators(tree.getSelectedNode());
+		updateStatusBar();
 	}
 
 	private void onLoadJar() {
@@ -2397,7 +2027,7 @@ class Translator extends Frame implements AWTEventListener {
 					}
 					initData(false);
 					// Force new file name for storage
-					bundle.getBundle().getLanguage(0).setLangFile(null);
+					bundle.getBundle().getFirstLanguage().setFileName(null);
 					setTitle(filename);
 				}
 			}
@@ -2405,46 +2035,22 @@ class Translator extends Frame implements AWTEventListener {
 				infoException(e);
 			}
 		}
+		updateStatusBar();
 	}
 
 	private void hideTranslated(boolean hide) {
 		hideTranslated(tree.getRootNode(), hide);
-		tree.invalidate();
 		validate();
-		tree.repaint();
 	}
 
-	private void hideTranslated(TreeNode tn, boolean hide) {
+	private void hideTranslated(TranslationTreeNode tn, boolean hide) {
 		while (tn != null) {
-			if (tn.getIndicator() == null) {
-				tn.setHide(hide);
+			if (!tn.isShowIndicator()) {
+				tn.setVisible(!hide);
 			}
-			hideTranslated(tn.child, hide);
-			tn = tn.sibling;
+			hideTranslated(tn.getFirstChild(), hide);
+			tn = tn.getNextSibling();
 		}
-	}
-
-	private void constrain(Container c, Component p, int x, int y, int width, int height, int anchor, int fill, double weightx,
-		double weighty, int insetLeft, int insetTop, int insetRight, int insetBottom) {
-		GridBagConstraints cc = new GridBagConstraints();
-
-		cc.gridx = x;
-		cc.gridy = y;
-		cc.gridwidth = width;
-		cc.gridheight = height;
-
-		cc.fill = fill;
-		cc.anchor = anchor;
-		cc.weightx = weightx;
-		cc.weighty = weighty;
-
-		if ((insetTop + insetBottom + insetLeft + insetRight) > 0) {
-			cc.insets = new Insets(insetTop, insetLeft, insetBottom, insetRight);
-		}
-		LayoutManager lm = c.getLayout();
-		GridBagLayout gbl = (GridBagLayout) lm;
-		gbl.setConstraints(p, cc);
-		c.add(p);
 	}
 
 	private boolean match_regex(String mask, String val, boolean matchCase) {
@@ -2500,51 +2106,5 @@ class Translator extends Frame implements AWTEventListener {
 		}
 		return IntStream.range(tp, t.length).anyMatch(vp -> match_mask(s, sp + 1, t, vp, matchCase))
 			|| match_mask(s, sp + 1, t, tp, matchCase);
-	}
-
-	private void checkForScrolling(Component what) {
-		if (what instanceof EmulatedTextField) {
-			Rectangle r1 = what.getBounds();
-			Rectangle r2 = ((EmulatedTextField) what).getCursorShape();
-			if ((r1 == null) || (r2 == null)) {
-				return;
-			}
-			r1.x += r2.x;
-			r1.y += r2.y;
-			r1.width = r2.width + 25;
-			r1.height = r2.height + 25;
-
-			// Now R1 contains top/right cursor position
-			Dimension s1 = scrPanel.size();
-			s1.width -= scrPanel.getVScrollbar().isVisible() ? scrPanel.getVScrollbar().size().width : 0;
-			s1.height -= scrPanel.getHScrollbar().isVisible() ? scrPanel.getHScrollbar().size().height : 0;
-			// Now s1 contains view rect area
-
-			int curHS = scrPanel.getHScrollbar().isVisible() ? scrPanel.getHScrollbar().getValue() : 0;
-			int curVS = scrPanel.getVScrollbar().isVisible() ? scrPanel.getVScrollbar().getValue() : 0;
-
-			if (((r1.x + r1.width) >= (s1.width + curHS))
-				|| ((r1.y + r1.height) >= (s1.height + curVS))
-				|| (r1.x < curHS)
-				|| (r1.y < curVS)) {
-
-				int newX = curHS;
-				Dimension s2 = scrPanel.getScrollableObject().preferredSize();
-				if ((r1.x + r1.width) >= s1.width) {
-					newX = Math.min((r1.x + r1.width) - s1.width, s2.width - s1.width);
-				}
-				int newY = curVS;
-				if ((r1.y + r1.height) >= s1.height) {
-					newY = Math.min((r1.y + r1.height) - s1.height, s2.height - s1.height);
-				}
-				if (r1.x < curHS) {
-					newX = r1.x;
-				}
-				if (r1.y < curVS) {
-					newX = r1.y;
-				}
-				scrPanel.scroll(newX, newY);
-			}
-		}
 	}
 }

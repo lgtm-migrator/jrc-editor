@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2001-2002  Zaval Creative Engineering Group (http://www.zaval.org)
+ * Copyright (C) 2019 Christoph Obexer <cobexer@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -31,19 +32,17 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 class BundleManager {
-	private final BundleSet set;
+	private final BundleSet set = new BundleSet();
 
-	BundleManager() {
-		set = new BundleSet();
+	public BundleManager() {
+	}
+
+	BundleManager(String baseFileName) throws IOException {
+		readResources(baseFileName);
 	}
 
 	void appendResource(InputStream stream, String lang) throws IOException {
 		readResource(stream, lang);
-	}
-
-	BundleManager(String baseFileName) throws IOException {
-		set = new BundleSet();
-		readResources(baseFileName);
 	}
 
 	BundleSet getBundle() {
@@ -140,7 +139,7 @@ class BundleManager {
 	private void proceedLines(List<String> lines, String lang, String fullName) {
 		fullName = fullName != null ? fullName : "tmp_" + lang;
 		set.addLanguage(lang);
-		set.getLanguage(lang).setLangFile(fullName);
+		set.getLanguage(lang).setFileName(fullName);
 		String lastComment = null;
 		for (String line : lines) {
 			line = line.trim();
@@ -171,7 +170,6 @@ class BundleManager {
 			bi.setComment(lastComment);
 			lastComment = null;
 		}
-		set.resort();
 	}
 
 	private List<String> getLines(String fileName) throws IOException {
@@ -334,27 +332,26 @@ class BundleManager {
 	}
 
 	void store(String fileName) throws IOException {
-		int k = set.getLangCount();
-		for (int j = 0; j < k; ++j) {
-			LangItem lang = set.getLanguage(j);
-			store(lang.getLangId(), fileName);
+		for (LangItem lang : set.getLanguages()) {
+			store(lang.getId(), fileName);
 		}
 	}
 
 	private void store(String lng, String fn) throws IOException {
 		LangItem lang = set.getLanguage(lng);
 		if (fn == null) {
-			fn = lang.getLangFile();
+			fn = lang.getFileName();
 		}
 		else {
 			String tmpFn = fn;
 			tmpFn = dirName(tmpFn) + purifyFileName(tmpFn);
-			if (set.getLanguage(0) != lang) {
-				tmpFn += "_" + lang.getLangId();
+			LangItem firstLanguage = set.getFirstLanguage();
+			if (firstLanguage != lang) {
+				tmpFn += "_" + lang.getId();
 			}
 			tmpFn += TranslatorConstants.RES_EXTENSION;
 			fn = tmpFn;
-			lang.setLangFile(fn);
+			lang.setFileName(fn);
 		}
 
 		if (fn == null) {
@@ -362,7 +359,7 @@ class BundleManager {
 			return;
 		}
 
-		List<String> lines = set.store(lang.getLangId());
+		List<String> lines = set.store(lang.getId());
 		if (fn.endsWith(TranslatorConstants.RES_EXTENSION)) {
 			try (PrintStream f = new PrintStream(new FileOutputStream(fn))) {
 				for (String line : lines) {

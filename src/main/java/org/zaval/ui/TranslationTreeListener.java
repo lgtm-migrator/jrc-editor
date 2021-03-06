@@ -16,42 +16,20 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package org.zaval.tools.i18n.translator;
+package org.zaval.ui;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 
-class BundleItem {
-	private final String identifier;
-	private final Map<String, String> translations = new HashMap<>();
-	private String comment;
+public interface TranslationTreeListener {
+	/**
+	 * Called in response to changing the selected node.
+	 * @param newSelectedNode the node that receives the selection (if any).
+	 */
+	void onTreeSelectionChanged(Optional<TranslationTreeNode> newSelectedNode);
 
-	BundleItem(String id) {
-		identifier = id;
-	}
-
-	String getId() {
-		return identifier;
-	}
-
-	String getTranslation(String lng) {
-		return translations.get(lng);
-	}
-
-	String getComment() {
-		return comment;
-	}
-
-	void setComment(String s) {
-		comment = s;
-	}
-
-	void setTranslation(String lng, String txt) {
-		translations.put(lng, txt);
-	}
-
-	Set<String> getLanguages() {
-		return translations.keySet();
-	}
+	/**
+	 * Called in response to pressing the delete key.
+	 * @param selectedNode the currently selected node (if any).
+	 */
+	void onDeleteTreeNode(Optional<TranslationTreeNode> selectedNode);
 }

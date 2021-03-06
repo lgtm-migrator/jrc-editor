@@ -16,16 +16,28 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package org.zaval.tools.i18n.translator;
+package org.zaval.ui;
 
-import javax.swing.JCheckBoxMenuItem;
+import java.awt.Component;
+import java.util.function.Function;
+
 import javax.swing.JLabel;
-import javax.swing.JTextArea;
+import javax.swing.JList;
+import javax.swing.ListCellRenderer;
 
-class LangState {
-	JTextArea tf;
-	boolean hidden;
-	JLabel label;
-	String name;
-	JCheckBoxMenuItem box;
+class LangDialogCellRenderer<T> implements ListCellRenderer<T> {
+	private final ListCellRenderer<? super T> cellRenderer;
+	private final Function<T, String> itemMapper;
+
+	LangDialogCellRenderer(ListCellRenderer<? super T> cellRenderer, Function<T, String> itemMapper) {
+		this.cellRenderer = cellRenderer;
+		this.itemMapper = itemMapper;
+	}
+
+	@Override
+	public Component getListCellRendererComponent(JList<? extends T> list, T value, int index, boolean isSelected, boolean cellHasFocus) {
+		JLabel l = (JLabel) cellRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+		l.setText(itemMapper.apply(value));
+		return l;
+	}
 }
